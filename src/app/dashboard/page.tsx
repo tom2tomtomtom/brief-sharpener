@@ -8,6 +8,7 @@ interface GenerationRecord {
   input_data: {
     productName?: string
     productDescription?: string
+    briefText?: string
     template?: string
     targetAudience?: string
     tone?: string
@@ -15,6 +16,8 @@ interface GenerationRecord {
   output_copy: {
     headline?: string
     subheadline?: string
+    score?: number
+    gaps?: string[]
   }
   template_id: string | null
   created_at: string
@@ -77,7 +80,7 @@ export default async function DashboardPage() {
         {isLimitReached && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-6 py-4 flex items-center justify-between gap-4">
             <p className="text-sm font-medium text-red-800">
-              You have reached your free limit this month. Upgrade to keep generating.
+              You have reached your free limit this month. Upgrade to keep analysing.
             </p>
             <a
               href="/pricing"
@@ -110,7 +113,7 @@ export default async function DashboardPage() {
           {/* Usage counter */}
           <div className="mt-6 rounded-xl border border-gray-100 bg-gray-50 px-5 py-4">
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-              Generations this month
+              Analyses this month
             </p>
             <p className="mt-1 text-2xl font-bold text-gray-900">
               {planLimits.limit === null
@@ -131,7 +134,7 @@ export default async function DashboardPage() {
               <p className="mt-3 text-sm text-amber-700">
                 Running low?{' '}
                 <a href="/pricing" className="font-medium underline hover:text-amber-800">
-                  Upgrade for unlimited generations
+                  Upgrade for unlimited analyses
                 </a>
               </p>
             )}
@@ -139,59 +142,82 @@ export default async function DashboardPage() {
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <DashboardCard
-              title="Landing Page Generator"
-              description="Create AI-powered landing page copy for your product."
+              title="Analyse new brief"
+              description="Run a new brief through AIDEN's intelligence engine."
               href="/generate"
             />
           </div>
         </div>
 
-        {/* Past generations */}
+        {/* Brief analysis history */}
         <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-900">Past Generations</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-semibold text-gray-900">My Brief Analyses</h2>
+            <a
+              href="/generate"
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition"
+            >
+              Analyse new brief
+            </a>
+          </div>
 
           {!generations || generations.length === 0 ? (
             <p className="mt-4 text-sm text-gray-500">
-              No generations yet.{' '}
+              No analyses yet.{' '}
               <a href="/generate" className="text-indigo-600 hover:underline">
-                Create your first landing page
+                Analyse your first brief
               </a>
-
               .
             </p>
           ) : (
             <ul className="mt-4 divide-y divide-gray-100">
-              {(generations as GenerationRecord[]).map((gen) => (
-                <li key={gen.id} className="flex items-start justify-between gap-4 py-4">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-gray-900">
-                      {gen.input_data?.productName ?? 'Untitled'}
-                    </p>
-                    {gen.output_copy?.headline && (
-                      <p className="mt-0.5 truncate text-xs text-gray-500">
-                        {gen.output_copy.headline}
+              {(generations as GenerationRecord[]).map((gen) => {
+                const briefSnippet = (
+                  gen.input_data?.briefText ??
+                  gen.input_data?.productDescription ??
+                  gen.input_data?.productName ??
+                  'Untitled brief'
+                ).slice(0, 100)
+                const score = gen.output_copy?.score ?? null
+                const gapsCount = gen.output_copy?.gaps?.length ?? null
+
+                return (
+                  <li key={gen.id} className="flex items-start justify-between gap-4 py-4">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-gray-900 line-clamp-2">
+                        {briefSnippet}
+                        {(gen.input_data?.briefText ?? gen.input_data?.productDescription ?? '').length > 100 ? '…' : ''}
                       </p>
-                    )}
-                    <p className="mt-1 text-xs text-gray-400">
-                      {new Date(gen.created_at).toLocaleString('en-US', {
-                        dateStyle: 'medium',
-                        timeStyle: 'short',
-                      })}
-                      {gen.template_id && (
-                        <span className="ml-2 rounded-full bg-indigo-50 px-2 py-0.5 text-indigo-600">
-                          {gen.template_id}
+                      <div className="mt-1.5 flex items-center gap-3 text-xs text-gray-500">
+                        {score !== null && (
+                          <span className="flex items-center gap-1">
+                            <span className="font-medium text-indigo-600">Score:</span>
+                            {score}
+                          </span>
+                        )}
+                        {gapsCount !== null && (
+                          <span className="flex items-center gap-1">
+                            <span className="font-medium text-amber-600">Gaps:</span>
+                            {gapsCount} found
+                          </span>
+                        )}
+                        <span>
+                          {new Date(gen.created_at).toLocaleString('en-US', {
+                            dateStyle: 'medium',
+                            timeStyle: 'short',
+                          })}
                         </span>
-                      )}
-                    </p>
-                  </div>
-                  <a
-                    href="/generate"
-                    className="shrink-0 rounded-lg border border-indigo-200 px-3 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 transition"
-                  >
-                    Regenerate
-                  </a>
-                </li>
-              ))}
+                      </div>
+                    </div>
+                    <a
+                      href="/generate"
+                      className="shrink-0 rounded-lg border border-indigo-200 px-3 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 transition"
+                    >
+                      Analyse again
+                    </a>
+                  </li>
+                )
+              })}
             </ul>
           )}
         </div>
