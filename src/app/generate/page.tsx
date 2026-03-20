@@ -198,6 +198,7 @@ function GeneratePageInner() {
                   data={analysisData}
                   previewUrl={generationId ? `${typeof window !== 'undefined' ? window.location.origin : ''}/preview/${generationId}` : undefined}
                   isPro={planInfo?.plan === 'pro'}
+                  isPaidUser={planInfo?.plan !== 'free' && planInfo?.plan !== undefined}
                 />
               </div>
             )}
