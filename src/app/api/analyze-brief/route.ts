@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { canGenerate, incrementUsage, getUserPlan } from '@/lib/usage'
 import { checkRateLimit } from '@/lib/rate-limit'
 
-const BRAIN_API_BASE = process.env.AIDEN_BRAIN_API_URL ?? 'https://aiden-api-production.up.railway.app'
+const BRAIN_API_BASE = process.env.AIDEN_BRAIN_API_URL ?? 'https://aiden-brain-v2-production.up.railway.app'
 
 interface AnalyzeBriefRequest {
   briefText: string
@@ -13,24 +13,16 @@ interface AnalyzeBriefRequest {
   briefType?: string
 }
 
-async function callBrainAPI<T>(endpoint: string, body: unknown): Promise<T> {
-  const apiKey = process.env.AIDEN_BRAIN_API_KEY
-  if (!apiKey) {
-    throw new Error('Brain API key not configured')
-  }
-
-  const response = await fetch(`${BRAIN_API_BASE}/api/v1/${endpoint}`, {
+async function callBrainAPI<T>(path: string, body: unknown): Promise<T> {
+  const response = await fetch(`${BRAIN_API_BASE}${path}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => 'Unknown error')
-    throw new Error(`Brain API ${endpoint} failed (${response.status}): ${errorText}`)
+    throw new Error(`Brain API ${path} failed (${response.status}): ${errorText}`)
   }
 
   return response.json() as Promise<T>
@@ -132,19 +124,18 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Step 1: Extract structured brief
-    const extractedBrief = await callBrainAPI<Record<string, unknown>>('extract-brief', {
+    // Step 1: Extract structured brief via Brain V2
+    const extractResult = await callBrainAPI<{ content: Record<string, unknown> }>('/api/extract-brief', {
       brief_text: briefText,
       ...(brandName && { brand_name: brandName }),
       ...(industry && { industry }),
       ...(briefType && { brief_type: briefType }),
     })
+    const extractedBrief = extractResult.content ?? extractResult
 
-    // Step 2: Generate strategy from extracted brief
-    const strategicAnalysis = await callBrainAPI<Record<string, unknown>>('generate-strategy', {
-      brief: extractedBrief,
-      ...(brandName && { brand_name: brandName }),
-      ...(industry && { industry }),
+    // Step 2: Generate strategy from extracted brief via Brain V2
+    const strategicAnalysis = await callBrainAPI<Record<string, unknown>>('/aiden/generate-strategy', {
+      briefData: extractedBrief,
     })
 
     const score = calculateBriefScore(briefText, extractedBrief)
