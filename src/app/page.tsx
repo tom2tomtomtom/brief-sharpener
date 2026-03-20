@@ -3,7 +3,7 @@ import LandingPageForm from '@/components/LandingPageForm'
 export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
@@ -14,8 +14,8 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Form card */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+        {/* Form / Preview */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
           <LandingPageForm />
         </div>
       </div>

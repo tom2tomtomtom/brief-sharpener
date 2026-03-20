@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import LandingPagePreview, { GeneratedContent } from './LandingPagePreview'
 
 const TONES = [
   { value: 'professional', label: 'Professional' },
@@ -10,6 +11,7 @@ const TONES = [
 ] as const
 
 type Tone = (typeof TONES)[number]['value']
+type Status = 'idle' | 'loading' | 'done' | 'error'
 
 interface FormData {
   productName: string
@@ -35,7 +37,9 @@ const initialFormData: FormData = {
 export default function LandingPageForm() {
   const [formData, setFormData] = useState<FormData>(initialFormData)
   const [errors, setErrors] = useState<FormErrors>({})
-  const [submitted, setSubmitted] = useState(false)
+  const [status, setStatus] = useState<Status>('idle')
+  const [generatedData, setGeneratedData] = useState<GeneratedContent | null>(null)
+  const [apiError, setApiError] = useState<string | null>(null)
 
   function validate(): boolean {
     const newErrors: FormErrors = {}
@@ -57,69 +61,92 @@ export default function LandingPageForm() {
     })
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!validate()) return
-    setSubmitted(true)
+
+    setStatus('loading')
+    setApiError(null)
+
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productName: formData.productName,
+          productDescription: formData.productDescription,
+          targetAudience: formData.targetAudience || undefined,
+          features: formData.features.filter((f) => f.trim()),
+          tone: formData.tone,
+        }),
+      })
+
+      if (!response.ok) {
+        const err = await response.json()
+        throw new Error(err.error || 'Generation failed')
+      }
+
+      const data: GeneratedContent = await response.json()
+      setGeneratedData(data)
+      setStatus('done')
+    } catch (err) {
+      setApiError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+      setStatus('error')
+    }
   }
 
-  const filledFeatures = formData.features.filter((f) => f.trim())
+  function handleReset() {
+    setStatus('idle')
+    setGeneratedData(null)
+    setApiError(null)
+    setErrors({})
+  }
 
-  if (submitted) {
+  // Loading state
+  if (status === 'loading') {
     return (
-      <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
-            <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900">Ready to generate</h2>
-        </div>
-        <dl className="space-y-3 text-sm">
-          <div>
-            <dt className="font-medium text-gray-500">Product</dt>
-            <dd className="text-gray-900">{formData.productName}</dd>
-          </div>
-          <div>
-            <dt className="font-medium text-gray-500">Description</dt>
-            <dd className="text-gray-900">{formData.productDescription}</dd>
-          </div>
-          {formData.targetAudience && (
-            <div>
-              <dt className="font-medium text-gray-500">Audience</dt>
-              <dd className="text-gray-900">{formData.targetAudience}</dd>
-            </div>
-          )}
-          {filledFeatures.length > 0 && (
-            <div>
-              <dt className="font-medium text-gray-500">Features</dt>
-              <dd>
-                <ul className="mt-1 list-disc pl-4 text-gray-900">
-                  {filledFeatures.map((f, i) => (
-                    <li key={i}>{f}</li>
-                  ))}
-                </ul>
-              </dd>
-            </div>
-          )}
-          <div>
-            <dt className="font-medium text-gray-500">Tone</dt>
-            <dd className="capitalize text-gray-900">{formData.tone}</dd>
-          </div>
-        </dl>
-        <button
-          onClick={() => { setSubmitted(false); setErrors({}) }}
-          className="mt-6 text-sm text-indigo-600 hover:text-indigo-800 underline"
-        >
-          Edit details
-        </button>
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+        <p className="mt-4 text-sm font-medium text-gray-700">Generating your landing page…</p>
+        <p className="mt-1 text-xs text-gray-400">This usually takes a few seconds</p>
       </div>
     )
   }
 
+  // Preview state
+  if (status === 'done' && generatedData) {
+    return (
+      <div>
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Live preview</p>
+            <h2 className="text-lg font-semibold text-gray-900">{formData.productName}</h2>
+          </div>
+          <button
+            onClick={handleReset}
+            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 shadow-sm transition hover:bg-gray-50 hover:text-gray-900"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+            </svg>
+            Edit details
+          </button>
+        </div>
+        <LandingPagePreview data={generatedData} productName={formData.productName} />
+      </div>
+    )
+  }
+
+  // Form state (idle + error)
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-6">
+      {/* API error banner */}
+      {status === 'error' && apiError && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {apiError}
+        </div>
+      )}
+
       {/* Product Name */}
       <div>
         <label htmlFor="productName" className="block text-sm font-medium text-gray-700">
@@ -179,7 +206,7 @@ export default function LandingPageForm() {
       <div>
         <fieldset>
           <legend className="block text-sm font-medium text-gray-700">
-            Key features <span className="text-gray-400 font-normal">(up to 6)</span>
+            Key features <span className="font-normal text-gray-400">(up to 6)</span>
           </legend>
           <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {formData.features.map((feature, index) => (
