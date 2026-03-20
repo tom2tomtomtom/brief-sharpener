@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import LandingPageForm from '@/components/LandingPageForm'
 import LandingPagePreview, { GeneratedContent } from '@/components/LandingPagePreview'
 import { TemplateId, DEFAULT_TEMPLATE_ID } from '@/lib/templates'
+import { createClient } from '@/lib/supabase/client'
 
 type Status = 'idle' | 'loading' | 'done' | 'error'
 
@@ -22,6 +23,24 @@ export default function Home() {
   const [apiError, setApiError] = useState<string | null>(null)
   const [productName, setProductName] = useState('')
   const [activeTemplateId, setActiveTemplateId] = useState<TemplateId>(DEFAULT_TEMPLATE_ID)
+  const [isPaidUser, setIsPaidUser] = useState(false)
+
+  useEffect(() => {
+    async function checkPlan() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase
+        .from('subscriptions')
+        .select('plan')
+        .eq('user_id', user.id)
+        .single()
+      if (data?.plan === 'pro' || data?.plan === 'single') {
+        setIsPaidUser(true)
+      }
+    }
+    checkPlan()
+  }, [])
 
   async function handleGenerate(formData: GenerateFormData) {
     setStatus('loading')
@@ -84,7 +103,7 @@ export default function Home() {
           <div className="min-w-0 flex-1">
             {status === 'loading' && <LoadingState />}
             {status === 'done' && generatedData && (
-              <LandingPagePreview data={generatedData} productName={productName} templateId={activeTemplateId} />
+              <LandingPagePreview data={generatedData} productName={productName} templateId={activeTemplateId} isPaidUser={isPaidUser} />
             )}
             {(status === 'idle' || status === 'error') && !generatedData && (
               <EmptyPreview />
