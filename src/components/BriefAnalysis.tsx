@@ -1,5 +1,7 @@
 'use client'
 
+import { useState, useCallback } from 'react'
+
 export interface BriefAnalysisData {
   extractedBrief: Record<string, unknown>
   strategicAnalysis: Record<string, unknown>
@@ -9,6 +11,44 @@ export interface BriefAnalysisData {
 
 interface BriefAnalysisProps {
   data: BriefAnalysisData
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // clipboard not available
+    }
+  }, [text])
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="relative ml-2 inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+      aria-label="Copy to clipboard"
+    >
+      {copied ? (
+        <>
+          <svg className="h-3.5 w-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          <span className="text-green-500">Copied</span>
+        </>
+      ) : (
+        <>
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          <span>Copy</span>
+        </>
+      )}
+    </button>
+  )
 }
 
 function getScoreColor(score: number): { text: string; stroke: string; bg: string; label: string } {
@@ -75,9 +115,18 @@ function ExtractedBriefCard({ extractedBrief }: { extractedBrief: Record<string,
 
   if (fields.length === 0) return null
 
+  const copyText = fields.map(([key, value]) => {
+    const label = BRIEF_FIELD_LABELS[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+    const displayValue = Array.isArray(value) ? value.join(', ') : typeof value === 'object' ? JSON.stringify(value) : String(value)
+    return `${label}: ${displayValue}`
+  }).join('\n')
+
   return (
     <section>
-      <h2 className="mb-4 text-lg font-semibold text-gray-900">Extracted Brief</h2>
+      <div className="mb-4 flex items-center">
+        <h2 className="text-lg font-semibold text-gray-900">Extracted Brief</h2>
+        <CopyButton text={copyText} />
+      </div>
       <div className="grid gap-3 sm:grid-cols-2">
         {fields.map(([key, value]) => {
           const label = BRIEF_FIELD_LABELS[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
@@ -146,7 +195,10 @@ function GapAnalysisSection({ gaps }: { gaps: string[] }) {
   if (gaps.length === 0) {
     return (
       <section>
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">Gap Analysis</h2>
+        <div className="mb-4 flex items-center">
+          <h2 className="text-lg font-semibold text-gray-900">Gap Analysis</h2>
+          <CopyButton text="No gaps found. Your brief covers all key areas." />
+        </div>
         <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-4">
           <svg className="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -159,7 +211,10 @@ function GapAnalysisSection({ gaps }: { gaps: string[] }) {
 
   return (
     <section>
-      <h2 className="mb-4 text-lg font-semibold text-gray-900">Gap Analysis</h2>
+      <div className="mb-4 flex items-center">
+        <h2 className="text-lg font-semibold text-gray-900">Gap Analysis</h2>
+        <CopyButton text={gaps.map(g => `${SEVERITY_LABEL[getGapSeverity(g)]}: ${g}`).join('\n')} />
+      </div>
       <div className="space-y-3">
         {gaps.map((gap) => {
           const severity = getGapSeverity(gap)
@@ -202,9 +257,16 @@ function StrategicTensionsSection({ strategicAnalysis }: { strategicAnalysis: Re
     const insights = Object.entries(strategicAnalysis).filter(([, v]) => typeof v === 'string' && v.length > 0)
     if (insights.length === 0) return null
 
+    const insightsCopyText = insights.map(([key, value]) => {
+      const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+      return `${label}: ${String(value)}`
+    }).join('\n')
     return (
       <section>
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">Strategic Analysis</h2>
+        <div className="mb-4 flex items-center">
+          <h2 className="text-lg font-semibold text-gray-900">Strategic Analysis</h2>
+          <CopyButton text={insightsCopyText} />
+        </div>
         <div className="grid gap-3 sm:grid-cols-2">
           {insights.map(([key, value]) => {
             const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
@@ -220,9 +282,23 @@ function StrategicTensionsSection({ strategicAnalysis }: { strategicAnalysis: Re
     )
   }
 
+  const tensionsCopyText = tensions.map((tension, i) => {
+    if (typeof tension === 'string') return tension
+    if (typeof tension === 'object' && tension !== null) {
+      const t = tension as Record<string, unknown>
+      const title = String(t.title ?? t.name ?? t.tension ?? `Tension ${i + 1}`)
+      const description = String(t.description ?? t.insight ?? t.explanation ?? t.detail ?? '')
+      return description ? `${title}: ${description}` : title
+    }
+    return ''
+  }).filter(Boolean).join('\n')
+
   return (
     <section>
-      <h2 className="mb-4 text-lg font-semibold text-gray-900">Strategic Tensions</h2>
+      <div className="mb-4 flex items-center">
+        <h2 className="text-lg font-semibold text-gray-900">Strategic Tensions</h2>
+        <CopyButton text={tensionsCopyText} />
+      </div>
       <div className="grid gap-3 sm:grid-cols-2">
         {tensions.map((tension, i) => {
           if (typeof tension === 'string') {
@@ -284,7 +360,10 @@ function RewrittenBriefSection({ strategicAnalysis, extractedBrief }: { strategi
 
   return (
     <section>
-      <h2 className="mb-4 text-lg font-semibold text-gray-900">Sharpened Brief</h2>
+      <div className="mb-4 flex items-center">
+        <h2 className="text-lg font-semibold text-gray-900">Sharpened Brief</h2>
+        <CopyButton text={rewrittenBrief} />
+      </div>
       <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
         <div className="space-y-3">
           {lines.map((line, i) => {
