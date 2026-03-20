@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import LandingPagePreview, { GeneratedContent } from './LandingPagePreview'
+import { GenerateFormData } from '@/app/page'
 
 const TONES = [
   { value: 'professional', label: 'Professional' },
@@ -11,9 +11,8 @@ const TONES = [
 ] as const
 
 type Tone = (typeof TONES)[number]['value']
-type Status = 'idle' | 'loading' | 'done' | 'error'
 
-interface FormData {
+interface FormFields {
   productName: string
   productDescription: string
   targetAudience: string
@@ -26,7 +25,13 @@ interface FormErrors {
   productDescription?: string
 }
 
-const initialFormData: FormData = {
+interface LandingPageFormProps {
+  onGenerate: (data: GenerateFormData) => void
+  isLoading: boolean
+  error: string | null
+}
+
+const initialFormData: FormFields = {
   productName: '',
   productDescription: '',
   targetAudience: '',
@@ -34,12 +39,9 @@ const initialFormData: FormData = {
   tone: 'professional',
 }
 
-export default function LandingPageForm() {
-  const [formData, setFormData] = useState<FormData>(initialFormData)
+export default function LandingPageForm({ onGenerate, isLoading, error }: LandingPageFormProps) {
+  const [formData, setFormData] = useState<FormFields>(initialFormData)
   const [errors, setErrors] = useState<FormErrors>({})
-  const [status, setStatus] = useState<Status>('idle')
-  const [generatedData, setGeneratedData] = useState<GeneratedContent | null>(null)
-  const [apiError, setApiError] = useState<string | null>(null)
 
   function validate(): boolean {
     const newErrors: FormErrors = {}
@@ -61,89 +63,25 @@ export default function LandingPageForm() {
     })
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!validate()) return
 
-    setStatus('loading')
-    setApiError(null)
-
-    try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          productName: formData.productName,
-          productDescription: formData.productDescription,
-          targetAudience: formData.targetAudience || undefined,
-          features: formData.features.filter((f) => f.trim()),
-          tone: formData.tone,
-        }),
-      })
-
-      if (!response.ok) {
-        const err = await response.json()
-        throw new Error(err.error || 'Generation failed')
-      }
-
-      const data: GeneratedContent = await response.json()
-      setGeneratedData(data)
-      setStatus('done')
-    } catch (err) {
-      setApiError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
-      setStatus('error')
-    }
+    onGenerate({
+      productName: formData.productName,
+      productDescription: formData.productDescription,
+      targetAudience: formData.targetAudience || undefined,
+      features: formData.features.filter((f) => f.trim()),
+      tone: formData.tone,
+    })
   }
 
-  function handleReset() {
-    setStatus('idle')
-    setGeneratedData(null)
-    setApiError(null)
-    setErrors({})
-  }
-
-  // Loading state
-  if (status === 'loading') {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
-        <p className="mt-4 text-sm font-medium text-gray-700">Generating your landing page…</p>
-        <p className="mt-1 text-xs text-gray-400">This usually takes a few seconds</p>
-      </div>
-    )
-  }
-
-  // Preview state
-  if (status === 'done' && generatedData) {
-    return (
-      <div>
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Live preview</p>
-            <h2 className="text-lg font-semibold text-gray-900">{formData.productName}</h2>
-          </div>
-          <button
-            onClick={handleReset}
-            className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 shadow-sm transition hover:bg-gray-50 hover:text-gray-900"
-          >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
-            </svg>
-            Edit details
-          </button>
-        </div>
-        <LandingPagePreview data={generatedData} productName={formData.productName} />
-      </div>
-    )
-  }
-
-  // Form state (idle + error)
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-6">
       {/* API error banner */}
-      {status === 'error' && apiError && (
+      {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {apiError}
+          {error}
         </div>
       )}
 
@@ -254,9 +192,17 @@ export default function LandingPageForm() {
 
       <button
         type="submit"
-        className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        disabled={isLoading}
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        Generate landing page
+        {isLoading ? (
+          <>
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            Generating…
+          </>
+        ) : (
+          'Generate landing page'
+        )}
       </button>
     </form>
   )
