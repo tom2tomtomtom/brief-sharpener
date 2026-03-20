@@ -140,11 +140,23 @@ export async function POST(request: NextRequest) {
     const plan = await getUserPlan(adminSupabase, user.id)
     await incrementUsage(adminSupabase, user.id, plan)
 
+    // Save analysis results to generations table
+    const { data: generation } = await adminSupabase
+      .from('generations')
+      .insert({
+        user_id: user.id,
+        input_data: { briefText, brandName, industry, briefType },
+        output_copy: { extractedBrief, strategicAnalysis, gaps, score },
+      })
+      .select('id')
+      .single()
+
     return NextResponse.json({
       extractedBrief,
       strategicAnalysis,
       gaps,
       score,
+      generationId: generation?.id ?? null,
     })
   } catch (error) {
     if (error instanceof Error) {
