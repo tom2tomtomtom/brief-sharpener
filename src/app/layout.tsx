@@ -26,11 +26,20 @@ export const metadata: Metadata = {
     siteName: 'AIDEN',
     title: 'AIDEN Landing Page Generator',
     description: 'AI-powered landing page copy generator with live preview. Create high-converting landing pages in seconds.',
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'AIDEN Landing Page Generator',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'AIDEN Landing Page Generator',
     description: 'AI-powered landing page copy generator with live preview. Create high-converting landing pages in seconds.',
+    images: ['/opengraph-image'],
   },
 }
 
