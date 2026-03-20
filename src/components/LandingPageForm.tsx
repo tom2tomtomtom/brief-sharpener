@@ -3,6 +3,89 @@
 import { useState } from 'react'
 import { GenerateFormData } from '@/app/generate/page'
 
+const EXAMPLE_BRIEFS = [
+  {
+    label: 'FMCG Launch',
+    brief: `Project: NovaBite Protein Bar — UK Market Launch
+
+Brand: NovaBite
+Category: Health & Wellness Snacks
+Target Audience: Health-conscious millennials aged 25–40, gym-goers and busy professionals seeking convenient nutrition. Primary skew female, ABC1 socioeconomic group, urban and suburban UK.
+
+Campaign Objective: Drive trial and awareness for NovaBite's new plant-based protein bar range across the UK. Target 15% prompted awareness among core audience within 6 months of launch. Generate 50,000 units sold in month one.
+
+Key Message: Real ingredients, real protein — fuel your day without compromise.
+
+Tone of Voice: Energetic, honest, and aspirational without being preachy. Think Innocent Drinks meets Gymshark.
+
+Channels: Paid social (Instagram, TikTok), influencer seeding (micro and macro), sampling activations in gyms and co-working spaces, OOH in commuter zones.
+
+Mandatories: Logo lock-up, "8 ingredients or less" claim, recyclable packaging callout, BRC certified.
+
+Budget: £450,000 total. Deliverables required: campaign concept, hero visual, social assets, sampling kit design.`,
+  },
+  {
+    label: 'Tech SaaS',
+    brief: `Project: Flowdesk CRM — Series B Launch Campaign
+
+Brand: Flowdesk
+Category: B2B SaaS / Sales Enablement
+Target Audience: Sales Directors and Revenue Operations leaders at mid-market B2B companies (50–500 employees). Decision-makers evaluating Salesforce alternatives. North America and UK.
+
+Campaign Objective: Position Flowdesk as the intelligent CRM for modern sales teams. Generate 2,000 qualified demo requests in Q1. Establish thought leadership in the "AI-native CRM" category ahead of key industry conferences.
+
+Key Message: Stop managing your CRM. Start closing deals. Flowdesk thinks so you don't have to.
+
+Tone of Voice: Sharp, confident, and peer-to-peer. No corporate jargon. Speak like a senior sales leader, not a vendor.
+
+Channels: LinkedIn paid (sponsored content and InMail), SEM (bottom-of-funnel), G2 review campaign, partner co-marketing with HubSpot consultants, podcast sponsorships (sales-focused shows).
+
+Mandatories: SOC 2 Type II compliance badge, Salesforce migration messaging, "deploy in 48 hours" proof point.
+
+Budget: $600,000 USD. Deliverables: campaign strategy, LinkedIn creative suite, landing page copy, sales deck.`,
+  },
+  {
+    label: 'Charity Campaign',
+    brief: `Project: See The Child — Annual Awareness and Fundraising Campaign
+
+Organisation: ChildFirst UK (registered charity)
+Cause Area: Child poverty and educational inequality in the UK
+Target Audience: Socially conscious UK adults aged 30–60, existing donors and lapsed supporters, corporate giving leads at FTSE 350 companies. Secondary: general public aged 18+.
+
+Campaign Objective: Raise £2.1M through the annual appeal. Reactivate 8,000 lapsed donors. Grow brand awareness by 20% among primary audience. Secure three new corporate partnerships worth £150K+ each.
+
+Key Message: Right now, 4.2 million children in the UK are living in poverty. You can change one child's story today.
+
+Tone of Voice: Warm, urgent, and empowering — not guilt-driven. Give donors agency and hope, not despair.
+
+Channels: TV and radio (30-second spots), direct mail, email nurture sequence, social media (Facebook, Instagram), PR campaign targeting national press.
+
+Mandatories: Charity Commission registration number, real case studies with consent, GDPR-compliant data capture, Gift Aid messaging.
+
+Budget: £320,000. Deliverables: campaign concept, TV script, DM pack, email series, social content plan.`,
+  },
+  {
+    label: 'Retail Seasonal',
+    brief: `Project: Hartley's Home — Christmas 2025 Seasonal Campaign
+
+Brand: Hartley's Home
+Category: Mid-premium homeware and gifting retail (UK)
+Target Audience: Gift-buyers aged 28–55, predominantly female, ABC1. Existing loyalty card holders and new-to-brand shoppers. Focus on those buying gifts for the home — partners, parents, friends.
+
+Campaign Objective: Drive a 22% uplift in Christmas period revenue versus prior year. Increase average basket value by 15% through gifting bundles. Grow email subscriber list by 40,000 ahead of peak trading.
+
+Key Message: The gift that makes a house feel like home.
+
+Tone of Voice: Warm, nostalgic, and generous. Evoke the feeling of Christmas morning — considered, personal, and a little luxurious. Not discount-led.
+
+Channels: TV (brand-led 60-second hero ad), digital display, email (8-touch nurture from October), Instagram and Pinterest, in-store POS and window displays, gift guide PR placement.
+
+Mandatories: Free gifting service messaging, sustainability credentials (FSC packaging), loyalty points multiplier offer, returns policy callout.
+
+Budget: £875,000. Deliverables: TV concept and script, hero visual, in-store kit, email templates, social content calendar.`,
+  },
+]
+
 const INDUSTRIES = [
   'FMCG',
   'Tech',
@@ -94,6 +177,24 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
         <label htmlFor="briefText" className="block text-sm font-medium text-gray-700">
           Paste your brief here <span className="text-red-500">*</span>
         </label>
+
+        {/* Example brief chips */}
+        <div className="mt-2 mb-2">
+          <p className="mb-1.5 text-xs text-gray-500">Try an example:</p>
+          <div className="flex flex-wrap gap-2">
+            {EXAMPLE_BRIEFS.map((ex) => (
+              <button
+                key={ex.label}
+                type="button"
+                onClick={() => handleBriefChange(ex.brief)}
+                className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 transition hover:border-indigo-400 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                {ex.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <textarea
           id="briefText"
           rows={10}
