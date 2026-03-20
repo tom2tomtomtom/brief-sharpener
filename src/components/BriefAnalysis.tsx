@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import Link from 'next/link'
 
 export interface BriefAnalysisData {
   extractedBrief: Record<string, unknown>
@@ -12,6 +13,7 @@ export interface BriefAnalysisData {
 interface BriefAnalysisProps {
   data: BriefAnalysisData
   previewUrl?: string
+  isPro?: boolean
 }
 
 function CopyButton({ text }: { text: string }) {
@@ -328,7 +330,47 @@ function StrategicTensionsSection({ strategicAnalysis }: { strategicAnalysis: Re
   )
 }
 
-function RewrittenBriefSection({ strategicAnalysis, extractedBrief }: { strategicAnalysis: Record<string, unknown>; extractedBrief: Record<string, unknown> }) {
+function PhantomCDLockedSection() {
+  return (
+    <section>
+      <div className="mb-4 flex items-center">
+        <h2 className="text-lg font-semibold text-gray-900">Phantom Creative Director</h2>
+        <span className="ml-2 inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-700">Pro</span>
+      </div>
+      <div className="relative overflow-hidden rounded-xl border border-indigo-100 bg-indigo-50">
+        {/* Blurred preview */}
+        <div className="select-none p-5 blur-sm pointer-events-none" aria-hidden="true">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {['Provocateur', 'Strategist', 'Contrarian', 'Empath'].map((role) => (
+              <div key={role} className="rounded-xl border border-indigo-100 bg-white p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-indigo-400">{role}</p>
+                <p className="mt-1 text-sm text-indigo-900">This brief lacks a clear emotional hook. Push harder on the tension between aspiration and reality — that&apos;s where the work lives.</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Lock overlay */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 backdrop-blur-sm px-6 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
+            <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+          </div>
+          <h3 className="mt-3 text-base font-semibold text-gray-900">Unlock Phantom Creative Director</h3>
+          <p className="mt-1 text-sm text-gray-600 max-w-xs">See how 340+ creative minds would attack this brief.</p>
+          <Link
+            href="/pricing"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
+          >
+            Upgrade to Pro
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function RewrittenBriefSection({ strategicAnalysis, extractedBrief, isPro }: { strategicAnalysis: Record<string, unknown>; extractedBrief: Record<string, unknown>; isPro?: boolean }) {
   const rewriteFields = ['rewritten_brief', 'sharpened_brief', 'improved_brief', 'refined_brief', 'brief_rewrite', 'recommended_brief']
   let rewrittenBrief: string | null = null
 
@@ -358,12 +400,14 @@ function RewrittenBriefSection({ strategicAnalysis, extractedBrief }: { strategi
   }
 
   const lines = rewrittenBrief.split('\n').filter(Boolean)
+  const ATTRIBUTION = '\n\nAnalysed by AIDEN Brief Intelligence — aiden-landing-gen.vercel.app'
+  const copyText = isPro ? rewrittenBrief : rewrittenBrief + ATTRIBUTION
 
   return (
     <section>
       <div className="mb-4 flex items-center">
         <h2 className="text-lg font-semibold text-gray-900">Sharpened Brief</h2>
-        <CopyButton text={rewrittenBrief} />
+        <CopyButton text={copyText} />
       </div>
       <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
         <div className="space-y-3">
@@ -424,7 +468,7 @@ function ShareResultButton({ url }: { url: string }) {
   )
 }
 
-export default function BriefAnalysis({ data, previewUrl }: BriefAnalysisProps) {
+export default function BriefAnalysis({ data, previewUrl, isPro }: BriefAnalysisProps) {
   const { score, extractedBrief, strategicAnalysis, gaps } = data
 
   return (
@@ -442,7 +486,8 @@ export default function BriefAnalysis({ data, previewUrl }: BriefAnalysisProps) 
       <ExtractedBriefCard extractedBrief={extractedBrief} />
       <GapAnalysisSection gaps={gaps} />
       <StrategicTensionsSection strategicAnalysis={strategicAnalysis} />
-      <RewrittenBriefSection strategicAnalysis={strategicAnalysis} extractedBrief={extractedBrief} />
+      {!isPro && <PhantomCDLockedSection />}
+      <RewrittenBriefSection strategicAnalysis={strategicAnalysis} extractedBrief={extractedBrief} isPro={isPro} />
     </div>
   )
 }
