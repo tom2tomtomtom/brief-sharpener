@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { canGenerate, incrementUsage, getUserPlan } from '@/lib/usage'
+import { getTemplate, TemplateId } from '@/lib/templates'
 
 const client = new Anthropic()
 
@@ -12,6 +13,7 @@ interface GenerateRequest {
   targetAudience?: string
   features?: string[]
   tone?: 'professional' | 'casual' | 'bold' | 'minimal'
+  template?: string
 }
 
 interface Feature {
@@ -67,7 +69,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { productName, productDescription, targetAudience, features, tone = 'professional' } = body
+  const { productName, productDescription, targetAudience, features, tone = 'professional', template } = body
 
   if (!productName?.trim()) {
     return NextResponse.json({ error: 'productName is required' }, { status: 400 })
@@ -77,8 +79,9 @@ export async function POST(request: NextRequest) {
   }
 
   const filledFeatures = (features ?? []).filter((f) => f?.trim())
+  const tpl = getTemplate(template as TemplateId | undefined)
 
-  const prompt = `You are an expert copywriter. Generate landing page copy for the following product.
+  const prompt = `${tpl.promptInstructions}
 
 Product name: ${productName}
 Description: ${productDescription}

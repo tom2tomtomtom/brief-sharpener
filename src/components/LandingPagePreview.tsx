@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { TemplateId, getTemplate } from '@/lib/templates'
 
 export interface GeneratedContent {
   headline: string
@@ -14,30 +15,32 @@ export interface GeneratedContent {
 interface LandingPagePreviewProps {
   data: GeneratedContent
   productName: string
+  templateId?: TemplateId
 }
 
 const FEATURE_ICONS = ['⚡', '🎯', '🔒', '📊', '🚀', '✨']
 
-export default function LandingPagePreview({ data, productName }: LandingPagePreviewProps) {
+export default function LandingPagePreview({ data, productName, templateId }: LandingPagePreviewProps) {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const theme = getTemplate(templateId).previewTheme
 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-xl">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-indigo-900 via-indigo-800 to-purple-900 px-6 py-16 text-center sm:px-12 sm:py-24">
+      <section className={`${theme.heroGradient} px-6 py-16 text-center sm:px-12 sm:py-24`}>
         <div className="mx-auto max-w-3xl">
           <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl">
             {data.headline}
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-base text-indigo-200 sm:text-lg">
+          <p className={`mx-auto mt-4 max-w-xl text-base sm:text-lg ${theme.heroSubtext}`}>
             {data.subheadline}
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            <button className="w-full rounded-lg bg-white px-8 py-3 text-sm font-semibold text-indigo-700 shadow-md transition hover:bg-indigo-50 sm:w-auto">
+            <button className={`w-full rounded-lg px-8 py-3 text-sm font-semibold shadow-md transition sm:w-auto ${theme.ctaButton}`}>
               {data.cta}
             </button>
           </div>
-          <p className="mt-4 text-xs text-indigo-300 sm:text-sm">{data.socialProof}</p>
+          <p className={`mt-4 text-xs sm:text-sm ${theme.heroSubtext} opacity-80`}>{data.socialProof}</p>
         </div>
       </section>
 
@@ -45,18 +48,18 @@ export default function LandingPagePreview({ data, productName }: LandingPagePre
       <section className="bg-white px-6 py-14 sm:px-12 sm:py-20">
         <div className="mx-auto max-w-4xl">
           <h2 className="text-center text-2xl font-bold text-gray-900 sm:text-3xl">
-            Everything you need
+            {theme.featuresHeading}
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-center text-sm text-gray-500 sm:text-base">
-            Built to help you move faster and achieve more.
+            {theme.featuresSubtext}
           </p>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {data.features.map((feature, i) => (
               <div
                 key={i}
-                className="rounded-xl border border-gray-100 bg-gray-50 p-6 transition hover:border-indigo-100 hover:bg-indigo-50/40"
+                className={`rounded-xl border border-gray-100 bg-gray-50 p-6 transition ${theme.featureHover}`}
               >
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-lg">
+                <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-lg text-lg ${theme.featureIconBg}`}>
                   {FEATURE_ICONS[i % FEATURE_ICONS.length]}
                 </div>
                 <h3 className="text-sm font-semibold text-gray-900">{feature.title}</h3>
@@ -106,7 +109,7 @@ export default function LandingPagePreview({ data, productName }: LandingPagePre
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 px-6 py-10 sm:px-12">
+      <footer className={`${theme.footerBg} px-6 py-10 sm:px-12`}>
         <div className="mx-auto max-w-4xl text-center">
           <p className="text-base font-semibold text-white">{productName}</p>
           <p className="mt-1 text-xs text-gray-400">

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import LandingPageForm from '@/components/LandingPageForm'
 import LandingPagePreview, { GeneratedContent } from '@/components/LandingPagePreview'
+import { TemplateId, DEFAULT_TEMPLATE_ID } from '@/lib/templates'
 
 type Status = 'idle' | 'loading' | 'done' | 'error'
 
@@ -12,6 +13,7 @@ export interface GenerateFormData {
   targetAudience?: string
   features?: string[]
   tone?: 'professional' | 'casual' | 'bold' | 'minimal'
+  template?: string
 }
 
 export default function Home() {
@@ -19,11 +21,15 @@ export default function Home() {
   const [generatedData, setGeneratedData] = useState<GeneratedContent | null>(null)
   const [apiError, setApiError] = useState<string | null>(null)
   const [productName, setProductName] = useState('')
+  const [activeTemplateId, setActiveTemplateId] = useState<TemplateId>(DEFAULT_TEMPLATE_ID)
 
   async function handleGenerate(formData: GenerateFormData) {
     setStatus('loading')
     setApiError(null)
     setProductName(formData.productName)
+    if (formData.template) {
+      setActiveTemplateId(formData.template as TemplateId)
+    }
 
     try {
       const response = await fetch('/api/generate', {
@@ -78,7 +84,7 @@ export default function Home() {
           <div className="min-w-0 flex-1">
             {status === 'loading' && <LoadingState />}
             {status === 'done' && generatedData && (
-              <LandingPagePreview data={generatedData} productName={productName} />
+              <LandingPagePreview data={generatedData} productName={productName} templateId={activeTemplateId} />
             )}
             {(status === 'idle' || status === 'error') && !generatedData && (
               <EmptyPreview />
