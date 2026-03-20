@@ -133,6 +133,14 @@ Generate 3-5 features and 3-4 FAQ items. Match the ${tone} tone throughout.`
     const plan = await getUserPlan(adminSupabase, user.id)
     await incrementUsage(adminSupabase, user.id, plan)
 
+    // Save generation to database
+    await adminSupabase.from('generations').insert({
+      user_id: user.id,
+      input_data: body,
+      output_copy: parsed,
+      template_id: template ?? null,
+    })
+
     return NextResponse.json(parsed)
   } catch (error) {
     if (error instanceof Anthropic.APIError) {
