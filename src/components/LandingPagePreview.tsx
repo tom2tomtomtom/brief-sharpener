@@ -3,9 +3,16 @@
 import { useState, useCallback } from 'react'
 import { TemplateId, getTemplate, Template } from '@/lib/templates'
 
+export interface HeadlineVariant {
+  headline: string
+  subheadline: string
+}
+
 export interface GeneratedContent {
   headline: string
   subheadline: string
+  headline_variants?: HeadlineVariant[]
+  recommended_index?: number
   features: Array<{ title: string; description: string }>
   howItWorks?: Array<{ step: number; title: string; description: string }>
   faq: Array<{ question: string; answer: string }>
@@ -467,8 +474,14 @@ function CopyButton({ text, copiedKey, id, onCopy, light = false }: CopyButtonPr
 export default function LandingPagePreview({ data, productName, templateId, isPaidUser = false, onToast, generationId }: LandingPagePreviewProps) {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
+  const [selectedVariant, setSelectedVariant] = useState<number>(() => data.recommended_index ?? 0)
   const template = getTemplate(templateId)
   const theme = template.previewTheme
+
+  const variants = data.headline_variants
+  const activeVariant = variants?.[selectedVariant] ?? { headline: data.headline, subheadline: data.subheadline }
+  const activeHeadline = activeVariant.headline
+  const activeSubheadline = activeVariant.subheadline
 
   const handleCopy = useCallback((text: string, id: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -528,26 +541,49 @@ export default function LandingPagePreview({ data, productName, templateId, isPa
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-xl">
+        {/* Headline variant tabs */}
+        {variants && variants.length > 1 && (
+          <div className="flex items-center gap-1 border-b border-gray-200 bg-gray-50 px-4 py-2">
+            <span className="mr-2 text-xs font-medium text-gray-500">Headlines:</span>
+            {variants.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setSelectedVariant(i)}
+                className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
+                  selectedVariant === i
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-200 hover:text-gray-900'
+                }`}
+              >
+                {String.fromCharCode(65 + i)}
+                {i === (data.recommended_index ?? 0) && (
+                  <span className={`ml-1 text-[10px] ${selectedVariant === i ? 'text-indigo-200' : 'text-indigo-500'}`}>★</span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Hero */}
         <section className={`${theme.heroGradient} px-6 py-16 text-center sm:px-12 sm:py-24`}>
           <div className="mx-auto max-w-3xl">
             {/* Headline */}
             <div className="group relative inline-block">
               <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl">
-                {data.headline}
+                {activeHeadline}
               </h1>
               <div className="absolute -right-2 top-0 translate-x-full pl-1 hidden sm:block">
-                <CopyButton text={data.headline} copiedKey={copiedKey} id="headline" onCopy={handleCopy} light />
+                <CopyButton text={activeHeadline} copiedKey={copiedKey} id="headline" onCopy={handleCopy} light />
               </div>
             </div>
 
             {/* Subheadline */}
             <div className="group relative mx-auto mt-4 max-w-xl">
               <p className={`text-base sm:text-lg ${theme.heroSubtext}`}>
-                {data.subheadline}
+                {activeSubheadline}
               </p>
               <div className="absolute -right-2 top-0 translate-x-full pl-1 hidden sm:block">
-                <CopyButton text={data.subheadline} copiedKey={copiedKey} id="subheadline" onCopy={handleCopy} light />
+                <CopyButton text={activeSubheadline} copiedKey={copiedKey} id="subheadline" onCopy={handleCopy} light />
               </div>
             </div>
 

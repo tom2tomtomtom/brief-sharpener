@@ -33,9 +33,16 @@ interface HowItWorksStep {
   description: string
 }
 
+interface HeadlineVariant {
+  headline: string
+  subheadline: string
+}
+
 interface GenerateResponse {
   headline: string
   subheadline: string
+  headline_variants: HeadlineVariant[]
+  recommended_index: number
   features: Feature[]
   howItWorks: HowItWorksStep[]
   faq: FAQ[]
@@ -111,18 +118,21 @@ ${filledFeatures.length > 0 ? `- Key features to highlight: ${filledFeatures.joi
 - Tone: ${tone}
 
 COPYWRITING RULES
-1. HEADLINE — Use the PAS (Problem-Agitate-Solution) framework compressed into a single punchy line (under 10 words). Lead with the pain or desired outcome, not the product name. Make the reader feel seen.
-2. SUBHEADLINE — Agitate the problem or amplify the promise in 1–2 sentences (under 25 words). Be specific. Mention a concrete result where possible.
-3. FEATURES — Write exactly 4 features. Each feature title should name the outcome, not the tool (e.g. "Ship faster" not "Auto-deploy"). Each description explains the specific mechanism that delivers that benefit in one sentence. No generic superlatives.
-4. HOW IT WORKS — Explain the product in exactly 3 sequential steps. Each step has a short action title (3–5 words) and a one-sentence description of what happens and why it matters. Steps must feel logical and effortless.
-5. FAQ — Write 3–4 FAQ items that address the most common objections or points of confusion a buyer would have before purchasing. Answers should be reassuring and specific.
-6. CTA — A punchy call-to-action button label (2–5 words). Action verb first.
-7. SOCIAL PROOF — Write a specific, credible social proof statement. Include a plausible but realistic number of users, companies, or a measurable result (e.g. "Trusted by 1,200+ SaaS teams to cut onboarding time by 40%"). Make it feel earned, not invented.
+1. HEADLINE VARIANTS — Generate exactly 3 distinct headline variants. Each variant has a headline (under 10 words using the PAS framework) and a subheadline (1–2 sentences, under 25 words). Make each variant meaningfully different: vary the angle, emotion, or framing. Also provide a recommended_index (0, 1, or 2) for the strongest variant.
+2. FEATURES — Write exactly 4 features. Each feature title should name the outcome, not the tool (e.g. "Ship faster" not "Auto-deploy"). Each description explains the specific mechanism that delivers that benefit in one sentence. No generic superlatives.
+3. HOW IT WORKS — Explain the product in exactly 3 sequential steps. Each step has a short action title (3–5 words) and a one-sentence description of what happens and why it matters. Steps must feel logical and effortless.
+4. FAQ — Write 3–4 FAQ items that address the most common objections or points of confusion a buyer would have before purchasing. Answers should be reassuring and specific.
+5. CTA — A punchy call-to-action button label (2–5 words). Action verb first.
+6. SOCIAL PROOF — Write a specific, credible social proof statement. Include a plausible but realistic number of users, companies, or a measurable result (e.g. "Trusted by 1,200+ SaaS teams to cut onboarding time by 40%"). Make it feel earned, not invented.
 
 Return ONLY a raw JSON object with no markdown, no code fences, no commentary — just the JSON:
 {
-  "headline": "under 10 words using PAS framework",
-  "subheadline": "1-2 sentences agitating the problem or amplifying the promise",
+  "headline_variants": [
+    { "headline": "under 10 words using PAS framework", "subheadline": "1-2 sentences agitating the problem or amplifying the promise" },
+    { "headline": "different angle — outcome-focused or curiosity-driven", "subheadline": "1-2 sentences with a different emotional hook" },
+    { "headline": "bold claim or transformation-focused headline", "subheadline": "1-2 sentences amplifying the transformation or result" }
+  ],
+  "recommended_index": 0,
   "features": [
     { "title": "outcome-focused feature title", "description": "one sentence explaining the mechanism and benefit" },
     { "title": "outcome-focused feature title", "description": "one sentence explaining the mechanism and benefit" },
@@ -144,7 +154,7 @@ Return ONLY a raw JSON object with no markdown, no code fences, no commentary �
   try {
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 2048,
+      max_tokens: 2800,
       messages: [{ role: 'user', content: prompt }],
     })
 
@@ -163,6 +173,14 @@ Return ONLY a raw JSON object with no markdown, no code fences, no commentary �
         return NextResponse.json({ error: 'Failed to parse AI response as JSON' }, { status: 500 })
       }
       parsed = JSON.parse(match[0]) as GenerateResponse
+    }
+
+    // Derive top-level headline/subheadline from the recommended variant
+    if (parsed.headline_variants?.length > 0) {
+      const idx = parsed.recommended_index ?? 0
+      const recommended = parsed.headline_variants[Math.min(idx, parsed.headline_variants.length - 1)]
+      parsed.headline = recommended.headline
+      parsed.subheadline = recommended.subheadline
     }
 
     // Track usage after successful generation
