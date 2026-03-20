@@ -39,6 +39,7 @@ function GeneratePageInner() {
   const [isPaidUser, setIsPaidUser] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [isFormFilled, setIsFormFilled] = useState(false)
+  const [lastFormData, setLastFormData] = useState<GenerateFormData | null>(null)
 
   useEffect(() => {
     async function checkPlan() {
@@ -66,6 +67,7 @@ function GeneratePageInner() {
     setStatus('loading')
     setApiError(null)
     setProductName(formData.productName)
+    setLastFormData(formData)
     if (formData.template) {
       setActiveTemplateId(formData.template as TemplateId)
     }
@@ -133,7 +135,29 @@ function GeneratePageInner() {
             {status === 'loading' && <LoadingState />}
             {status === 'unauthenticated' && <AuthPrompt />}
             {status === 'done' && generatedData && (
-              <LandingPagePreview data={generatedData} productName={productName} templateId={activeTemplateId} isPaidUser={isPaidUser} onToast={showToast} />
+              <div>
+                <div className="mb-4 flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm sticky top-0 z-10">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => lastFormData && handleGenerate(lastFormData)}
+                      className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 transition-colors"
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                      Regenerate
+                    </button>
+                    <button
+                      onClick={() => { setGeneratedData(null); setGenerationId(null); setStatus('idle'); setLastFormData(null) }}
+                      className="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                    >
+                      Start over
+                    </button>
+                  </div>
+                  {generationId && (
+                    <span className="text-xs text-gray-400">ID: {generationId.slice(0, 8)}</span>
+                  )}
+                </div>
+                <LandingPagePreview data={generatedData} productName={productName} templateId={activeTemplateId} isPaidUser={isPaidUser} onToast={showToast} />
+              </div>
             )}
             {(status === 'idle' || status === 'error') && !generatedData && (
               <EmptyPreview />
