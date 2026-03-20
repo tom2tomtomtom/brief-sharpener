@@ -1,0 +1,343 @@
+'use client'
+
+export interface BriefAnalysisData {
+  extractedBrief: Record<string, unknown>
+  strategicAnalysis: Record<string, unknown>
+  gaps: string[]
+  score: number
+}
+
+interface BriefAnalysisProps {
+  data: BriefAnalysisData
+}
+
+// Score color thresholds
+function getScoreColor(score: number): { text: string; stroke: string; bg: string; label: string } {
+  if (score >= 71) return { text: 'text-green-600', stroke: '#16a34a', bg: 'bg-green-50', label: 'Strong brief' }
+  if (score >= 40) return { text: 'text-amber-600', stroke: '#d97706', bg: 'bg-amber-50', label: 'Needs work' }
+  return { text: 'text-red-600', stroke: '#dc2626', bg: 'bg-red-50', label: 'Incomplete brief' }
+}
+
+function ScoreCircle({ score }: { score: number }) {
+  const { text, stroke, bg, label } = getScoreColor(score)
+  const radius = 52
+  const circumference = 2 * Math.PI * radius
+  const dashOffset = circumference - (score / 100) * circumference
+
+  return (
+    <div className={`flex flex-col items-center justify-center rounded-2xl ${bg} border border-gray-200 p-8`}>
+      <div className="relative inline-flex items-center justify-center">
+        <svg width="140" height="140" className="-rotate-90">
+          <circle
+            cx="70"
+            cy="70"
+            r={radius}
+            fill="none"
+            stroke="#e5e7eb"
+            strokeWidth="10"
+          />
+          <circle
+            cx="70"
+            cy="70"
+            r={radius}
+            fill="none"
+            stroke={stroke}
+            strokeWidth="10"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={dashOffset}
+            className="transition-all duration-700"
+          />
+        </svg>
+        <div className="absolute flex flex-col items-center">
+          <span className={`text-4xl font-bold ${text}`}>{score}</span>
+          <span className="text-xs text-gray-500 font-medium">/100</span>
+        </div>
+      </div>
+      <p className={`mt-3 text-base font-semibold ${text}`}>{label}</p>
+      <p className="mt-1 text-sm text-gray-500">Brief quality score</p>
+    </div>
+  )
+}
+
+const BRIEF_FIELD_LABELS: Record<string, string> = {
+  objective: 'Objective',
+  target_audience: 'Target Audience',
+  brand: 'Brand',
+  deliverables: 'Deliverables',
+  tone: 'Tone of Voice',
+  budget: 'Budget',
+  timeline: 'Timeline',
+  kpis: 'Success Metrics / KPIs',
+  key_message: 'Key Message',
+  constraints: 'Constraints',
+}
+
+function ExtractedBriefCard({ extractedBrief }: { extractedBrief: Record<string, unknown> }) {
+  const fields = Object.entries(extractedBrief).filter(([, v]) => {
+    if (v === null || v === undefined || v === '') return false
+    if (Array.isArray(v) && v.length === 0) return false
+    return true
+  })
+
+  if (fields.length === 0) return null
+
+  return (
+    <section>
+      <h2 className="mb-4 text-lg font-semibold text-gray-900">Extracted Brief</h2>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {fields.map(([key, value]) => {
+          const label = BRIEF_FIELD_LABELS[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+          const displayValue = Array.isArray(value)
+            ? value.join(', ')
+            : typeof value === 'object'
+            ? JSON.stringify(value)
+            : String(value)
+
+          return (
+            <div key={key} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">{label}</p>
+              <p className="mt-1 text-sm text-gray-800 leading-relaxed">{displayValue}</p>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+type GapSeverity = 'critical' | 'warning' | 'info'
+
+function getGapSeverity(gap: string): GapSeverity {
+  const lower = gap.toLowerCase()
+  if (lower.includes('objective') || lower.includes('target audience') || lower.includes('deliverable')) return 'critical'
+  if (lower.includes('budget') || lower.includes('timeline') || lower.includes('kpi') || lower.includes('metric')) return 'warning'
+  return 'info'
+}
+
+function GapIcon({ severity }: { severity: GapSeverity }) {
+  if (severity === 'critical') {
+    return (
+      <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-red-100">
+        <svg className="h-3.5 w-3.5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+        </svg>
+      </span>
+    )
+  }
+  if (severity === 'warning') {
+    return (
+      <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-amber-100">
+        <svg className="h-3.5 w-3.5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+        </svg>
+      </span>
+    )
+  }
+  return (
+    <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100">
+      <svg className="h-3.5 w-3.5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+      </svg>
+    </span>
+  )
+}
+
+const SEVERITY_LABEL: Record<GapSeverity, string> = {
+  critical: 'Critical',
+  warning: 'Missing',
+  info: 'Consider adding',
+}
+
+function GapAnalysisSection({ gaps }: { gaps: string[] }) {
+  if (gaps.length === 0) {
+    return (
+      <section>
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">Gap Analysis</h2>
+        <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-4">
+          <svg className="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+          </svg>
+          <p className="text-sm font-medium text-green-800">No gaps found — your brief covers all key areas.</p>
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <section>
+      <h2 className="mb-4 text-lg font-semibold text-gray-900">Gap Analysis</h2>
+      <div className="space-y-3">
+        {gaps.map((gap) => {
+          const severity = getGapSeverity(gap)
+          return (
+            <div key={gap} className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+              <GapIcon severity={severity} />
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">{SEVERITY_LABEL[severity]}</p>
+                <p className="mt-0.5 text-sm text-gray-800">{gap}</p>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+function StrategicTensionsSection({ strategicAnalysis }: { strategicAnalysis: Record<string, unknown> }) {
+  // Look for tensions in common field names the API might return
+  const tensionFields = ['tensions', 'strategic_tensions', 'cultural_tensions', 'audience_tensions', 'key_tensions']
+  let tensions: unknown[] = []
+
+  for (const field of tensionFields) {
+    if (Array.isArray(strategicAnalysis[field]) && (strategicAnalysis[field] as unknown[]).length > 0) {
+      tensions = strategicAnalysis[field] as unknown[]
+      break
+    }
+  }
+
+  // Also check for any array fields that look like tensions/insights
+  if (tensions.length === 0) {
+    for (const [, value] of Object.entries(strategicAnalysis)) {
+      if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
+        tensions = value
+        break
+      }
+    }
+  }
+
+  if (tensions.length === 0) {
+    // Try to extract any string-valued top-level fields as insights
+    const insights = Object.entries(strategicAnalysis).filter(([, v]) => typeof v === 'string' && v.length > 0)
+    if (insights.length === 0) return null
+
+    return (
+      <section>
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">Strategic Analysis</h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {insights.map(([key, value]) => {
+            const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+            return (
+              <div key={key} className="rounded-xl border border-indigo-100 bg-indigo-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-indigo-400">{label}</p>
+                <p className="mt-1 text-sm text-indigo-900 leading-relaxed">{String(value)}</p>
+              </div>
+            )
+          })}
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <section>
+      <h2 className="mb-4 text-lg font-semibold text-gray-900">Strategic Tensions</h2>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {tensions.map((tension, i) => {
+          if (typeof tension === 'string') {
+            return (
+              <div key={i} className="rounded-xl border border-indigo-100 bg-indigo-50 p-4">
+                <p className="text-sm text-indigo-900 leading-relaxed">{tension}</p>
+              </div>
+            )
+          }
+          if (typeof tension === 'object' && tension !== null) {
+            const t = tension as Record<string, unknown>
+            const title = String(t.title ?? t.name ?? t.tension ?? `Tension ${i + 1}`)
+            const description = String(t.description ?? t.insight ?? t.explanation ?? t.detail ?? '')
+            return (
+              <div key={i} className="rounded-xl border border-indigo-100 bg-indigo-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-indigo-400">Tension</p>
+                <p className="mt-1 text-sm font-semibold text-indigo-900">{title}</p>
+                {description && <p className="mt-1 text-sm text-indigo-700 leading-relaxed">{description}</p>}
+              </div>
+            )
+          }
+          return null
+        })}
+      </div>
+    </section>
+  )
+}
+
+function RewrittenBriefSection({ strategicAnalysis, extractedBrief }: { strategicAnalysis: Record<string, unknown>; extractedBrief: Record<string, unknown> }) {
+  // Look for a rewritten/sharpened brief in the strategy output
+  const rewriteFields = ['rewritten_brief', 'sharpened_brief', 'improved_brief', 'refined_brief', 'brief_rewrite', 'recommended_brief']
+  let rewrittenBrief: string | null = null
+
+  for (const field of rewriteFields) {
+    if (typeof strategicAnalysis[field] === 'string' && (strategicAnalysis[field] as string).length > 0) {
+      rewrittenBrief = strategicAnalysis[field] as string
+      break
+    }
+  }
+
+  // Fall back to constructing one from extracted brief fields
+  if (!rewrittenBrief) {
+    const parts: string[] = []
+    const objective = extractedBrief.objective
+    const audience = extractedBrief.target_audience
+    const deliverables = extractedBrief.deliverables
+    const tone = extractedBrief.tone
+    const kpis = extractedBrief.kpis
+
+    if (objective) parts.push(`**Objective:** ${objective}`)
+    if (audience) parts.push(`**Target Audience:** ${Array.isArray(audience) ? audience.join(', ') : audience}`)
+    if (deliverables) parts.push(`**Deliverables:** ${Array.isArray(deliverables) ? deliverables.join(', ') : deliverables}`)
+    if (tone) parts.push(`**Tone:** ${tone}`)
+    if (kpis) parts.push(`**Success Metrics:** ${Array.isArray(kpis) ? kpis.join(', ') : kpis}`)
+
+    if (parts.length === 0) return null
+    rewrittenBrief = parts.join('\n')
+  }
+
+  const lines = rewrittenBrief.split('\n').filter(Boolean)
+
+  return (
+    <section>
+      <h2 className="mb-4 text-lg font-semibold text-gray-900">Sharpened Brief</h2>
+      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div className="space-y-3">
+          {lines.map((line, i) => {
+            const boldMatch = line.match(/^\*\*(.+?):\*\*\s*(.+)$/)
+            if (boldMatch) {
+              return (
+                <div key={i} className="flex gap-2">
+                  <span className="min-w-[140px] text-xs font-semibold uppercase tracking-wide text-gray-400 pt-0.5">{boldMatch[1]}</span>
+                  <span className="text-sm text-gray-800 leading-relaxed">{boldMatch[2]}</span>
+                </div>
+              )
+            }
+            return (
+              <p key={i} className="text-sm text-gray-800 leading-relaxed">{line}</p>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+export default function BriefAnalysis({ data }: BriefAnalysisProps) {
+  const { score, extractedBrief, strategicAnalysis, gaps } = data
+
+  return (
+    <div className="space-y-8">
+      {/* Score */}
+      <ScoreCircle score={score} />
+
+      {/* Extracted Brief */}
+      <ExtractedBriefCard extractedBrief={extractedBrief} />
+
+      {/* Gap Analysis */}
+      <GapAnalysisSection gaps={gaps} />
+
+      {/* Strategic Tensions */}
+      <StrategicTensionsSection strategicAnalysis={strategicAnalysis} />
+
+      {/* Rewritten Brief */}
+      <RewrittenBriefSection strategicAnalysis={strategicAnalysis} extractedBrief={extractedBrief} />
+    </div>
+  )
+}
