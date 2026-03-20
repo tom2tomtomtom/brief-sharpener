@@ -29,7 +29,6 @@ function GeneratePageInner() {
   const { showToast } = useToast()
   const [status, setStatus] = useState<Status>('idle')
   const [analysisData, setAnalysisData] = useState<BriefAnalysisData | null>(null)
-  const [generationId, setGenerationId] = useState<string | null>(null)
   const [apiError, setApiError] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [isFormFilled, setIsFormFilled] = useState(false)
@@ -70,9 +69,8 @@ function GeneratePageInner() {
         throw new Error(err.error || 'Analysis failed')
       }
 
-      const { generationId: newGenerationId, ...data } = await response.json()
+      const data = await response.json()
       setAnalysisData(data as BriefAnalysisData)
-      setGenerationId(newGenerationId ?? null)
       setStatus('done')
       showToast('Brief analysis complete!')
     } catch (err) {
@@ -129,18 +127,15 @@ function GeneratePageInner() {
                       className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 transition-colors"
                     >
                       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                      Regenerate
+                      Re-interrogate
                     </button>
                     <button
-                      onClick={() => { setAnalysisData(null); setGenerationId(null); setStatus('idle'); setLastFormData(null) }}
+                      onClick={() => { setAnalysisData(null); setStatus('idle'); setLastFormData(null) }}
                       className="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
                     >
                       Start over
                     </button>
                   </div>
-                  {generationId && (
-                    <span className="text-xs text-gray-400">ID: {generationId.slice(0, 8)}</span>
-                  )}
                 </div>
                 <BriefAnalysis data={analysisData} />
               </div>
@@ -180,7 +175,7 @@ function GeneratePageInner() {
 const ANALYSIS_STEPS = [
   { label: 'Reading your brief' },
   { label: 'Extracting key elements' },
-  { label: 'Identifying gaps' },
+  { label: 'Identifying gaps and tensions' },
   { label: 'Building strategic analysis' },
 ]
 

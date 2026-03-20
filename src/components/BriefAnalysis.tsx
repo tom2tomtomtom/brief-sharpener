@@ -11,7 +11,6 @@ interface BriefAnalysisProps {
   data: BriefAnalysisData
 }
 
-// Score color thresholds
 function getScoreColor(score: number): { text: string; stroke: string; bg: string; label: string } {
   if (score >= 71) return { text: 'text-green-600', stroke: '#16a34a', bg: 'bg-green-50', label: 'Strong brief' }
   if (score >= 40) return { text: 'text-amber-600', stroke: '#d97706', bg: 'bg-amber-50', label: 'Needs work' }
@@ -28,24 +27,10 @@ function ScoreCircle({ score }: { score: number }) {
     <div className={`flex flex-col items-center justify-center rounded-2xl ${bg} border border-gray-200 p-8`}>
       <div className="relative inline-flex items-center justify-center">
         <svg width="140" height="140" className="-rotate-90">
+          <circle cx="70" cy="70" r={radius} fill="none" stroke="#e5e7eb" strokeWidth="10" />
           <circle
-            cx="70"
-            cy="70"
-            r={radius}
-            fill="none"
-            stroke="#e5e7eb"
-            strokeWidth="10"
-          />
-          <circle
-            cx="70"
-            cy="70"
-            r={radius}
-            fill="none"
-            stroke={stroke}
-            strokeWidth="10"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={dashOffset}
+            cx="70" cy="70" r={radius} fill="none" stroke={stroke} strokeWidth="10"
+            strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={dashOffset}
             className="transition-all duration-700"
           />
         </svg>
@@ -158,7 +143,7 @@ function GapAnalysisSection({ gaps }: { gaps: string[] }) {
           <svg className="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
-          <p className="text-sm font-medium text-green-800">No gaps found — your brief covers all key areas.</p>
+          <p className="text-sm font-medium text-green-800">No gaps found. Your brief covers all key areas.</p>
         </div>
       </section>
     )
