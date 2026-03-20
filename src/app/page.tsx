@@ -2,6 +2,7 @@ import Link from 'next/link'
 import FAQAccordion from '@/components/FAQAccordion'
 import TryDemoSection from '@/components/TryDemoSection'
 import EmailCapture from '@/components/EmailCapture'
+import ExampleOutputs from '@/components/ExampleOutputs'
 import type { StatsResponse } from '@/app/api/stats/route'
 
 async function getStats(): Promise<StatsResponse> {
@@ -312,6 +313,9 @@ export default async function MarketingPage() {
 
       {/* Try it now demo */}
       <TryDemoSection />
+
+      {/* Example outputs */}
+      <ExampleOutputs />
 
       {/* Pricing */}
       <section className="bg-gray-50 px-4 py-24 sm:px-6 lg:px-8">
