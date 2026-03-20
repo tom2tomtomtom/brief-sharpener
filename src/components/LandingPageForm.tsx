@@ -2,29 +2,36 @@
 
 import { useState } from 'react'
 import { GenerateFormData } from '@/app/generate/page'
-import { TEMPLATES, TemplateId, DEFAULT_TEMPLATE_ID, getTemplate } from '@/lib/templates'
 
-const TONES = [
-  { value: 'professional', label: 'Professional' },
-  { value: 'casual', label: 'Casual' },
-  { value: 'bold', label: 'Bold' },
-  { value: 'minimal', label: 'Minimal' },
-] as const
+const INDUSTRIES = [
+  'FMCG',
+  'Tech',
+  'Finance',
+  'Healthcare',
+  'Retail',
+  'Automotive',
+  'Entertainment',
+  'Other',
+]
 
-type Tone = (typeof TONES)[number]['value']
+const BRIEF_TYPES = [
+  'Campaign',
+  'Brand',
+  'Digital',
+  'Social',
+  'Media',
+  'Other',
+]
 
 interface FormFields {
-  productName: string
-  productDescription: string
-  targetAudience: string
-  features: string[]
-  tone: Tone
-  template: TemplateId
+  briefText: string
+  brandName: string
+  industry: string
+  briefType: string
 }
 
 interface FormErrors {
-  productName?: string
-  productDescription?: string
+  briefText?: string
 }
 
 interface LandingPageFormProps {
@@ -35,45 +42,30 @@ interface LandingPageFormProps {
 }
 
 const initialFormData: FormFields = {
-  productName: '',
-  productDescription: '',
-  targetAudience: '',
-  features: ['', '', '', '', '', ''],
-  tone: 'professional',
-  template: DEFAULT_TEMPLATE_ID,
+  briefText: '',
+  brandName: '',
+  industry: '',
+  briefType: '',
 }
 
 export default function LandingPageForm({ onGenerate, isLoading, error, onFormChange }: LandingPageFormProps) {
   const [formData, setFormData] = useState<FormFields>(initialFormData)
   const [errors, setErrors] = useState<FormErrors>({})
 
-  function handleTemplateChange(id: TemplateId) {
-    const tpl = getTemplate(id)
-    setFormData((prev) => ({
-      ...prev,
-      template: id,
-      tone: tpl.defaultTone,
-    }))
-  }
-
   function validate(): boolean {
     const newErrors: FormErrors = {}
-    if (!formData.productName.trim()) {
-      newErrors.productName = 'Product name is required.'
-    }
-    if (!formData.productDescription.trim()) {
-      newErrors.productDescription = 'Product description is required.'
+    if (!formData.briefText.trim()) {
+      newErrors.briefText = 'Brief text is required.'
+    } else if (formData.briefText.trim().length < 100) {
+      newErrors.briefText = 'Brief must be at least 100 characters.'
     }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  function handleFeatureChange(index: number, value: string) {
-    setFormData((prev) => {
-      const features = [...prev.features]
-      features[index] = value
-      return { ...prev, features }
-    })
+  function handleBriefChange(val: string) {
+    setFormData((p) => ({ ...p, briefText: val }))
+    onFormChange?.(val.trim().length >= 100)
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -81,16 +73,12 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
     if (!validate()) return
 
     onGenerate({
-      productName: formData.productName,
-      productDescription: formData.productDescription,
-      targetAudience: formData.targetAudience || undefined,
-      features: formData.features.filter((f) => f.trim()),
-      tone: formData.tone,
-      template: formData.template,
+      briefText: formData.briefText,
+      brandName: formData.brandName || undefined,
+      industry: formData.industry || undefined,
+      briefType: formData.briefType || undefined,
     })
   }
-
-  const selectedTemplate = getTemplate(formData.template)
 
   return (
     <form id="generate-form" onSubmit={handleSubmit} noValidate className="space-y-6">
@@ -101,137 +89,81 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
         </div>
       )}
 
-      {/* Template */}
+      {/* Brief textarea */}
       <div>
-        <label htmlFor="template" className="block text-sm font-medium text-gray-700">
-          Industry template
-        </label>
-        <select
-          id="template"
-          value={formData.template}
-          onChange={(e) => handleTemplateChange(e.target.value as TemplateId)}
-          className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:ring-2 focus:ring-indigo-500"
-        >
-          {TEMPLATES.map((tpl) => (
-            <option key={tpl.id} value={tpl.id}>
-              {tpl.label}
-            </option>
-          ))}
-        </select>
-        <p className="mt-1 text-xs text-gray-400">{selectedTemplate.description}</p>
-      </div>
-
-      {/* Product Name */}
-      <div>
-        <label htmlFor="productName" className="block text-sm font-medium text-gray-700">
-          Product name <span className="text-red-500">*</span>
-        </label>
-        <input
-          id="productName"
-          type="text"
-          value={formData.productName}
-          onChange={(e) => {
-            const val = e.target.value
-            setFormData((p) => ({ ...p, productName: val }))
-            onFormChange?.(!!(val.trim() && formData.productDescription.trim()))
-          }}
-          placeholder="e.g. Acme Analytics"
-          className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm shadow-sm outline-none transition focus:ring-2 focus:ring-indigo-500 ${
-            errors.productName ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'
-          }`}
-        />
-        {errors.productName && (
-          <p className="mt-1 text-xs text-red-500">{errors.productName}</p>
-        )}
-      </div>
-
-      {/* Product Description */}
-      <div>
-        <label htmlFor="productDescription" className="block text-sm font-medium text-gray-700">
-          Product description <span className="text-red-500">*</span>
+        <label htmlFor="briefText" className="block text-sm font-medium text-gray-700">
+          Paste your brief here <span className="text-red-500">*</span>
         </label>
         <textarea
-          id="productDescription"
-          rows={4}
-          value={formData.productDescription}
-          onChange={(e) => {
-            const val = e.target.value
-            setFormData((p) => ({ ...p, productDescription: val }))
-            onFormChange?.(!!(formData.productName.trim() && val.trim()))
-          }}
-          placeholder="Describe what your product does and the problem it solves…"
+          id="briefText"
+          rows={10}
+          value={formData.briefText}
+          onChange={(e) => handleBriefChange(e.target.value)}
+          maxLength={10000}
+          placeholder="Paste your full brief here…"
           className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm shadow-sm outline-none transition focus:ring-2 focus:ring-indigo-500 ${
-            errors.productDescription ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'
+            errors.briefText ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'
           }`}
         />
-        {errors.productDescription && (
-          <p className="mt-1 text-xs text-red-500">{errors.productDescription}</p>
-        )}
+        <div className="mt-1 flex justify-between">
+          {errors.briefText ? (
+            <p className="text-xs text-red-500">{errors.briefText}</p>
+          ) : (
+            <span />
+          )}
+          <p className="text-xs text-gray-400">{formData.briefText.length}/10000</p>
+        </div>
       </div>
 
-      {/* Target Audience */}
+      {/* Brand name */}
       <div>
-        <label htmlFor="targetAudience" className="block text-sm font-medium text-gray-700">
-          Target audience
+        <label htmlFor="brandName" className="block text-sm font-medium text-gray-700">
+          Brand / Company name <span className="text-gray-400 font-normal">(optional)</span>
         </label>
         <input
-          id="targetAudience"
+          id="brandName"
           type="text"
-          value={formData.targetAudience}
-          onChange={(e) => setFormData((p) => ({ ...p, targetAudience: e.target.value }))}
-          placeholder="e.g. SaaS founders, marketing teams, freelance designers"
+          value={formData.brandName}
+          onChange={(e) => setFormData((p) => ({ ...p, brandName: e.target.value }))}
+          placeholder="e.g. Acme Corp"
           className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:ring-2 focus:ring-indigo-500"
         />
       </div>
 
-      {/* Key Features */}
+      {/* Industry */}
       <div>
-        <fieldset>
-          <legend className="block text-sm font-medium text-gray-700">
-            Key features <span className="font-normal text-gray-400">(up to 6)</span>
-          </legend>
-          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {formData.features.map((feature, index) => (
-              <input
-                key={index}
-                type="text"
-                value={feature}
-                onChange={(e) => handleFeatureChange(index, e.target.value)}
-                placeholder={`Feature ${index + 1}`}
-                className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:ring-2 focus:ring-indigo-500"
-              />
-            ))}
-          </div>
-        </fieldset>
+        <label htmlFor="industry" className="block text-sm font-medium text-gray-700">
+          Industry <span className="text-gray-400 font-normal">(optional)</span>
+        </label>
+        <select
+          id="industry"
+          value={formData.industry}
+          onChange={(e) => setFormData((p) => ({ ...p, industry: e.target.value }))}
+          className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:ring-2 focus:ring-indigo-500"
+        >
+          <option value="">Select industry…</option>
+          {INDUSTRIES.map((ind) => (
+            <option key={ind} value={ind}>{ind}</option>
+          ))}
+        </select>
       </div>
 
-      {/* Tone */}
+      {/* Brief type */}
       <div>
-        <fieldset>
-          <legend className="block text-sm font-medium text-gray-700">Tone</legend>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {TONES.map(({ value, label }) => (
-              <label
-                key={value}
-                className={`cursor-pointer rounded-full border px-4 py-1.5 text-sm font-medium transition select-none ${
-                  formData.tone === value
-                    ? 'border-indigo-600 bg-indigo-600 text-white'
-                    : 'border-gray-300 bg-white text-gray-700 hover:border-indigo-400 hover:text-indigo-600'
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="tone"
-                  value={value}
-                  checked={formData.tone === value}
-                  onChange={() => setFormData((p) => ({ ...p, tone: value }))}
-                  className="sr-only"
-                />
-                {label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        <label htmlFor="briefType" className="block text-sm font-medium text-gray-700">
+          Brief type <span className="text-gray-400 font-normal">(optional)</span>
+        </label>
+        <select
+          id="briefType"
+          value={formData.briefType}
+          onChange={(e) => setFormData((p) => ({ ...p, briefType: e.target.value }))}
+          className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:ring-2 focus:ring-indigo-500"
+        >
+          <option value="">Select type…</option>
+          {BRIEF_TYPES.map((bt) => (
+            <option key={bt} value={bt}>{bt}</option>
+          ))}
+        </select>
       </div>
 
       <button
@@ -245,7 +177,7 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
             Generating…
           </>
         ) : (
-          'Generate landing page'
+          'Interrogate this brief'
         )}
       </button>
     </form>

@@ -13,12 +13,10 @@ import { createClient } from '@/lib/supabase/client'
 type Status = 'idle' | 'loading' | 'done' | 'error' | 'unauthenticated'
 
 export interface GenerateFormData {
-  productName: string
-  productDescription: string
-  targetAudience?: string
-  features?: string[]
-  tone?: 'professional' | 'casual' | 'bold' | 'minimal'
-  template?: string
+  briefText: string
+  brandName?: string
+  industry?: string
+  briefType?: string
 }
 
 export default function GeneratePage() {
@@ -67,11 +65,8 @@ function GeneratePageInner() {
     }
     setStatus('loading')
     setApiError(null)
-    setProductName(formData.productName)
+    setProductName(formData.brandName ?? '')
     setLastFormData(formData)
-    if (formData.template) {
-      setActiveTemplateId(formData.template as TemplateId)
-    }
 
     try {
       const response = await fetch('/api/generate', {
