@@ -17,6 +17,7 @@ interface LandingPagePreviewProps {
   productName: string
   templateId?: TemplateId
   isPaidUser?: boolean
+  onToast?: (message: string) => void
 }
 
 const FEATURE_ICONS = ['⚡', '🎯', '🔒', '📊', '🚀', '✨']
@@ -410,7 +411,7 @@ function CopyButton({ text, copiedKey, id, onCopy, light = false }: CopyButtonPr
   )
 }
 
-export default function LandingPagePreview({ data, productName, templateId, isPaidUser = false }: LandingPagePreviewProps) {
+export default function LandingPagePreview({ data, productName, templateId, isPaidUser = false, onToast }: LandingPagePreviewProps) {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
   const template = getTemplate(templateId)
@@ -420,8 +421,9 @@ export default function LandingPagePreview({ data, productName, templateId, isPa
     navigator.clipboard.writeText(text).then(() => {
       setCopiedKey(id)
       setTimeout(() => setCopiedKey(null), 2000)
+      onToast?.('Copied to clipboard!')
     })
-  }, [])
+  }, [onToast])
 
   function handleDownload() {
     const html = generateHtml(data, productName, template, isPaidUser)
@@ -432,6 +434,7 @@ export default function LandingPagePreview({ data, productName, templateId, isPa
     a.download = `${productName.toLowerCase().replace(/\s+/g, '-')}-landing-page.html`
     a.click()
     URL.revokeObjectURL(url)
+    onToast?.('HTML downloaded!')
   }
 
   return (

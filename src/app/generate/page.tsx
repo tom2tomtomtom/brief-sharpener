@@ -5,6 +5,7 @@ import Link from 'next/link'
 import LandingPageForm from '@/components/LandingPageForm'
 import LandingPagePreview, { GeneratedContent } from '@/components/LandingPagePreview'
 import ErrorBoundary from '@/components/ErrorBoundary'
+import { ToastProvider, useToast } from '@/components/Toast'
 import { TemplateId, DEFAULT_TEMPLATE_ID } from '@/lib/templates'
 import { createClient } from '@/lib/supabase/client'
 
@@ -20,6 +21,15 @@ export interface GenerateFormData {
 }
 
 export default function GeneratePage() {
+  return (
+    <ToastProvider>
+      <GeneratePageInner />
+    </ToastProvider>
+  )
+}
+
+function GeneratePageInner() {
+  const { showToast } = useToast()
   const [status, setStatus] = useState<Status>('idle')
   const [generatedData, setGeneratedData] = useState<GeneratedContent | null>(null)
   const [apiError, setApiError] = useState<string | null>(null)
@@ -73,6 +83,7 @@ export default function GeneratePage() {
       const data: GeneratedContent = await response.json()
       setGeneratedData(data)
       setStatus('done')
+      showToast('Landing page generated!')
     } catch (err) {
       setApiError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
       setStatus('error')
@@ -118,7 +129,7 @@ export default function GeneratePage() {
             {status === 'loading' && <LoadingState />}
             {status === 'unauthenticated' && <AuthPrompt />}
             {status === 'done' && generatedData && (
-              <LandingPagePreview data={generatedData} productName={productName} templateId={activeTemplateId} isPaidUser={isPaidUser} />
+              <LandingPagePreview data={generatedData} productName={productName} templateId={activeTemplateId} isPaidUser={isPaidUser} onToast={showToast} />
             )}
             {(status === 'idle' || status === 'error') && !generatedData && (
               <EmptyPreview />
