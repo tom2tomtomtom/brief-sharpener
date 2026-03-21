@@ -163,7 +163,7 @@ function getFileTypeIcon(fileName: string) {
 }
 
 const DocumentIcon = () => (
-  <svg className="h-8 w-8 text-gray-400" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <svg className="h-8 w-8 text-white-dim" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <path d="M6 4a2 2 0 0 1 2-2h12l6 6v20a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4Z" fill="#f3f4f6" stroke="currentColor" strokeWidth="1.5"/>
     <path d="M20 2v6h6" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
     <line x1="10" y1="16" x2="22" y2="16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -286,15 +286,15 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
     <form id="generate-form" onSubmit={handleSubmit} noValidate className="space-y-6">
       {/* API error banner */}
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-hot bg-black-card px-4 py-3 text-sm text-red-hot">
           {error}
         </div>
       )}
 
       {/* Brief textarea */}
       <div>
-        <label htmlFor="briefText" className="block text-sm font-medium text-gray-700">
-          Upload or paste your brief <span className="text-red-500">*</span>
+        <label htmlFor="briefText" className="block text-xs font-medium uppercase tracking-wide text-white-muted">
+          Upload or paste your brief <span className="text-red-hot">*</span>
         </label>
 
         {/* File upload dropzone */}
@@ -314,12 +314,12 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
           }}
           className={`mt-2 cursor-pointer border-2 border-dashed p-4 text-center transition ${
             isDragOver
-              ? 'border-indigo-400 bg-indigo-50'
+              ? 'border-red-hot bg-black-card'
               : uploadState === 'done'
-              ? 'border-green-300 bg-green-50'
+              ? 'border-green-600 bg-black-card'
               : uploadState === 'error'
-              ? 'border-red-300 bg-red-50'
-              : 'border-gray-300 bg-gray-50 hover:border-indigo-300 hover:bg-indigo-50/50'
+              ? 'border-red-hot bg-black-card'
+              : 'border-border-subtle bg-black-deep hover:border-red-hot hover:bg-black-card'
           } rounded-lg`}
         >
           <input
@@ -338,9 +338,9 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
           </div>
           {uploadState === 'parsing' ? (
             <div className="py-2 space-y-2">
-              <p className="text-sm text-indigo-600">Parsing {uploadFileName}...</p>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-indigo-100">
-                <div className="h-full w-full origin-left animate-[progress_1.5s_ease-in-out_infinite] rounded-full bg-indigo-500" />
+              <p className="text-sm text-orange-accent">Parsing {uploadFileName}...</p>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-black-card">
+                <div className="h-full w-full origin-left animate-[progress_1.5s_ease-in-out_infinite] rounded-full bg-red-hot" />
               </div>
             </div>
           ) : uploadState === 'done' ? (
@@ -362,11 +362,11 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
                     setUploadError(null)
                     handleBriefChange('')
                   }}
-                  className="rounded-md border border-red-200 bg-white px-3 py-1 text-xs font-medium text-red-600 transition hover:border-red-300 hover:bg-red-50"
+                  className="rounded-md border border-red-hot bg-black-card px-3 py-1 text-xs font-medium text-red-hot transition hover:border-red-hot hover:bg-black-card"
                 >
                   Clear file
                 </button>
-                <span className="text-xs text-gray-400">or click to upload a different file</span>
+                <span className="text-xs text-white-dim">or click to upload a different file</span>
               </div>
             </div>
           ) : (
@@ -374,33 +374,33 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
               <div className="flex items-center justify-center mb-2">
                 <DocumentIcon />
               </div>
-              <p className="text-sm text-gray-600">
-                <span className="font-medium text-indigo-600">Upload a file</span> or drag and drop
+              <p className="text-sm text-white-dim">
+                <span className="font-medium text-orange-accent">Upload a file</span> or drag and drop
               </p>
-              <p className="text-xs text-gray-400 mt-1">PDF, Word (.docx), or text files up to 10MB</p>
+              <p className="text-xs text-white-dim mt-1">PDF, Word (.docx), or text files up to 10MB</p>
               {uploadState === 'error' && uploadError && (
-                <p className="text-xs text-red-500 mt-1">{uploadError}</p>
+                <p className="text-xs text-red-hot mt-1">{uploadError}</p>
               )}
             </div>
           )}
         </div>
 
         <div className="my-3 flex items-center gap-3">
-          <div className="h-px flex-1 bg-gray-200" />
-          <span className="text-xs text-gray-400">or</span>
-          <div className="h-px flex-1 bg-gray-200" />
+          <div className="h-px flex-1 bg-border-subtle" />
+          <span className="text-xs text-white-dim">or</span>
+          <div className="h-px flex-1 bg-border-subtle" />
         </div>
 
         {/* Example brief chips */}
         <div className="mt-2 mb-2">
-          <p className="mb-1.5 text-xs text-gray-500">Try an example:</p>
+          <p className="mb-1.5 text-xs text-white-dim">Try an example:</p>
           <div className="flex flex-wrap gap-2">
             {EXAMPLE_BRIEFS.map((ex) => (
               <button
                 key={ex.label}
                 type="button"
                 onClick={() => handleBriefChange(ex.brief)}
-                className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 transition hover:border-indigo-400 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="rounded-full border border-border-subtle bg-black-card px-3 py-1 text-xs font-medium text-orange-accent transition hover:border-red-hot hover:bg-black-card focus:outline-none focus:ring-2 focus:ring-red-hot"
               >
                 {ex.label}
               </button>
@@ -417,13 +417,13 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
           placeholder="Paste your full brief here…"
           aria-describedby={errors.briefText ? 'briefText-error' : undefined}
           aria-invalid={!!errors.briefText}
-          className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm shadow-sm outline-none transition focus:ring-2 focus:ring-indigo-500 ${
-            errors.briefText ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'
+          className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm text-white shadow-sm outline-none transition focus:ring-2 focus:ring-red-hot ${
+            errors.briefText ? 'border-red-hot bg-black-card' : 'border-border-subtle bg-black-card'
           }`}
         />
         <div className="mt-1 flex justify-between">
           {errors.briefText ? (
-            <p id="briefText-error" role="alert" className="text-xs text-red-500">{errors.briefText}</p>
+            <p id="briefText-error" role="alert" className="text-xs text-red-hot">{errors.briefText}</p>
           ) : (
             <span />
           )}
@@ -432,7 +432,7 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
               const wordCount = formData.briefText.trim() === '' ? 0 : formData.briefText.trim().split(/\s+/).length
               const underMin = wordCount < 20
               return (
-                <span className={underMin ? 'text-red-500' : 'text-gray-400'}>
+                <span className={underMin ? 'text-red-hot' : 'text-white-dim'}>
                   {wordCount} words (min 20)
                 </span>
               )
@@ -444,7 +444,7 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
               const circumference = 2 * Math.PI * radius
               const dashOffset = circumference * (1 - pct)
               const ringColor = charCount >= 9500 ? '#ef4444' : charCount >= 8000 ? '#f59e0b' : '#6366f1'
-              const textColor = charCount >= 9500 ? 'text-red-500' : charCount >= 8000 ? 'text-amber-500' : 'text-gray-400'
+              const textColor = charCount >= 9500 ? 'text-red-hot' : charCount >= 8000 ? 'text-amber-500' : 'text-white-dim'
               return (
                 <span className={`flex items-center gap-1 ${textColor}`}>
                   <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
@@ -470,8 +470,8 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
 
       {/* Brand name */}
       <div>
-        <label htmlFor="brandName" className="block text-sm font-medium text-gray-700">
-          Brand / Company name <span className="text-gray-400 font-normal">(optional)</span>
+        <label htmlFor="brandName" className="block text-xs font-medium uppercase tracking-wide text-white-muted">
+          Brand / Company name <span className="text-white-dim font-normal">(optional)</span>
         </label>
         <input
           id="brandName"
@@ -479,20 +479,20 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
           value={formData.brandName}
           onChange={(e) => setFormData((p) => ({ ...p, brandName: e.target.value }))}
           placeholder="e.g. Acme Corp"
-          className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:ring-2 focus:ring-indigo-500"
+          className="mt-1 block w-full rounded-lg border border-border-subtle bg-black-card px-3 py-2 text-sm text-white shadow-sm outline-none transition focus:ring-2 focus:ring-red-hot"
         />
       </div>
 
       {/* Industry */}
       <div>
-        <label htmlFor="industry" className="block text-sm font-medium text-gray-700">
-          Industry <span className="text-gray-400 font-normal">(optional)</span>
+        <label htmlFor="industry" className="block text-xs font-medium uppercase tracking-wide text-white-muted">
+          Industry <span className="text-white-dim font-normal">(optional)</span>
         </label>
         <select
           id="industry"
           value={formData.industry}
           onChange={(e) => setFormData((p) => ({ ...p, industry: e.target.value }))}
-          className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:ring-2 focus:ring-indigo-500"
+          className="mt-1 block w-full rounded-lg border border-border-subtle bg-black-card px-3 py-2 text-sm text-white shadow-sm outline-none transition focus:ring-2 focus:ring-red-hot"
         >
           <option value="">Select industry…</option>
           {INDUSTRIES.map((ind) => (
@@ -503,14 +503,14 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
 
       {/* Brief type */}
       <div>
-        <label htmlFor="briefType" className="block text-sm font-medium text-gray-700">
-          Brief type <span className="text-gray-400 font-normal">(optional)</span>
+        <label htmlFor="briefType" className="block text-xs font-medium uppercase tracking-wide text-white-muted">
+          Brief type <span className="text-white-dim font-normal">(optional)</span>
         </label>
         <select
           id="briefType"
           value={formData.briefType}
           onChange={(e) => setFormData((p) => ({ ...p, briefType: e.target.value }))}
-          className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:ring-2 focus:ring-indigo-500"
+          className="mt-1 block w-full rounded-lg border border-border-subtle bg-black-card px-3 py-2 text-sm text-white shadow-sm outline-none transition focus:ring-2 focus:ring-red-hot"
         >
           <option value="">Select type…</option>
           {BRIEF_TYPES.map((bt) => (
@@ -522,7 +522,7 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
       <button
         type="submit"
         disabled={isLoading}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-hot px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-dim focus:outline-none focus:ring-2 focus:ring-red-hot focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isLoading ? (
           <>
@@ -533,8 +533,8 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
           'Interrogate this brief'
         )}
       </button>
-      <p className="text-center text-xs text-gray-400">
-        Press <kbd className="rounded border border-gray-300 bg-gray-100 px-1 py-0.5 font-mono text-xs">⌘ Enter</kbd> to submit
+      <p className="text-center text-xs text-white-dim">
+        Press <kbd className="rounded border border-border-subtle bg-black-card px-1 py-0.5 font-mono text-xs">⌘ Enter</kbd> to submit
       </p>
     </form>
   )
