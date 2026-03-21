@@ -405,6 +405,79 @@ function GapAnalysisSection({ gaps, strategicAnalysis }: { gaps: string[]; strat
   )
 }
 
+function TensionCards({ tensions }: { tensions: unknown[] }) {
+  const [expanded, setExpanded] = useState<Record<number, boolean>>({})
+
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {tensions.map((tension, i) => {
+        const isExpanded = !!expanded[i]
+
+        if (typeof tension === 'string') {
+          const [summary, ...rest] = tension.split('. ')
+          const hasMore = rest.length > 0
+          return (
+            <div
+              key={i}
+              onClick={() => hasMore && setExpanded(prev => ({ ...prev, [i]: !prev[i] }))}
+              className={`border bg-black-card p-4 transition-colors ${isExpanded ? 'border-orange-accent' : 'border-border-subtle'} ${hasMore ? 'cursor-pointer' : ''}`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-sm text-white leading-relaxed">{summary}{!isExpanded && hasMore ? '...' : ''}</p>
+                {hasMore && (
+                  <svg className={`mt-0.5 h-4 w-4 flex-shrink-0 text-white-muted transition-transform ${isExpanded ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                )}
+              </div>
+              {isExpanded && hasMore && (
+                <p className="mt-2 text-sm text-white-muted leading-relaxed">{rest.join('. ')}</p>
+              )}
+            </div>
+          )
+        }
+
+        if (typeof tension === 'object' && tension !== null) {
+          const t = tension as Record<string, unknown>
+          const title = String(t.title ?? t.name ?? t.tension ?? `Tension ${i + 1}`)
+          const description = String(t.description ?? t.insight ?? t.explanation ?? t.detail ?? '')
+          const recommendation = String(t.recommendation ?? t.action ?? t.suggest ?? '')
+          const hasMore = !!(description || recommendation)
+          return (
+            <div
+              key={i}
+              onClick={() => hasMore && setExpanded(prev => ({ ...prev, [i]: !prev[i] }))}
+              className={`border bg-black-card p-4 transition-colors ${isExpanded ? 'border-orange-accent' : 'border-border-subtle'} ${hasMore ? 'cursor-pointer' : ''}`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-orange-accent">Tension</p>
+                  <p className="mt-1 text-sm font-semibold text-white">{title}</p>
+                </div>
+                {hasMore && (
+                  <svg className={`mt-1 h-4 w-4 flex-shrink-0 text-white-muted transition-transform ${isExpanded ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                )}
+              </div>
+              {isExpanded && (
+                <div className="mt-2 space-y-2">
+                  {description && <p className="text-sm text-white-muted leading-relaxed">{description}</p>}
+                  {recommendation && (
+                    <p className="text-sm text-white-muted leading-relaxed border-t border-border-subtle pt-2">{recommendation}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )
+        }
+
+        return null
+      })}
+    </div>
+  )
+}
+
 function StrategicTensionsSection({ strategicAnalysis }: { strategicAnalysis: Record<string, unknown> }) {
   const tensionFields = ['tensions', 'strategic_tensions', 'cultural_tensions', 'audience_tensions', 'key_tensions']
   let tensions: unknown[] = []
@@ -471,30 +544,7 @@ function StrategicTensionsSection({ strategicAnalysis }: { strategicAnalysis: Re
         <h2 className="text-lg font-semibold uppercase tracking-wider text-white">Strategic Tensions</h2>
         <CopyButton text={tensionsCopyText} />
       </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {tensions.map((tension, i) => {
-          if (typeof tension === 'string') {
-            return (
-              <div key={i} className="border border-border-strong bg-black-card p-4">
-                <p className="text-sm text-white leading-relaxed">{tension}</p>
-              </div>
-            )
-          }
-          if (typeof tension === 'object' && tension !== null) {
-            const t = tension as Record<string, unknown>
-            const title = String(t.title ?? t.name ?? t.tension ?? `Tension ${i + 1}`)
-            const description = String(t.description ?? t.insight ?? t.explanation ?? t.detail ?? '')
-            return (
-              <div key={i} className="border border-border-strong bg-black-card p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-orange-accent">Tension</p>
-                <p className="mt-1 text-sm font-semibold text-white">{title}</p>
-                {description && <p className="mt-1 text-sm text-white-muted leading-relaxed">{description}</p>}
-              </div>
-            )
-          }
-          return null
-        })}
-      </div>
+      <TensionCards tensions={tensions} />
     </section>
   )
 }
