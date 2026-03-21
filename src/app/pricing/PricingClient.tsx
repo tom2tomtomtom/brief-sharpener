@@ -86,21 +86,21 @@ export default function PricingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 py-16 px-4">
+    <main className="min-h-screen bg-black-ink py-16 px-4">
       {/* Header */}
       <div className="text-center mb-14">
-        <Link href="/" className="text-sm text-indigo-600 hover:text-indigo-800 font-medium mb-6 inline-block">
+        <Link href="/" className="text-sm text-orange-accent hover:text-red-hot font-medium mb-6 inline-block uppercase tracking-wide transition-colors">
           ← Back to home
         </Link>
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">Brief Intelligence pricing</h1>
-        <p className="text-lg text-gray-600 max-w-xl mx-auto">
+        <h1 className="text-4xl font-bold text-red-hot mb-4 uppercase tracking-tight">Brief Intelligence Pricing</h1>
+        <p className="text-lg text-white-muted max-w-xl mx-auto">
           Start free. Interrogate your brief with the rigour it deserves.
         </p>
       </div>
 
       {/* Error banner */}
       {error && (
-        <div className="max-w-md mx-auto mb-8 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm text-center">
+        <div className="max-w-md mx-auto mb-8 bg-black-card border-2 border-red-hot text-red-hot px-4 py-3 text-sm text-center uppercase tracking-wide">
           {error}
         </div>
       )}
@@ -110,16 +110,16 @@ export default function PricingPage() {
         {tiers.map((tier) => (
           <div
             key={tier.name}
-            className={`relative rounded-2xl p-8 flex flex-col ${
+            className={`relative p-8 flex flex-col ${
               tier.highlighted
-                ? 'bg-indigo-600 text-white shadow-2xl scale-105'
-                : 'bg-white text-gray-900 shadow-md'
+                ? 'bg-black-card border-2 border-red-hot'
+                : 'bg-black-card border-2 border-border-subtle'
             }`}
           >
             {/* Most Popular badge */}
             {tier.highlighted && (
               <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                <span className="bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                <span className="bg-red-hot text-white text-xs font-bold px-3 py-1 uppercase tracking-wide">
                   Most Popular
                 </span>
               </div>
@@ -127,30 +127,18 @@ export default function PricingPage() {
 
             {/* Tier name */}
             <div className="mb-6">
-              <h2
-                className={`text-sm font-semibold uppercase tracking-widest mb-3 ${
-                  tier.highlighted ? 'text-indigo-200' : 'text-indigo-600'
-                }`}
-              >
+              <h2 className="text-sm font-bold uppercase tracking-widest mb-3 text-orange-accent">
                 {tier.name}
               </h2>
               <div className="flex items-end gap-1 mb-2">
-                <span className="text-4xl font-bold">{tier.price}</span>
+                <span className="text-4xl font-bold text-white">{tier.price}</span>
                 {tier.period && (
-                  <span
-                    className={`text-sm mb-1 ${
-                      tier.highlighted ? 'text-indigo-200' : 'text-gray-500'
-                    }`}
-                  >
+                  <span className="text-sm mb-1 text-white-muted">
                     / {tier.period}
                   </span>
                 )}
               </div>
-              <p
-                className={`text-sm ${
-                  tier.highlighted ? 'text-indigo-100' : 'text-gray-500'
-                }`}
-              >
+              <p className="text-sm text-white-muted">
                 {tier.description}
               </p>
             </div>
@@ -160,9 +148,7 @@ export default function PricingPage() {
               {tier.features.map((feature) => (
                 <li key={feature} className="flex items-start gap-2 text-sm">
                   <svg
-                    className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-                      tier.highlighted ? 'text-indigo-200' : 'text-indigo-500'
-                    }`}
+                    className="w-4 h-4 mt-0.5 flex-shrink-0 text-orange-accent"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -170,9 +156,7 @@ export default function PricingPage() {
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className={tier.highlighted ? 'text-indigo-50' : 'text-gray-600'}>
-                    {feature}
-                  </span>
+                  <span className="text-white-muted">{feature}</span>
                 </li>
               ))}
             </ul>
@@ -181,11 +165,7 @@ export default function PricingPage() {
             {tier.ctaType === 'link' ? (
               <Link
                 href={tier.href!}
-                className={`block text-center py-3 px-6 rounded-xl font-semibold text-sm transition-colors ${
-                  tier.highlighted
-                    ? 'bg-white text-indigo-600 hover:bg-indigo-50'
-                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                }`}
+                className="block text-center py-3 px-6 font-bold text-sm uppercase tracking-wide transition-all bg-red-hot text-white border-2 border-red-hot hover:bg-red-dim"
               >
                 {tier.cta}
               </Link>
@@ -193,11 +173,7 @@ export default function PricingPage() {
               <button
                 onClick={() => handleCheckout(tier.plan!)}
                 disabled={loading !== null}
-                className={`block w-full text-center py-3 px-6 rounded-xl font-semibold text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
-                  tier.highlighted
-                    ? 'bg-white text-indigo-600 hover:bg-indigo-50'
-                    : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                }`}
+                className="block w-full text-center py-3 px-6 font-bold text-sm uppercase tracking-wide transition-all disabled:opacity-60 disabled:cursor-not-allowed bg-red-hot text-white border-2 border-red-hot hover:bg-red-dim"
               >
                 {loading === tier.plan ? (
                   <span className="flex items-center justify-center gap-2">
@@ -218,15 +194,15 @@ export default function PricingPage() {
 
       {/* Feature comparison table */}
       <div className="max-w-5xl mx-auto mt-16">
-        <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">Compare plans</h2>
-        <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+        <h2 className="text-2xl font-bold text-red-hot text-center mb-8 uppercase">Compare Plans</h2>
+        <div className="bg-black-card border-2 border-border-subtle overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-left py-4 px-6 font-semibold text-gray-700 w-1/2">Feature</th>
-                <th className="text-center py-4 px-6 font-semibold text-gray-700">Free</th>
-                <th className="text-center py-4 px-6 font-semibold text-indigo-600 bg-indigo-50">Single</th>
-                <th className="text-center py-4 px-6 font-semibold text-gray-700">Pro</th>
+              <tr className="border-b border-border-subtle">
+                <th className="text-left py-4 px-6 font-bold text-white-muted uppercase tracking-wide w-1/2">Feature</th>
+                <th className="text-center py-4 px-6 font-bold text-white-muted uppercase tracking-wide">Free</th>
+                <th className="text-center py-4 px-6 font-bold text-orange-accent uppercase tracking-wide bg-black-deep">Single</th>
+                <th className="text-center py-4 px-6 font-bold text-white-muted uppercase tracking-wide">Pro</th>
               </tr>
             </thead>
             <tbody>
@@ -238,25 +214,25 @@ export default function PricingPage() {
                 { feature: 'Custom branding', free: false, single: true, pro: true },
                 { feature: 'Support', free: 'Community', single: 'Email', pro: 'Priority' },
               ].map((row, i) => (
-                <tr key={row.feature} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                  <td className="py-4 px-6 font-medium text-gray-700">{row.feature}</td>
+                <tr key={row.feature} className={`border-b border-border-subtle ${i % 2 === 0 ? 'bg-black-card' : 'bg-black-deep'}`}>
+                  <td className="py-4 px-6 font-medium text-white-muted">{row.feature}</td>
                   {(['free', 'single', 'pro'] as const).map((tier) => (
                     <td
                       key={tier}
-                      className={`py-4 px-6 text-center ${tier === 'single' ? 'bg-indigo-50/60' : ''}`}
+                      className={`py-4 px-6 text-center ${tier === 'single' ? 'bg-black-deep' : ''}`}
                     >
                       {typeof row[tier] === 'boolean' ? (
                         row[tier] ? (
-                          <svg className="w-5 h-5 text-indigo-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <svg className="w-5 h-5 text-orange-accent mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                           </svg>
                         ) : (
-                          <svg className="w-5 h-5 text-gray-300 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <svg className="w-5 h-5 text-white-faint mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         )
                       ) : (
-                        <span className="text-gray-600">{row[tier]}</span>
+                        <span className="text-white-muted">{row[tier]}</span>
                       )}
                     </td>
                   ))}
@@ -268,7 +244,7 @@ export default function PricingPage() {
       </div>
 
       {/* Footer note */}
-      <p className="text-center text-sm text-gray-400 mt-12">
+      <p className="text-center text-sm text-white-dim mt-12 uppercase tracking-wide">
         Payments processed securely by Stripe. Cancel anytime.
       </p>
     </main>
