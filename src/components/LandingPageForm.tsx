@@ -212,7 +212,18 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
           ) : (
             <span />
           )}
-          <p className="text-xs text-gray-400">{formData.briefText.length}/10000</p>
+          <div className="flex items-center gap-3 text-xs">
+            {(() => {
+              const wordCount = formData.briefText.trim() === '' ? 0 : formData.briefText.trim().split(/\s+/).length
+              const underMin = wordCount < 20
+              return (
+                <span className={underMin ? 'text-red-500' : 'text-gray-400'}>
+                  {wordCount} words (min 20)
+                </span>
+              )
+            })()}
+            <span className="text-gray-400">{formData.briefText.length}/10000</span>
+          </div>
         </div>
       </div>
 
