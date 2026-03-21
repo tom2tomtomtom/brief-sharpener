@@ -2,8 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --background: #050505;
+  --foreground: #ffffff;
+  --black-ink: #050505;
+  --black-deep: #0a0a0a;
+  --black-card: #0f0f0f;
+  --red-hot: #ff2e2e;
+  --red-dim: #cc2525;
+  --orange-accent: #ff6b00;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 46, 46, 0.3);
+  --grid-lines: rgba(255, 255, 255, 0.02);
+}
+
 html {
   scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  background-image:
+    linear-gradient(var(--grid-lines) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-lines) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Sharp corners everywhere */
+* {
+  border-radius: 0 !important;
+}
+
+/* Focus states */
+:where(button, [role="button"], a, input, select, textarea):focus-visible {
+  box-shadow: 0 0 0 2px var(--red-hot);
+  outline: 2px solid var(--red-hot);
+  outline-offset: 2px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track { background: var(--black-deep); }
+::-webkit-scrollbar-thumb { background: var(--red-hot); }
+::-webkit-scrollbar-thumb:hover { background: var(--red-dim); }
+
+/* Selection */
+::selection {
+  background: var(--red-hot);
+  color: #ffffff;
+}
+
+/* Form elements base */
+input, textarea, select {
+  background: var(--black-card);
+  border: 1px solid var(--border-subtle);
+  color: #ffffff;
+}
+input:hover, textarea:hover, select:hover {
+  border-color: var(--border-strong);
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--red-hot);
+  background: var(--black-deep);
 }
 
 @keyframes aidenCelebRing {
@@ -18,109 +79,23 @@ html {
 }
 
 @media print {
-  /* Hide non-content UI */
-  header,
-  nav,
-  footer,
-  /* Welcome banner, usage warning, loading bar */
-  .border-indigo-200.bg-indigo-50,
-  .border-amber-200.bg-amber-50,
-  .nprogress-bar,
-  /* Form panel (left column) */
-  .lg\:w-\[420px\],
-  /* Sticky action buttons (re-interrogate / start over) */
+  * { border-radius: 0 !important; }
+  body, main {
+    background: white !important;
+    color: black !important;
+    background-image: none !important;
+  }
+  header, nav, footer,
   .sticky.top-0.z-10,
-  /* Fixed mobile sticky button */
   .fixed.bottom-0,
-  /* Toast notifications */
   [role="status"],
   [data-toast],
   [data-sonner-toaster] {
     display: none !important;
   }
-
-  /* Reset layout so analysis takes full width */
-  body,
-  main {
-    background: white !important;
-    color: black !important;
-  }
-
-  /* Remove padding/shadow from the outer wrapper */
-  .min-h-screen {
-    min-height: unset !important;
-  }
-
-  /* Make the two-column flex go full-width single column */
-  .flex.flex-col.gap-8.lg\:flex-row {
-    display: block !important;
-  }
-
-  /* Analysis results pane takes full width */
-  .min-w-0.flex-1 {
-    width: 100% !important;
-  }
-
-  /* Print-friendly colors for cards */
-  .rounded-xl,
-  .rounded-2xl {
-    border: 1px solid #ccc !important;
-    box-shadow: none !important;
-    background: white !important;
-    color: black !important;
-    page-break-inside: avoid;
-  }
-
-  /* Score circle: make strokes black/grey */
-  svg circle[stroke="#6366f1"],
-  svg circle[stroke="#4f46e5"],
-  svg circle[stroke="#818cf8"] {
-    stroke: #333 !important;
-  }
-
-  /* Indigo/color backgrounds on tension cards → white */
-  .bg-indigo-50,
-  .bg-indigo-100,
-  .bg-green-50,
-  .bg-amber-50,
-  .bg-red-50 {
-    background: white !important;
-  }
-
-  /* Text colors → black */
-  .text-indigo-600,
-  .text-indigo-700,
-  .text-indigo-800,
-  .text-indigo-900,
-  .text-green-600,
-  .text-green-700,
-  .text-amber-600,
-  .text-amber-700,
-  .text-red-600,
-  .text-red-700,
-  .text-gray-400,
-  .text-gray-500,
-  .text-gray-600 {
-    color: #333 !important;
-  }
-
-  /* Borders → light grey */
-  .border-indigo-100,
-  .border-indigo-200,
-  .border-green-200,
-  .border-amber-200,
-  .border-red-200 {
-    border-color: #ccc !important;
-  }
-
-  /* Ensure links print as plain text */
-  a {
-    color: black !important;
-    text-decoration: none !important;
-  }
-
-  /* Page break handling */
-  section {
-    page-break-inside: avoid;
-  }
+  .lg\:w-\[420px\] { display: none !important; }
+  .flex.flex-col.gap-8.lg\:flex-row { display: block !important; }
+  .min-w-0.flex-1 { width: 100% !important; }
+  section { page-break-inside: avoid; }
+  a { color: black !important; text-decoration: none !important; }
 }

@@ -94,7 +94,7 @@ const weakBrief = {
     { label: 'Tone', value: 'Fun and engaging.' },
   ],
   badge: 'Weak brief',
-  badgeColor: 'bg-red-100 text-red-700',
+  badgeColor: 'border border-red-hot/50 text-red-hot bg-black-card',
 }
 
 const strongBrief = {
@@ -107,7 +107,7 @@ const strongBrief = {
     { label: 'Tone', value: 'Direct and honest. No hype. Like a friend who knows they let you down and is showing you why it\'s worth another chance.' },
   ],
   badge: 'AIDEN-sharpened',
-  badgeColor: 'bg-green-100 text-green-700',
+  badgeColor: 'border border-orange-accent/50 text-orange-accent bg-black-card',
 }
 
 const gapTypes = [
@@ -123,7 +123,7 @@ export default async function MarketingPage() {
   const stats = await getStats()
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-black-ink">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -132,17 +132,17 @@ export default async function MarketingPage() {
 
       {/* Live stats bar */}
       {stats.briefCount > 0 && (
-        <section className="border-b border-indigo-100 bg-indigo-600 py-2.5">
+        <section className="border-b border-border-subtle bg-red-hot py-2.5">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-1 text-sm font-medium text-indigo-100">
+            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-1 text-sm font-medium text-white-muted">
               <span>
                 <span className="font-bold text-white">{stats.briefCount.toLocaleString()}</span> briefs interrogated
               </span>
-              <span className="hidden sm:inline text-indigo-400">·</span>
+              <span className="hidden sm:inline text-white-dim">·</span>
               <span>
                 Average score: <span className="font-bold text-white">{stats.avgScore}/100</span>
               </span>
-              <span className="hidden sm:inline text-indigo-400">·</span>
+              <span className="hidden sm:inline text-white-dim">·</span>
               <span>
                 <span className="font-bold text-white">{stats.gapCount.toLocaleString()}</span> gaps found
               </span>
@@ -152,40 +152,40 @@ export default async function MarketingPage() {
       )}
 
       {/* Hero */}
-      <section className="bg-gradient-to-b from-indigo-50 to-white px-4 pt-20 pb-24 sm:px-6 lg:px-8">
+      <section className="bg-black-deep px-4 pt-20 pb-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 mb-6">
+          <div className="inline-flex items-center gap-2 border border-border-subtle bg-black-card px-3 py-1 text-xs font-medium text-orange-accent mb-6">
             AI-powered creative analysis · Powered by Claude AI
           </div>
-          <h1 className="text-5xl font-extrabold tracking-tight text-gray-900 sm:text-6xl leading-tight">
+          <h1 className="text-5xl font-extrabold tracking-tight text-white uppercase sm:text-6xl leading-tight">
             Your brief is holding{' '}
-            <span className="text-indigo-600">you back.</span>
+            <span className="text-red-hot">you back.</span>
             <br />
             AIDEN will show you why.
           </h1>
-          <p className="mt-6 text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-6 text-xl text-white-muted max-w-2xl mx-auto leading-relaxed">
             Brief Intelligence interrogates your brief the way the best strategists do — relentlessly, specifically, and without mercy. Find every gap before it becomes a missed opportunity.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/generate"
-              className="w-full sm:w-auto rounded-xl bg-indigo-600 px-8 py-4 text-base font-semibold text-white shadow-lg hover:bg-indigo-700 transition-colors"
+              className="w-full sm:w-auto bg-red-hot px-8 py-4 text-base font-semibold text-white shadow-lg hover:bg-red-dim transition-colors"
             >
               Interrogate your brief — free
             </Link>
             <Link
               href="/pricing"
-              className="w-full sm:w-auto rounded-xl border border-gray-200 bg-white px-8 py-4 text-base font-semibold text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-colors"
+              className="w-full sm:w-auto border border-border-subtle bg-black-card px-8 py-4 text-base font-semibold text-white-muted hover:border-border-strong transition-colors"
             >
               See pricing
             </Link>
           </div>
-          <p className="mt-4 text-sm text-gray-400">No credit card required · 3 free analyses per month</p>
+          <p className="mt-4 text-sm text-white-dim">No credit card required · 3 free analyses per month</p>
         </div>
       </section>
 
       {/* Trust badges */}
-      <section className="border-y border-gray-100 bg-gray-50 py-6">
+      <section className="border-y border-border-subtle bg-black-deep py-6">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-center gap-3">
             {[
@@ -196,7 +196,7 @@ export default async function MarketingPage() {
             ].map(({ label }) => (
               <span
                 key={label}
-                className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-xs font-medium text-gray-600 shadow-sm"
+                className="border border-border-subtle bg-black-card px-4 py-1.5 text-xs font-medium text-white-muted"
               >
                 {label}
               </span>
@@ -209,17 +209,17 @@ export default async function MarketingPage() {
       <section id="how-it-works" className="px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight text-white uppercase sm:text-4xl">
               How it works
             </h2>
-            <p className="mt-4 text-lg text-gray-600">Three steps from weak brief to sharp strategy.</p>
+            <p className="mt-4 text-lg text-white-muted">Three steps from weak brief to sharp strategy.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {steps.map((step) => (
-              <div key={step.number} className="flex flex-col rounded-2xl border border-transparent p-6 transition-all duration-200 hover:border-indigo-100 hover:bg-indigo-50/40 hover:shadow-sm">
-                <span className="text-5xl font-black text-indigo-100 leading-none mb-4">{step.number}</span>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{step.title}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{step.description}</p>
+              <div key={step.number} className="flex flex-col border border-transparent p-6 transition-all duration-200 hover:border-border-subtle hover:bg-black-card">
+                <span className="text-5xl font-black text-red-hot leading-none mb-4">{step.number}</span>
+                <h3 className="text-lg font-semibold text-white uppercase mb-2">{step.title}</h3>
+                <p className="text-white-muted text-sm leading-relaxed">{step.description}</p>
               </div>
             ))}
           </div>
@@ -227,16 +227,16 @@ export default async function MarketingPage() {
       </section>
 
       {/* Before / After */}
-      <section className="bg-gray-50 px-4 py-24 sm:px-6 lg:px-8">
+      <section className="bg-black-deep px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-14">
-            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 mb-4">
+            <span className="inline-flex items-center gap-2 border border-border-subtle bg-black-card px-3 py-1 text-xs font-medium text-orange-accent mb-4">
               Real example
             </span>
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight text-white uppercase sm:text-4xl">
               The difference a sharp brief makes
             </h2>
-            <p className="mt-4 text-lg text-gray-600 max-w-xl mx-auto">
+            <p className="mt-4 text-lg text-white-muted max-w-xl mx-auto">
               See exactly how AIDEN transforms a vague, underspecified brief into something your team can actually use.
             </p>
           </div>
@@ -245,26 +245,26 @@ export default async function MarketingPage() {
             {/* Weak brief */}
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 uppercase tracking-widest">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 text-xs font-bold text-gray-600">1</span>
+                <div className="flex items-center gap-2 text-sm font-semibold text-white-dim uppercase tracking-widest">
+                  <span className="flex h-6 w-6 items-center justify-center bg-black-card text-xs font-bold text-white-muted">1</span>
                   {weakBrief.title}
                 </div>
-                <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${weakBrief.badgeColor}`}>
+                <span className={`px-2.5 py-1 text-xs font-semibold ${weakBrief.badgeColor}`}>
                   {weakBrief.badge}
                 </span>
               </div>
-              <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-                <div className="border-b border-gray-100 bg-gray-50 px-5 py-3 flex items-center gap-2">
+              <div className="border border-border-subtle bg-black-card overflow-hidden">
+                <div className="border-b border-border-subtle bg-black-deep px-5 py-3 flex items-center gap-2">
                   <span className="h-3 w-3 rounded-full bg-red-300" />
                   <span className="h-3 w-3 rounded-full bg-yellow-300" />
                   <span className="h-3 w-3 rounded-full bg-green-300" />
-                  <span className="ml-2 text-xs text-gray-400">campaign-brief-v3-FINAL.doc</span>
+                  <span className="ml-2 text-xs text-white-dim">campaign-brief-v3-FINAL.doc</span>
                 </div>
                 <div className="px-6 py-6 space-y-5">
                   {weakBrief.content.map((field) => (
                     <div key={field.label}>
-                      <label className="block text-xs font-semibold text-gray-500 mb-1.5">{field.label}</label>
-                      <div className="rounded-lg border border-red-100 bg-red-50/50 px-3.5 py-2.5 text-sm text-gray-700">
+                      <label className="block text-xs font-semibold text-white-dim mb-1.5">{field.label}</label>
+                      <div className="border border-red-hot/30 bg-black-ink px-3.5 py-2.5 text-sm text-white-muted">
                         {field.value}
                       </div>
                     </div>
@@ -276,26 +276,26 @@ export default async function MarketingPage() {
             {/* Sharp brief */}
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 uppercase tracking-widest">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">2</span>
+                <div className="flex items-center gap-2 text-sm font-semibold text-white-dim uppercase tracking-widest">
+                  <span className="flex h-6 w-6 items-center justify-center bg-red-hot text-xs font-bold text-white">2</span>
                   {strongBrief.title}
                 </div>
-                <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${strongBrief.badgeColor}`}>
+                <span className={`px-2.5 py-1 text-xs font-semibold ${strongBrief.badgeColor}`}>
                   {strongBrief.badge}
                 </span>
               </div>
-              <div className="rounded-2xl border border-indigo-100 bg-white shadow-sm overflow-hidden">
-                <div className="border-b border-indigo-50 bg-indigo-50/50 px-5 py-3 flex items-center gap-2">
+              <div className="border border-border-strong bg-black-card overflow-hidden">
+                <div className="border-b border-border-subtle bg-black-deep px-5 py-3 flex items-center gap-2">
                   <span className="h-3 w-3 rounded-full bg-red-300" />
                   <span className="h-3 w-3 rounded-full bg-yellow-300" />
                   <span className="h-3 w-3 rounded-full bg-green-300" />
-                  <span className="ml-2 text-xs text-gray-400">brief-intelligence-output.pdf</span>
+                  <span className="ml-2 text-xs text-white-dim">brief-intelligence-output.pdf</span>
                 </div>
                 <div className="px-6 py-6 space-y-5">
                   {strongBrief.content.map((field) => (
                     <div key={field.label}>
-                      <label className="block text-xs font-semibold text-indigo-600 mb-1.5">{field.label}</label>
-                      <div className="rounded-lg border border-indigo-100 bg-indigo-50/30 px-3.5 py-2.5 text-sm text-gray-800 leading-relaxed">
+                      <label className="block text-xs font-semibold text-orange-accent mb-1.5">{field.label}</label>
+                      <div className="border border-border-subtle bg-black-ink px-3.5 py-2.5 text-sm text-white-muted leading-relaxed">
                         {field.value}
                       </div>
                     </div>
@@ -306,14 +306,14 @@ export default async function MarketingPage() {
           </div>
 
           <div className="mt-12 text-center">
-            <p className="text-sm text-gray-500 mb-4">Your brief. Interrogated. Sharpened. Ready to brief your team.</p>
+            <p className="text-sm text-white-dim mb-4">Your brief. Interrogated. Sharpened. Ready to brief your team.</p>
             <Link
               href="/generate"
-              className="inline-block rounded-xl bg-indigo-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg hover:bg-indigo-700 transition-colors"
+              className="inline-block bg-red-hot px-8 py-3.5 text-sm font-semibold text-white shadow-lg hover:bg-red-dim transition-colors"
             >
               Interrogate your brief — free
             </Link>
-            <p className="mt-3 text-xs text-gray-400">No credit card required</p>
+            <p className="mt-3 text-xs text-white-dim">No credit card required</p>
           </div>
         </div>
       </section>
@@ -322,19 +322,19 @@ export default async function MarketingPage() {
       <section className="px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight text-white uppercase sm:text-4xl">
               What AIDEN finds
             </h2>
-            <p className="mt-4 text-lg text-gray-600 max-w-xl mx-auto">
+            <p className="mt-4 text-lg text-white-muted max-w-xl mx-auto">
               Six types of gaps that kill creative work before it starts. AIDEN identifies all of them.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {gapTypes.map((gap) => (
-              <div key={gap.title} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md hover:border-indigo-200 hover:-translate-y-0.5">
+              <div key={gap.title} className="border border-border-subtle bg-black-card p-6 transition-all duration-200 hover:border-border-strong hover:-translate-y-0.5">
                 <div className="text-2xl mb-3">{gap.icon}</div>
-                <h3 className="text-base font-semibold text-gray-900 mb-2">{gap.title}</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">{gap.description}</p>
+                <h3 className="text-base font-semibold text-white uppercase mb-2">{gap.title}</h3>
+                <p className="text-sm text-white-muted leading-relaxed">{gap.description}</p>
               </div>
             ))}
           </div>
@@ -342,16 +342,16 @@ export default async function MarketingPage() {
       </section>
 
       {/* Testimonials */}
-      <section className="bg-gray-50 px-4 py-24 sm:px-6 lg:px-8">
+      <section className="bg-black-deep px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-14">
-            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 mb-4">
+            <span className="inline-flex items-center gap-2 border border-border-subtle bg-black-card px-3 py-1 text-xs font-medium text-orange-accent mb-4">
               Early days
             </span>
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight text-white uppercase sm:text-4xl">
               What people are saying
             </h2>
-            <p className="mt-4 text-base text-gray-500 max-w-lg mx-auto">
+            <p className="mt-4 text-base text-white-muted max-w-lg mx-auto">
               We just launched — real quotes from real users are on their way. In the meantime, here&apos;s the format you can expect.
             </p>
           </div>
@@ -379,26 +379,26 @@ export default async function MarketingPage() {
             ].map((t, i) => (
               <div
                 key={i}
-                className="flex flex-col rounded-2xl border border-dashed border-gray-300 bg-white p-7 shadow-sm"
+                className="flex flex-col border border-dashed border-border-subtle bg-black-card p-7"
               >
-                <div className="text-indigo-200 text-3xl font-serif leading-none mb-4">&ldquo;</div>
-                <p className="text-sm text-gray-400 leading-relaxed flex-1 italic">{t.quote}</p>
+                <div className="text-red-hot text-3xl font-serif leading-none mb-4">&ldquo;</div>
+                <p className="text-sm text-white-dim leading-relaxed flex-1 italic">{t.quote}</p>
                 <div className="mt-6 flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-sm font-semibold text-gray-400">
+                  <div className="h-9 w-9 bg-black-ink border border-border-subtle flex items-center justify-center text-sm font-semibold text-white-dim">
                     {t.initials}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-400">{t.name}</p>
-                    <p className="text-xs text-gray-300">{t.role}</p>
+                    <p className="text-sm font-medium text-white-dim">{t.name}</p>
+                    <p className="text-xs text-white-faint">{t.role}</p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
 
-          <p className="mt-10 text-center text-xs text-gray-400">
+          <p className="mt-10 text-center text-xs text-white-dim">
             Used AIDEN? We&apos;d love to hear from you —{' '}
-            <a href="mailto:hello@aiden.services" className="text-indigo-500 hover:text-indigo-700 underline underline-offset-2">
+            <a href="mailto:hello@aiden.services" className="text-orange-accent hover:text-red-hot underline underline-offset-2">
               share your experience
             </a>
           </p>
@@ -414,12 +414,12 @@ export default async function MarketingPage() {
       </div>
 
       {/* Pricing */}
-      <section id="pricing" className="bg-gray-50 px-4 py-24 sm:px-6 lg:px-8">
+      <section id="pricing" className="bg-black-deep px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-white uppercase sm:text-4xl">
             Simple pricing
           </h2>
-          <p className="mt-4 text-lg text-gray-600 max-w-xl mx-auto">
+          <p className="mt-4 text-lg text-white-muted max-w-xl mx-auto">
             Start free. Go Pro when your briefs need to be immaculate.
           </p>
 
@@ -458,40 +458,40 @@ export default async function MarketingPage() {
             ].map((tier) => (
               <div
                 key={tier.name}
-                className={`rounded-2xl p-7 ${
+                className={`p-7 ${
                   tier.highlight
-                    ? 'bg-indigo-600 text-white shadow-xl ring-2 ring-indigo-600'
-                    : 'bg-white border border-gray-200 shadow-sm'
+                    ? 'bg-red-hot text-white ring-2 ring-red-hot'
+                    : 'bg-black-card border border-border-subtle'
                 }`}
               >
-                <p className={`text-xs font-semibold uppercase tracking-widest mb-3 ${tier.highlight ? 'text-indigo-200' : 'text-indigo-600'}`}>
+                <p className={`text-xs font-semibold uppercase tracking-widest mb-3 ${tier.highlight ? 'text-white-muted' : 'text-orange-accent'}`}>
                   {tier.name}
                 </p>
                 <div className="flex items-baseline gap-1 mb-1">
                   <span className="text-3xl font-bold">{tier.price}</span>
                   {tier.period && (
-                    <span className={`text-sm ${tier.highlight ? 'text-indigo-200' : 'text-gray-500'}`}>
+                    <span className={`text-sm ${tier.highlight ? 'text-white-muted' : 'text-white-muted'}`}>
                       {tier.period}
                     </span>
                   )}
                 </div>
-                <p className={`text-sm mb-5 ${tier.highlight ? 'text-indigo-100' : 'text-gray-500'}`}>
+                <p className={`text-sm mb-5 ${tier.highlight ? 'text-white-muted' : 'text-white-muted'}`}>
                   {tier.description}
                 </p>
-                <ul className={`space-y-2 mb-6 text-sm ${tier.highlight ? 'text-indigo-100' : 'text-gray-600'}`}>
+                <ul className={`space-y-2 mb-6 text-sm ${tier.highlight ? 'text-white-muted' : 'text-white-muted'}`}>
                   {tier.features.map((f) => (
                     <li key={f} className="flex items-center gap-2">
-                      <span className={`text-base leading-none ${tier.highlight ? 'text-indigo-300' : 'text-indigo-500'}`}>&#10003;</span>
+                      <span className={`text-base leading-none ${tier.highlight ? 'text-white-muted' : 'text-orange-accent'}`}>&#10003;</span>
                       {f}
                     </li>
                   ))}
                 </ul>
                 <Link
                   href={tier.href}
-                  className={`block text-center rounded-lg py-2.5 text-sm font-semibold transition-colors ${
+                  className={`block text-center py-2.5 text-sm font-semibold transition-colors ${
                     tier.highlight
-                      ? 'bg-white text-indigo-600 hover:bg-indigo-50'
-                      : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                      ? 'bg-black-ink text-red-hot hover:bg-black-deep'
+                      : 'bg-red-hot text-white hover:bg-red-dim'
                   }`}
                 >
                   {tier.cta}
@@ -501,7 +501,7 @@ export default async function MarketingPage() {
           </div>
 
           <div className="mt-8">
-            <Link href="/pricing" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
+            <Link href="/pricing" className="text-sm font-medium text-orange-accent hover:text-red-hot transition-colors">
               See full pricing details →
             </Link>
           </div>
@@ -516,27 +516,27 @@ export default async function MarketingPage() {
       {/* Final CTA */}
       <section className="px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-white uppercase sm:text-4xl">
             Your brief deserves better
           </h2>
-          <p className="mt-4 text-lg text-gray-600">
+          <p className="mt-4 text-lg text-white-muted">
             Stop briefing your team with gaps. AIDEN finds them first.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/generate"
-              className="w-full sm:w-auto rounded-xl bg-indigo-600 px-8 py-4 text-base font-semibold text-white shadow-lg hover:bg-indigo-700 transition-colors"
+              className="w-full sm:w-auto bg-red-hot px-8 py-4 text-base font-semibold text-white shadow-lg hover:bg-red-dim transition-colors"
             >
               Interrogate your brief — free
             </Link>
             <Link
               href="/login"
-              className="w-full sm:w-auto rounded-xl border border-gray-200 bg-white px-8 py-4 text-base font-semibold text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-colors"
+              className="w-full sm:w-auto border border-border-subtle bg-black-card px-8 py-4 text-base font-semibold text-white-muted hover:border-border-strong transition-colors"
             >
               Sign in
             </Link>
           </div>
-          <p className="mt-4 text-sm text-gray-400">No credit card required · 3 free analyses per month</p>
+          <p className="mt-4 text-sm text-white-dim">No credit card required · 3 free analyses per month</p>
         </div>
       </section>
 
