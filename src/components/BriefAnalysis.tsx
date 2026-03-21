@@ -539,7 +539,30 @@ function PhantomCDLockedSection() {
   )
 }
 
-function RewrittenBriefSection({ strategicAnalysis, extractedBrief, isPro }: { strategicAnalysis: Record<string, unknown>; extractedBrief: Record<string, unknown>; isPro?: boolean }) {
+function BriefLines({ lines }: { lines: string[] }) {
+  return (
+    <div className="space-y-3">
+      {lines.map((line, i) => {
+        const boldMatch = line.match(/^\*\*(.+?):\*\*\s*(.+)$/)
+        if (boldMatch) {
+          return (
+            <div key={i} className="flex gap-2">
+              <span className="min-w-[140px] text-xs font-semibold uppercase tracking-wide text-white-dim pt-0.5">{boldMatch[1]}</span>
+              <span className="text-sm text-white leading-relaxed">{boldMatch[2]}</span>
+            </div>
+          )
+        }
+        return (
+          <p key={i} className="text-sm text-white leading-relaxed">{line}</p>
+        )
+      })}
+    </div>
+  )
+}
+
+function RewrittenBriefSection({ strategicAnalysis, extractedBrief, isPro, briefText }: { strategicAnalysis: Record<string, unknown>; extractedBrief: Record<string, unknown>; isPro?: boolean; briefText?: string }) {
+  const [showComparison, setShowComparison] = useState(false)
+
   const rewriteFields = ['rewritten_brief', 'sharpened_brief', 'improved_brief', 'refined_brief', 'brief_rewrite', 'recommended_brief']
   let rewrittenBrief: string | null = null
 
@@ -568,34 +591,54 @@ function RewrittenBriefSection({ strategicAnalysis, extractedBrief, isPro }: { s
     rewrittenBrief = parts.join('\n')
   }
 
-  const lines = rewrittenBrief.split('\n').filter(Boolean)
+  const sharpenedLines = rewrittenBrief.split('\n').filter(Boolean)
   const ATTRIBUTION = '\n\nAnalysed by AIDEN Brief Intelligence — aiden-landing-gen.vercel.app'
   const copyText = isPro ? rewrittenBrief : rewrittenBrief + ATTRIBUTION
 
+  // Build original brief text for comparison
+  const originalText = briefText ?? Object.entries(extractedBrief)
+    .filter(([, v]) => v !== null && v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0))
+    .map(([key, value]) => {
+      const label = BRIEF_FIELD_LABELS[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+      const displayValue = Array.isArray(value) ? value.join(', ') : typeof value === 'object' ? JSON.stringify(value) : String(value)
+      return `**${label}:** ${displayValue}`
+    })
+    .join('\n')
+
+  const originalLines = originalText.split('\n').filter(Boolean)
+
   return (
     <section>
-      <div className="mb-4 flex items-center">
+      <div className="mb-4 flex items-center flex-wrap gap-2">
         <h2 className="text-lg font-semibold uppercase tracking-wider text-white">Sharpened Brief</h2>
         <CopyButton text={copyText} />
+        <button
+          onClick={() => setShowComparison(v => !v)}
+          className="ml-auto inline-flex items-center gap-1.5 border border-border-subtle bg-black-card px-3 py-1 text-xs font-medium text-white-muted hover:bg-white-faint transition-colors"
+        >
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          {showComparison ? 'Hide comparison' : 'Show comparison'}
+        </button>
       </div>
-      <div className="border border-border-subtle bg-black-card p-5">
-        <div className="space-y-3">
-          {lines.map((line, i) => {
-            const boldMatch = line.match(/^\*\*(.+?):\*\*\s*(.+)$/)
-            if (boldMatch) {
-              return (
-                <div key={i} className="flex gap-2">
-                  <span className="min-w-[140px] text-xs font-semibold uppercase tracking-wide text-white-dim pt-0.5">{boldMatch[1]}</span>
-                  <span className="text-sm text-white leading-relaxed">{boldMatch[2]}</span>
-                </div>
-              )
-            }
-            return (
-              <p key={i} className="text-sm text-white leading-relaxed">{line}</p>
-            )
-          })}
+
+      {showComparison ? (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="border border-border-subtle bg-black-card p-5" style={{ background: 'rgba(255,255,255,0.02)' }}>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-white-dim border-b border-border-subtle pb-2">Original Brief</p>
+            <BriefLines lines={originalLines} />
+          </div>
+          <div className="border border-border-subtle bg-black-card p-5" style={{ background: 'rgba(255,46,46,0.04)' }}>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-orange-accent border-b border-border-subtle pb-2">Sharpened Brief</p>
+            <BriefLines lines={sharpenedLines} />
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="border border-border-subtle bg-black-card p-5">
+          <BriefLines lines={sharpenedLines} />
+        </div>
+      )}
     </section>
   )
 }
@@ -909,7 +952,7 @@ export default function BriefAnalysis({ data, previewUrl, isPro, isPaidUser, isF
       </div>
       {!isPro && <PhantomCDLockedSection />}
       <div style={{ animation: 'aidenFadeInUp 0.5s ease-out 450ms both' }}>
-        <RewrittenBriefSection strategicAnalysis={strategicAnalysis} extractedBrief={extractedBrief} isPro={isPro} />
+        <RewrittenBriefSection strategicAnalysis={strategicAnalysis} extractedBrief={extractedBrief} isPro={isPro} briefText={data.briefText} />
       </div>
       {!isPaidUser && <UpgradeCtaCard />}
     </div>
