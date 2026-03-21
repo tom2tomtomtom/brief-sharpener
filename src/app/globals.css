@@ -16,3 +16,111 @@ html {
   60% { opacity: 1; }
   100% { opacity: 0; transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px))) scale(1); }
 }
+
+@media print {
+  /* Hide non-content UI */
+  header,
+  nav,
+  footer,
+  /* Welcome banner, usage warning, loading bar */
+  .border-indigo-200.bg-indigo-50,
+  .border-amber-200.bg-amber-50,
+  .nprogress-bar,
+  /* Form panel (left column) */
+  .lg\:w-\[420px\],
+  /* Sticky action buttons (re-interrogate / start over) */
+  .sticky.top-0.z-10,
+  /* Fixed mobile sticky button */
+  .fixed.bottom-0,
+  /* Toast notifications */
+  [role="status"],
+  [data-toast],
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+
+  /* Reset layout so analysis takes full width */
+  body,
+  main {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Remove padding/shadow from the outer wrapper */
+  .min-h-screen {
+    min-height: unset !important;
+  }
+
+  /* Make the two-column flex go full-width single column */
+  .flex.flex-col.gap-8.lg\:flex-row {
+    display: block !important;
+  }
+
+  /* Analysis results pane takes full width */
+  .min-w-0.flex-1 {
+    width: 100% !important;
+  }
+
+  /* Print-friendly colors for cards */
+  .rounded-xl,
+  .rounded-2xl {
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    background: white !important;
+    color: black !important;
+    page-break-inside: avoid;
+  }
+
+  /* Score circle: make strokes black/grey */
+  svg circle[stroke="#6366f1"],
+  svg circle[stroke="#4f46e5"],
+  svg circle[stroke="#818cf8"] {
+    stroke: #333 !important;
+  }
+
+  /* Indigo/color backgrounds on tension cards → white */
+  .bg-indigo-50,
+  .bg-indigo-100,
+  .bg-green-50,
+  .bg-amber-50,
+  .bg-red-50 {
+    background: white !important;
+  }
+
+  /* Text colors → black */
+  .text-indigo-600,
+  .text-indigo-700,
+  .text-indigo-800,
+  .text-indigo-900,
+  .text-green-600,
+  .text-green-700,
+  .text-amber-600,
+  .text-amber-700,
+  .text-red-600,
+  .text-red-700,
+  .text-gray-400,
+  .text-gray-500,
+  .text-gray-600 {
+    color: #333 !important;
+  }
+
+  /* Borders → light grey */
+  .border-indigo-100,
+  .border-indigo-200,
+  .border-green-200,
+  .border-amber-200,
+  .border-red-200 {
+    border-color: #ccc !important;
+  }
+
+  /* Ensure links print as plain text */
+  a {
+    color: black !important;
+    text-decoration: none !important;
+  }
+
+  /* Page break handling */
+  section {
+    page-break-inside: avoid;
+  }
+}
