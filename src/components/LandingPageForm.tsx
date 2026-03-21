@@ -298,6 +298,19 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
       }
 
       handleBriefChange(data.text)
+
+      // Auto-detect brand name from common patterns in first 500 chars
+      if (!formData.brandName.trim()) {
+        const preview = (data.text as string).slice(0, 500)
+        const match = preview.match(/(?:brand\s*name|brand|client|company)\s*:\s*([^\n,]+)/i)
+        if (match) {
+          const detected = match[1].trim()
+          if (detected) {
+            setFormData((p) => ({ ...p, brandName: detected }))
+          }
+        }
+      }
+
       setUploadState('done')
       if (data.truncated) {
         setUploadError('Brief was truncated to 10,000 characters.')
