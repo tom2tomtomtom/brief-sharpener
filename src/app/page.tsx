@@ -206,7 +206,7 @@ export default async function MarketingPage() {
       </section>
 
       {/* How it works */}
-      <section className="px-4 py-24 sm:px-6 lg:px-8">
+      <section id="how-it-works" className="px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
@@ -345,10 +345,12 @@ export default async function MarketingPage() {
       <TryDemoSection />
 
       {/* Example outputs */}
-      <ExampleOutputs />
+      <div id="examples">
+        <ExampleOutputs />
+      </div>
 
       {/* Pricing */}
-      <section className="bg-gray-50 px-4 py-24 sm:px-6 lg:px-8">
+      <section id="pricing" className="bg-gray-50 px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Simple pricing
@@ -443,7 +445,9 @@ export default async function MarketingPage() {
       </section>
 
       {/* FAQ */}
-      <FAQAccordion />
+      <div id="faq">
+        <FAQAccordion />
+      </div>
 
       {/* Final CTA */}
       <section className="px-4 py-24 sm:px-6 lg:px-8">
