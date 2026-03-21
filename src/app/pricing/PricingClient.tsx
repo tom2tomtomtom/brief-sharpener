@@ -216,6 +216,57 @@ export default function PricingPage() {
         ))}
       </div>
 
+      {/* Feature comparison table */}
+      <div className="max-w-5xl mx-auto mt-16">
+        <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">Compare plans</h2>
+        <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="text-left py-4 px-6 font-semibold text-gray-700 w-1/2">Feature</th>
+                <th className="text-center py-4 px-6 font-semibold text-gray-700">Free</th>
+                <th className="text-center py-4 px-6 font-semibold text-indigo-600 bg-indigo-50">Single</th>
+                <th className="text-center py-4 px-6 font-semibold text-gray-700">Pro</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { feature: 'Analyses per month', free: '3', single: '1', pro: 'Unlimited' },
+                { feature: 'PDF export', free: false, single: true, pro: true },
+                { feature: 'Share results', free: false, single: true, pro: true },
+                { feature: 'Priority processing', free: false, single: false, pro: true },
+                { feature: 'Custom branding', free: false, single: true, pro: true },
+                { feature: 'Support', free: 'Community', single: 'Email', pro: 'Priority' },
+              ].map((row, i) => (
+                <tr key={row.feature} className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                  <td className="py-4 px-6 font-medium text-gray-700">{row.feature}</td>
+                  {(['free', 'single', 'pro'] as const).map((tier) => (
+                    <td
+                      key={tier}
+                      className={`py-4 px-6 text-center ${tier === 'single' ? 'bg-indigo-50/60' : ''}`}
+                    >
+                      {typeof row[tier] === 'boolean' ? (
+                        row[tier] ? (
+                          <svg className="w-5 h-5 text-indigo-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        ) : (
+                          <svg className="w-5 h-5 text-gray-300 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        )
+                      ) : (
+                        <span className="text-gray-600">{row[tier]}</span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {/* Footer note */}
       <p className="text-center text-sm text-gray-400 mt-12">
         Payments processed securely by Stripe. Cancel anytime.
