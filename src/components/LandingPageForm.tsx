@@ -437,7 +437,33 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
                 </span>
               )
             })()}
-            <span className="text-gray-400">{formData.briefText.length}/10000</span>
+            {(() => {
+              const charCount = formData.briefText.length
+              const pct = charCount / 10000
+              const radius = 8
+              const circumference = 2 * Math.PI * radius
+              const dashOffset = circumference * (1 - pct)
+              const ringColor = charCount >= 9500 ? '#ef4444' : charCount >= 8000 ? '#f59e0b' : '#6366f1'
+              const textColor = charCount >= 9500 ? 'text-red-500' : charCount >= 8000 ? 'text-amber-500' : 'text-gray-400'
+              return (
+                <span className={`flex items-center gap-1 ${textColor}`}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+                    <circle cx="10" cy="10" r={radius} fill="none" stroke="#e5e7eb" strokeWidth="2" />
+                    <circle
+                      cx="10" cy="10" r={radius}
+                      fill="none"
+                      stroke={ringColor}
+                      strokeWidth="2"
+                      strokeDasharray={circumference}
+                      strokeDashoffset={dashOffset}
+                      strokeLinecap="round"
+                      transform="rotate(-90 10 10)"
+                    />
+                  </svg>
+                  {charCount}/10000
+                </span>
+              )
+            })()}
           </div>
         </div>
       </div>
