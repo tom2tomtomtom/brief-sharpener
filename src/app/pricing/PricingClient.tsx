@@ -6,12 +6,12 @@ import Link from 'next/link'
 const tiers = [
   {
     name: 'Free',
-    price: '£0',
+    price: '$0',
     period: null,
-    description: 'Try Brief Intelligence and see what your brief is missing.',
+    description: 'See what your brief is missing.',
     features: [
-      '3 brief analyses per month',
-      'Basic gap analysis',
+      '1 brief analysis per month',
+      'Full gap analysis',
       'AIDEN branding on output',
     ],
     cta: 'Interrogate your brief',
@@ -21,17 +21,17 @@ const tiers = [
     highlighted: false,
   },
   {
-    name: 'Single',
-    price: '£49',
+    name: 'Starter',
+    price: '$49',
     period: 'one-time',
-    description: 'One deep analysis, no compromises.',
+    description: '10 analyses. Use them whenever you need them.',
     features: [
-      '1 deep brief analysis',
+      '10 brief analyses',
       'Full strategic output',
-      'PDF export',
       'No AIDEN branding',
+      'Never expires',
     ],
-    cta: 'Interrogate your brief',
+    cta: 'Buy 10 analyses',
     ctaType: 'checkout' as const,
     href: null,
     plan: 'single' as const,
@@ -39,17 +39,15 @@ const tiers = [
   },
   {
     name: 'Pro',
-    price: '£99',
+    price: '$99',
     period: 'per month',
     description: 'For agencies and teams who live inside briefs.',
     features: [
       'Unlimited brief analyses',
       'Priority processing',
-      'Team sharing',
-      'API access',
       'No AIDEN branding',
     ],
-    cta: 'Interrogate your brief',
+    cta: 'Go Pro',
     ctaType: 'checkout' as const,
     href: null,
     plan: 'pro' as const,
@@ -201,15 +199,14 @@ export default function PricingPage() {
               <tr className="border-b border-border-subtle">
                 <th className="text-left py-4 px-6 font-bold text-white-muted uppercase tracking-wide w-1/2">Feature</th>
                 <th className="text-center py-4 px-6 font-bold text-white-muted uppercase tracking-wide">Free</th>
-                <th className="text-center py-4 px-6 font-bold text-orange-accent uppercase tracking-wide bg-black-deep">Single</th>
+                <th className="text-center py-4 px-6 font-bold text-orange-accent uppercase tracking-wide bg-black-deep">Starter</th>
                 <th className="text-center py-4 px-6 font-bold text-white-muted uppercase tracking-wide">Pro</th>
               </tr>
             </thead>
             <tbody>
               {[
-                { feature: 'Analyses per month', free: '3', single: '1', pro: 'Unlimited' },
-                { feature: 'PDF export', free: false, single: true, pro: true },
-                { feature: 'Share results', free: false, single: true, pro: true },
+                { feature: 'Analyses', free: '1 / month', single: '10 (one-time)', pro: 'Unlimited' },
+{ feature: 'Share results', free: false, single: true, pro: true },
                 { feature: 'Priority processing', free: false, single: false, pro: true },
                 { feature: 'Custom branding', free: false, single: true, pro: true },
                 { feature: 'Support', free: 'Community', single: 'Email', pro: 'Priority' },

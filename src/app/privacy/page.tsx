@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export const metadata = {
   title: 'Privacy Policy — AIDEN',
-  description: 'Privacy policy for AIDEN landing page generator.',
+  description: 'Privacy policy for AIDEN Brief Intelligence.',
 }
 
 export default function PrivacyPage() {
@@ -116,8 +116,8 @@ export default function PrivacyPage() {
               <h2 className="text-lg font-semibold text-white uppercase mb-3">9. Contact</h2>
               <p>
                 Privacy questions or data requests? Email us at{' '}
-                <a href="mailto:hello@aiden.so" className="text-orange-accent hover:opacity-80 transition-opacity">
-                  hello@aiden.so
+                <a href="mailto:hello@aiden.services" className="text-orange-accent hover:opacity-80 transition-opacity">
+                  hello@aiden.services
                 </a>
                 .
               </p>

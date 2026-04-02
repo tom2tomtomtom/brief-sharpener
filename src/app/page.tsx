@@ -28,21 +28,21 @@ const jsonLd = {
       '@type': 'Offer',
       name: 'Free',
       price: '0',
-      priceCurrency: 'GBP',
-      description: '3 brief analyses per month',
+      priceCurrency: 'USD',
+      description: '1 brief analysis per month',
     },
     {
       '@type': 'Offer',
-      name: 'Single',
+      name: 'Starter',
       price: '49',
-      priceCurrency: 'GBP',
-      description: '1 deep brief analysis with full strategic output',
+      priceCurrency: 'USD',
+      description: '10 brief analyses, never expires',
     },
     {
       '@type': 'Offer',
       name: 'Pro',
       price: '99',
-      priceCurrency: 'GBP',
+      priceCurrency: 'USD',
       description: 'Unlimited brief analyses for agencies and teams',
     },
   ],
@@ -158,10 +158,10 @@ export default async function MarketingPage() {
             AI-powered creative analysis · Powered by Claude AI
           </div>
           <h1 className="text-5xl font-extrabold tracking-tight text-white uppercase sm:text-6xl leading-tight">
-            Your brief is holding{' '}
-            <span className="text-red-hot">you back.</span>
+            Your brief is{' '}
+            <span className="text-red-hot whitespace-nowrap">holding you back.</span>
             <br />
-            AIDEN will show you why.
+            AIDEN will show you&nbsp;why.
           </h1>
           <p className="mt-6 text-xl text-white-muted max-w-2xl mx-auto leading-relaxed">
             Brief Intelligence interrogates your brief the way the best strategists do — relentlessly, specifically, and without mercy. Find every gap before it becomes a missed opportunity.
@@ -180,7 +180,7 @@ export default async function MarketingPage() {
               See pricing
             </Link>
           </div>
-          <p className="mt-4 text-sm text-white-dim">No credit card required · 3 free analyses per month</p>
+          <p className="mt-4 text-sm text-white-dim">No credit card required · 1 free analysis per month</p>
         </div>
       </section>
 
@@ -363,66 +363,11 @@ export default async function MarketingPage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="bg-black-deep px-4 py-24 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-5xl">
-          <div className="text-center mb-14">
-            <span className="inline-flex items-center gap-2 border border-border-subtle bg-black-card px-3 py-1 text-xs font-medium text-orange-accent mb-4">
-              Early days
-            </span>
-            <h2 className="text-3xl font-bold tracking-tight text-white uppercase sm:text-4xl">
-              What people are saying
-            </h2>
-            <p className="mt-4 text-base text-white-muted max-w-lg mx-auto">
-              We just launched — real quotes from real users are on their way. In the meantime, here&apos;s the format you can expect.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                quote: 'This spot is reserved for someone who used AIDEN to sharpen a brief and got better creative back. That person exists — we just need to find them and ask nicely.',
-                name: 'Coming soon',
-                role: 'Senior Strategist, Agency',
-                initials: '?',
-              },
-              {
-                quote: 'Real feedback from a real user who ran their brief through AIDEN and saw the difference. We launched recently — check back soon.',
-                name: 'Coming soon',
-                role: 'Brand Manager, In-house',
-                initials: '?',
-              },
-              {
-                quote: 'A genuine quote from someone who saved hours on brief prep is on its way. We\'re collecting them now. Be the first — interrogate your brief today.',
-                name: 'Coming soon',
-                role: 'Creative Director, Studio',
-                initials: '?',
-              },
-            ].map((t, i) => (
-              <div
-                key={i}
-                className="flex flex-col border border-dashed border-border-subtle bg-black-card p-7"
-              >
-                <div className="text-red-hot text-3xl font-serif leading-none mb-4">&ldquo;</div>
-                <p className="text-sm text-white-dim leading-relaxed flex-1 italic">{t.quote}</p>
-                <div className="mt-6 flex items-center gap-3">
-                  <div className="h-9 w-9 bg-black-ink border border-border-subtle flex items-center justify-center text-sm font-semibold text-white-dim">
-                    {t.initials}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white-dim">{t.name}</p>
-                    <p className="text-xs text-white-faint">{t.role}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-10 text-center text-xs text-white-dim">
-            Used AIDEN? We&apos;d love to hear from you —{' '}
-            <a href="mailto:hello@aiden.services" className="text-orange-accent hover:text-red-hot underline underline-offset-2">
-              share your experience
-            </a>
+      {/* Social proof */}
+      <section className="bg-black-deep px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-lg text-white-muted">
+            Built for agency strategists. Requested as the #1 tool by Uncommon Creative&apos;s strategy team.
           </p>
         </div>
       </section>
@@ -445,13 +390,13 @@ export default async function MarketingPage() {
             Start free. Go Pro when your briefs need to be immaculate.
           </p>
 
-          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-6 text-left">
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
             {[
               {
                 name: 'Free',
-                price: '£0',
+                price: '$0',
                 period: '',
-                description: '3 analyses per month',
+                description: '1 analysis per month',
                 features: [
                   'Full gap analysis report',
                   'Brief rewrite included',
@@ -462,20 +407,32 @@ export default async function MarketingPage() {
                 highlight: false,
               },
               {
-                name: 'Pro',
-                price: '£49',
-                period: '/ brief',
-                description: 'Clean output, no attribution',
+                name: 'Starter',
+                price: '$49',
+                period: 'one-time',
+                description: '10 analyses, never expires',
                 features: [
-                  'Full gap analysis report',
-                  'Brief rewrite included',
-                  'PDF export',
+                  'Full strategic output',
                   'No AIDEN branding',
+                  'Use them whenever',
+                ],
+                cta: 'Buy 10 analyses',
+                href: '/pricing',
+                highlight: true,
+              },
+              {
+                name: 'Pro',
+                price: '$99',
+                period: '/ month',
+                description: 'Unlimited for agencies and teams',
+                features: [
+                  'Unlimited brief analyses',
                   'Priority processing',
+                  'No AIDEN branding',
                 ],
                 cta: 'Go Pro',
                 href: '/pricing',
-                highlight: true,
+                highlight: false,
               },
             ].map((tier) => (
               <div
@@ -558,7 +515,7 @@ export default async function MarketingPage() {
               Sign in
             </Link>
           </div>
-          <p className="mt-4 text-sm text-white-dim">No credit card required · 3 free analyses per month</p>
+          <p className="mt-4 text-sm text-white-dim">No credit card required · 1 free analysis per month</p>
         </div>
       </section>
 

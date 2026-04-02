@@ -21,8 +21,11 @@ export async function POST(request: NextRequest) {
       { onConflict: 'email' }
     )
     return NextResponse.json({ ok: true })
-  } catch {
-    // Table might not exist yet — that's ok, we'll create it later
+  } catch (error) {
+    // Log the error server-side so we can diagnose Supabase/table issues
+    console.error('Failed to save lead:', error)
+    // Still return 200 to the user — email capture should degrade gracefully
+    // rather than showing an error for what feels like a simple signup action
     return NextResponse.json({ ok: true })
   }
 }

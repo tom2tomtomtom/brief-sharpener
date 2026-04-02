@@ -39,9 +39,9 @@ export default function FAQAccordion() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   return (
-    <section className="bg-gray-50 px-4 py-24 sm:px-6 lg:px-8">
+    <section className="bg-black-deep px-4 py-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-3xl">
-        <h2 className="text-3xl font-bold tracking-tight text-gray-900 text-center mb-12">
+        <h2 className="text-3xl font-bold tracking-tight text-white text-center mb-12">
           Frequently asked questions
         </h2>
         <div className="space-y-3">
@@ -50,16 +50,16 @@ export default function FAQAccordion() {
             return (
               <div
                 key={item.question}
-                className="rounded-xl border border-gray-200 bg-white overflow-hidden"
+                className="rounded-xl border border-border-subtle bg-black-card overflow-hidden"
               >
                 <button
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                   className="flex w-full items-center justify-between px-6 py-5 text-left"
                   aria-expanded={isOpen}
                 >
-                  <span className="text-sm font-semibold text-gray-900">{item.question}</span>
+                  <span className="text-sm font-semibold text-white">{item.question}</span>
                   <span
-                    className={`ml-4 flex-shrink-0 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                    className={`ml-4 flex-shrink-0 text-white-muted transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
                     aria-hidden="true"
                   >
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -69,7 +69,7 @@ export default function FAQAccordion() {
                 </button>
                 {isOpen && (
                   <div className="px-6 pb-5">
-                    <p className="text-sm text-gray-600 leading-relaxed">{item.answer}</p>
+                    <p className="text-sm text-white-muted leading-relaxed">{item.answer}</p>
                   </div>
                 )}
               </div>

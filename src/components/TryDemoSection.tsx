@@ -292,7 +292,7 @@ export default function TryDemoSection() {
                   >
                     Sign up free to see your full analysis
                   </Link>
-                  <p className="mt-2.5 text-xs text-gray-400">Free · No credit card required · 3 analyses per month</p>
+                  <p className="mt-2.5 text-xs text-gray-400">Free · No credit card required · 1 analysis per month</p>
                 </div>
               </div>
             </div>

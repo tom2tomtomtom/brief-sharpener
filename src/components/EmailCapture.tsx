@@ -24,12 +24,12 @@ export default function EmailCapture() {
   }
 
   return (
-    <section className="bg-gray-50 border-y border-gray-100 py-16 px-4 sm:px-6 lg:px-8">
+    <section className="bg-black-deep border-y border-border-subtle py-16 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-xl text-center">
-        <h2 className="text-2xl font-bold text-gray-900">
+        <h2 className="text-2xl font-bold text-white">
           Get the Brief Interrogation Checklist
         </h2>
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-sm text-white-muted">
           The 8-point checklist our AI uses to score your brief. Yours free.
         </p>
         {status === 'done' ? (
@@ -44,12 +44,12 @@ export default function EmailCapture() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@agency.com"
-              className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none"
+              className="flex-1 rounded-lg border border-border-subtle bg-black-card text-white placeholder-white-dim px-4 py-2.5 text-sm focus:border-red-hot focus:ring-2 focus:ring-red-hot outline-none"
             />
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors disabled:opacity-60"
+              className="rounded-lg bg-red-hot px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-dim transition-colors disabled:opacity-60"
             >
               {status === 'loading' ? 'Sending...' : 'Send it'}
             </button>
@@ -58,7 +58,7 @@ export default function EmailCapture() {
         {status === 'error' && (
           <p className="mt-2 text-xs text-red-500">Something went wrong. Try again.</p>
         )}
-        <p className="mt-3 text-xs text-gray-400">No spam. Unsubscribe anytime.</p>
+        <p className="mt-3 text-xs text-white-dim">No spam. Unsubscribe anytime.</p>
       </div>
     </section>
   )

@@ -666,7 +666,7 @@ function RewrittenBriefSection({ strategicAnalysis, extractedBrief, isPro, brief
   }
 
   const sharpenedLines = rewrittenBrief.split('\n').filter(Boolean)
-  const ATTRIBUTION = '\n\nAnalysed by AIDEN Brief Intelligence — aiden-landing-gen.vercel.app'
+  const ATTRIBUTION = '\n\nAnalysed by AIDEN Brief Intelligence — aiden.services'
   const copyText = isPro ? rewrittenBrief : rewrittenBrief + ATTRIBUTION
 
   // Build original brief text for comparison

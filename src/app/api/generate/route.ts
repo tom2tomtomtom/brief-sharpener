@@ -53,7 +53,7 @@ interface GenerateResponse {
 export async function POST(request: NextRequest) {
   // Rate limit check
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
-  const { allowed: rateLimitAllowed, retryAfter } = checkRateLimit(ip)
+  const { allowed: rateLimitAllowed, retryAfter } = await checkRateLimit(ip)
   if (!rateLimitAllowed) {
     return NextResponse.json(
       { error: 'Too many requests' },

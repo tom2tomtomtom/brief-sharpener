@@ -537,7 +537,7 @@ function AuthPrompt() {
       </div>
       <h2 className="mt-4 text-lg font-semibold text-white">Sign up free to interrogate your brief</h2>
       <p className="mt-2 text-sm text-white-muted max-w-xs">
-        Get 3 free analyses per month. No credit card required.
+        Get 1 free analysis per month. No credit card required.
       </p>
       <Link
         href="/login?redirect=/generate"

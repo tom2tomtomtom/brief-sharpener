@@ -1,21 +1,54 @@
-const requests = new Map<string, number[]>()
+import { createAdminClient } from '@/lib/supabase/admin'
 
-const WINDOW_MS = 60 * 1000 // 1 minute
+const WINDOW_SECONDS = 60
 const MAX_REQUESTS = 10
 
-export function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
-  const now = Date.now()
-  const windowStart = now - WINDOW_MS
+export async function checkRateLimit(
+  ip: string
+): Promise<{ allowed: boolean; retryAfter?: number }> {
+  const supabase = createAdminClient()
+  const now = new Date()
 
-  const timestamps = (requests.get(ip) ?? []).filter((t) => t > windowStart)
+  // Fetch existing record for this IP
+  const { data: existing } = await supabase
+    .from('rate_limits')
+    .select('request_count, window_start')
+    .eq('ip', ip)
+    .single()
 
-  if (timestamps.length >= MAX_REQUESTS) {
-    const oldest = timestamps[0]
-    const retryAfter = Math.ceil((oldest + WINDOW_MS - now) / 1000)
+  if (!existing) {
+    // First request from this IP - insert and allow
+    await supabase.from('rate_limits').upsert({
+      ip,
+      request_count: 1,
+      window_start: now.toISOString(),
+    })
+    return { allowed: true }
+  }
+
+  const windowStart = new Date(existing.window_start)
+  const elapsedSeconds = (now.getTime() - windowStart.getTime()) / 1000
+
+  if (elapsedSeconds >= WINDOW_SECONDS) {
+    // Window expired - reset counter
+    await supabase
+      .from('rate_limits')
+      .update({ request_count: 1, window_start: now.toISOString() })
+      .eq('ip', ip)
+    return { allowed: true }
+  }
+
+  if (existing.request_count >= MAX_REQUESTS) {
+    // Over limit - return retry info
+    const retryAfter = Math.ceil(WINDOW_SECONDS - elapsedSeconds)
     return { allowed: false, retryAfter }
   }
 
-  timestamps.push(now)
-  requests.set(ip, timestamps)
+  // Under limit - increment
+  await supabase
+    .from('rate_limits')
+    .update({ request_count: existing.request_count + 1 })
+    .eq('ip', ip)
+
   return { allowed: true }
 }

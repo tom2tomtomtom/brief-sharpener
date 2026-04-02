@@ -14,18 +14,26 @@ interface AnalyzeBriefRequest {
 }
 
 async function callBrainAPI<T>(path: string, body: unknown): Promise<T> {
-  const response = await fetch(`${BRAIN_API_BASE}${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  })
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 30000)
 
-  if (!response.ok) {
-    const errorText = await response.text().catch(() => 'Unknown error')
-    throw new Error(`Brain API ${path} failed (${response.status}): ${errorText}`)
+  try {
+    const response = await fetch(`${BRAIN_API_BASE}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error')
+      throw new Error(`Brain API ${path} failed (${response.status}): ${errorText}`)
+    }
+
+    return response.json() as Promise<T>
+  } finally {
+    clearTimeout(timeout)
   }
-
-  return response.json() as Promise<T>
 }
 
 // Brain V2 returns different field names than expected. Map to canonical names.
@@ -70,7 +78,7 @@ function identifyGaps(extractedBrief: Record<string, unknown>): string[] {
 export async function POST(request: NextRequest) {
   // Rate limit check
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
-  const { allowed: rateLimitAllowed, retryAfter } = checkRateLimit(ip)
+  const { allowed: rateLimitAllowed, retryAfter } = await checkRateLimit(ip)
   if (!rateLimitAllowed) {
     return NextResponse.json(
       { error: 'Too many requests' },
@@ -162,6 +170,12 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        return NextResponse.json(
+          { error: 'Analysis is taking longer than expected. Please try again.' },
+          { status: 504 }
+        )
+      }
       if (error.message.includes('Brain API') || error.message.includes('Brain API key')) {
         return NextResponse.json({ error: error.message }, { status: 502 })
       }
