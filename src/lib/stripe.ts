@@ -41,4 +41,10 @@ export const PLANS = {
     priceId: process.env.STRIPE_PRICE_ID_PRO!,
     mode: 'subscription' as const,
   },
+  agency: {
+    name: 'Agency',
+    price: 49900, // $499.00/month in cents
+    priceId: process.env.STRIPE_PRICE_ID_AGENCY!,
+    mode: 'subscription' as const,
+  },
 }

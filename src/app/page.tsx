@@ -479,7 +479,15 @@ export default async function MarketingPage() {
             ))}
           </div>
 
-          <div className="mt-8">
+          <div className="mt-6">
+            <p className="text-sm text-white-muted mb-2">
+              Need team access?{' '}
+              <Link href="/pricing" className="font-medium text-orange-accent hover:text-red-hot transition-colors">
+                See Agency pricing →
+              </Link>
+            </p>
+          </div>
+          <div className="mt-4">
             <Link href="/pricing" className="text-sm font-medium text-orange-accent hover:text-red-hot transition-colors">
               See full pricing details →
             </Link>

@@ -53,6 +53,24 @@ const tiers = [
     plan: 'pro' as const,
     highlighted: false,
   },
+  {
+    name: 'Agency',
+    price: '$499',
+    period: 'per month',
+    description: 'For teams of strategists. Up to 10 seats.',
+    features: [
+      'Unlimited brief analyses',
+      'Up to 10 team members',
+      'Priority processing',
+      'No AIDEN branding',
+      'Dedicated support',
+    ],
+    cta: 'Contact us',
+    ctaType: 'link' as const,
+    href: 'mailto:hello@aiden.services?subject=Agency%20plan%20inquiry',
+    plan: null,
+    highlighted: false,
+  },
 ]
 
 export default function PricingPage() {
@@ -104,7 +122,7 @@ export default function PricingPage() {
       )}
 
       {/* Pricing cards */}
-      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {tiers.map((tier) => (
           <div
             key={tier.name}
@@ -191,29 +209,32 @@ export default function PricingPage() {
       </div>
 
       {/* Feature comparison table */}
-      <div className="max-w-5xl mx-auto mt-16">
+      <div className="max-w-6xl mx-auto mt-16">
         <h2 className="text-2xl font-bold text-red-hot text-center mb-8 uppercase">Compare Plans</h2>
-        <div className="bg-black-card border-2 border-border-subtle overflow-hidden">
+        <div className="bg-black-card border-2 border-border-subtle overflow-hidden overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border-subtle">
-                <th className="text-left py-4 px-6 font-bold text-white-muted uppercase tracking-wide w-1/2">Feature</th>
+                <th className="text-left py-4 px-6 font-bold text-white-muted uppercase tracking-wide">Feature</th>
                 <th className="text-center py-4 px-6 font-bold text-white-muted uppercase tracking-wide">Free</th>
                 <th className="text-center py-4 px-6 font-bold text-orange-accent uppercase tracking-wide bg-black-deep">Starter</th>
                 <th className="text-center py-4 px-6 font-bold text-white-muted uppercase tracking-wide">Pro</th>
+                <th className="text-center py-4 px-6 font-bold text-white-muted uppercase tracking-wide">Agency</th>
               </tr>
             </thead>
             <tbody>
               {[
-                { feature: 'Analyses', free: '1 / month', single: '10 (one-time)', pro: 'Unlimited' },
-{ feature: 'Share results', free: false, single: true, pro: true },
-                { feature: 'Priority processing', free: false, single: false, pro: true },
-                { feature: 'Custom branding', free: false, single: true, pro: true },
-                { feature: 'Support', free: 'Community', single: 'Email', pro: 'Priority' },
+                { feature: 'Analyses', free: '1 / month', single: '10 (one-time)', pro: 'Unlimited', agency: 'Unlimited' },
+                { feature: 'Team members', free: '1', single: '1', pro: '1', agency: '10' },
+                { feature: 'Share results', free: false, single: true, pro: true, agency: true },
+                { feature: 'Priority processing', free: false, single: false, pro: true, agency: true },
+                { feature: 'Custom branding', free: false, single: true, pro: true, agency: true },
+                { feature: 'Dedicated support', free: false, single: false, pro: false, agency: true },
+                { feature: 'Support', free: 'Community', single: 'Email', pro: 'Priority', agency: 'Dedicated' },
               ].map((row, i) => (
                 <tr key={row.feature} className={`border-b border-border-subtle ${i % 2 === 0 ? 'bg-black-card' : 'bg-black-deep'}`}>
                   <td className="py-4 px-6 font-medium text-white-muted">{row.feature}</td>
-                  {(['free', 'single', 'pro'] as const).map((tier) => (
+                  {(['free', 'single', 'pro', 'agency'] as const).map((tier) => (
                     <td
                       key={tier}
                       className={`py-4 px-6 text-center ${tier === 'single' ? 'bg-black-deep' : ''}`}

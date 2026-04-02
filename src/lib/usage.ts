@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js'
 
-export type Plan = 'free' | 'single' | 'pro'
+export type Plan = 'free' | 'single' | 'pro' | 'agency'
 
 export interface PlanLimits {
   plan: Plan
@@ -13,6 +13,7 @@ const PLAN_LIMITS: Record<Plan, { limit: number | null; resetType: PlanLimits['r
   free: { limit: 1, resetType: 'monthly' },
   single: { limit: 10, resetType: 'lifetime' },
   pro: { limit: null, resetType: 'none' },
+  agency: { limit: null, resetType: 'none' },
 }
 
 function currentMonth(): string {
@@ -40,7 +41,7 @@ export async function getPlanLimits(
   const plan = await getUserPlan(supabase, userId)
   const config = PLAN_LIMITS[plan]
 
-  if (plan === 'pro') {
+  if (plan === 'pro' || plan === 'agency') {
     return { plan, limit: null, used: 0, resetType: 'none' }
   }
 

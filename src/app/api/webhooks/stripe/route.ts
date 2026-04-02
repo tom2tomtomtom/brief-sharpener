@@ -63,7 +63,7 @@ async function handleCheckoutCompleted(
   session: Stripe.Checkout.Session
 ) {
   const userId = session.metadata?.userId
-  const plan = session.metadata?.plan as 'single' | 'pro' | undefined
+  const plan = session.metadata?.plan as 'single' | 'pro' | 'agency' | undefined
 
   if (!userId || !plan) {
     console.error('Missing userId or plan in checkout session metadata', session.id)
@@ -87,7 +87,7 @@ async function handleCheckoutCompleted(
         { onConflict: 'user_id' }
       )
   } else if (session.mode === 'subscription') {
-    // Subscription (Pro plan) — full details come via customer.subscription.updated
+    // Subscription (Pro or Agency plan) — full details come via customer.subscription.updated
     const subscriptionId = session.subscription as string
     const subscription = await stripe.subscriptions.retrieve(subscriptionId) as Stripe.Subscription
 
@@ -96,7 +96,7 @@ async function handleCheckoutCompleted(
       .upsert(
         {
           user_id: userId,
-          plan: 'pro',
+          plan,
           stripe_customer_id: customerId,
           stripe_subscription_id: subscriptionId,
           stripe_price_id: subscription.items.data[0]?.price.id ?? null,

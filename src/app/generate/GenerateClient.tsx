@@ -9,7 +9,7 @@ import { ToastProvider, useToast } from '@/components/Toast'
 import { createClient } from '@/lib/supabase/client'
 
 type Status = 'idle' | 'loading' | 'done' | 'error' | 'unauthenticated'
-type Plan = 'free' | 'single' | 'pro'
+type Plan = 'free' | 'single' | 'pro' | 'agency'
 
 interface PlanInfo {
   plan: Plan
@@ -106,8 +106,8 @@ function GeneratePageInner() {
 
         const plan = (sub?.plan as Plan) ?? 'free'
 
-        if (plan === 'pro') {
-          setPlanInfo({ plan: 'pro', used: 0 })
+        if (plan === 'pro' || plan === 'agency') {
+          setPlanInfo({ plan, used: 0 })
         } else {
           const now = new Date()
           const month = plan === 'single'
@@ -159,7 +159,7 @@ function GeneratePageInner() {
       setMobileResultsCollapsed(false)
       setStatus('done')
       setCompletedAt(new Date().toLocaleTimeString())
-      setPlanInfo(prev => prev && prev.plan !== 'pro' ? { ...prev, used: prev.used + 1 } : prev)
+      setPlanInfo(prev => prev && prev.plan !== 'pro' && prev.plan !== 'agency' ? { ...prev, used: prev.used + 1 } : prev)
       showToast('Brief analysis complete!')
       if (!localStorage.getItem('aiden_first_analysis_done')) {
         localStorage.setItem('aiden_first_analysis_done', 'true')
@@ -352,7 +352,7 @@ function GeneratePageInner() {
                 <BriefAnalysis
                   data={analysisData}
                   previewUrl={generationId ? `${typeof window !== 'undefined' ? window.location.origin : ''}/preview/${generationId}` : undefined}
-                  isPro={planInfo?.plan === 'pro'}
+                  isPro={planInfo?.plan === 'pro' || planInfo?.plan === 'agency'}
                   isPaidUser={planInfo?.plan !== 'free' && planInfo?.plan !== undefined}
                   isFirstAnalysis={isFirstAnalysis}
                 />

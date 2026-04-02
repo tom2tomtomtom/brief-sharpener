@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { plan } = await request.json() as { plan: 'single' | 'pro' }
+  const { plan } = await request.json() as { plan: 'single' | 'pro' | 'agency' }
 
   if (!plan || !(plan in PLANS)) {
     return NextResponse.json({ error: 'Invalid plan' }, { status: 400 })

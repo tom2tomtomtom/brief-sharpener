@@ -60,20 +60,63 @@ const BRIEF_CHECKS = [
   { aliases: ['kpis', 'success_metrics', 'confidence'], label: 'Success metrics or KPIs' },
 ] as const
 
+function getFieldValue(obj: Record<string, unknown>, aliases: readonly string[]): string | null {
+  for (const field of aliases) {
+    const value = obj[field]
+    if (value !== null && value !== undefined && value !== '') {
+      if (Array.isArray(value)) {
+        if (value.length === 0) continue
+        return value.join(' ')
+      }
+      return String(value)
+    }
+  }
+  return null
+}
+
+function wordCount(text: string): number {
+  return text.trim().split(/\s+/).filter(Boolean).length
+}
+
+function scoreField(text: string | null): number {
+  if (text === null) return 0
+  const words = wordCount(text)
+  if (words < 3) return 3
+  if (words < 10) return 3
+  if (words < 30) return 6
+  return 10
+}
+
 function calculateBriefScore(briefText: string, extractedBrief: Record<string, unknown>): number {
-  const presentCount = BRIEF_CHECKS.filter(({ aliases }) => hasValue(extractedBrief, ...aliases)).length
+  // Field quality score: each of 8 fields scores 0-10 (max 80)
+  let fieldScore = 0
+  for (const { aliases } of BRIEF_CHECKS) {
+    const value = getFieldValue(extractedBrief, aliases)
+    fieldScore += scoreField(value)
+  }
 
-  const fieldScore = (presentCount / BRIEF_CHECKS.length) * 70
-  const lengthScore = Math.min((briefText.length / 500) * 20, 20)
-  const structureScore = briefText.includes('\n') ? 10 : 0
+  // Structure bonus (max 10): distinct sections indicated by newlines
+  const lines = briefText.split('\n').filter(l => l.trim().length > 0)
+  const structureScore = lines.length >= 4 ? 10 : lines.length >= 2 ? 5 : 0
 
-  return Math.round(Math.min(fieldScore + lengthScore + structureScore, 100))
+  // Completeness bonus (max 10): proportional to how many fields are present at all
+  const presentCount = BRIEF_CHECKS.filter(({ aliases }) => getFieldValue(extractedBrief, aliases) !== null).length
+  const completenessScore = Math.round((presentCount / BRIEF_CHECKS.length) * 10)
+
+  return Math.round(Math.min(fieldScore + structureScore + completenessScore, 100))
 }
 
 function identifyGaps(extractedBrief: Record<string, unknown>): string[] {
-  return BRIEF_CHECKS
-    .filter(({ aliases }) => !hasValue(extractedBrief, ...aliases))
-    .map(({ label }) => label)
+  const gaps: string[] = []
+  for (const { aliases, label } of BRIEF_CHECKS) {
+    const value = getFieldValue(extractedBrief, aliases)
+    if (value === null) {
+      gaps.push(`${label} (missing)`)
+    } else if (wordCount(value) < 10) {
+      gaps.push(`${label} (present but lacks detail)`)
+    }
+  }
+  return gaps
 }
 
 export async function POST(request: NextRequest) {
@@ -149,7 +192,7 @@ export async function POST(request: NextRequest) {
     if (user) {
       const plan = await getUserPlan(adminSupabase, user.id)
 
-      if (plan === 'pro') {
+      if (plan === 'pro' || plan === 'agency') {
         try {
           phantomAnalysis = await runPhantomAnalysis(extractedBrief, briefText)
         } catch (err) {
