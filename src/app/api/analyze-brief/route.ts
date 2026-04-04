@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { canGenerate, incrementUsage, getUserPlan } from '@/lib/usage'
 import { checkRateLimit } from '@/lib/rate-limit'
+import Anthropic from '@anthropic-ai/sdk'
 
 const AIDEN_API_BASE = process.env.AIDEN_API_URL ?? 'https://aiden-api-production.up.railway.app'
 const AIDEN_API_KEY = process.env.AIDEN_API_KEY ?? ''
@@ -213,30 +214,35 @@ export async function POST(request: NextRequest) {
     })
     const strategicAnalysis = await pollJob<Record<string, unknown>>(strategyJob.job_id)
 
-    // Step 4: Generate rewritten brief via Brain chat (Opus, phantom system)
-    const rewritePrompt = `You are rewriting a creative brief. Here is the original brief, the gaps we found, and the strategic analysis.
+    // Step 4: Rewrite the brief (Sonnet - fast, good quality for rewriting)
+    // Uses direct Anthropic call, not Brain/AIDEN API, to stay within Vercel timeout
+    let rewrittenBrief: string | null = null
+    try {
+      const anthropic = new Anthropic()
+      const rewriteResult = await anthropic.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        system: 'You are an expert creative strategist rewriting briefs. Output ONLY the rewritten brief. No commentary, no preamble.',
+        messages: [{
+          role: 'user',
+          content: `Rewrite this creative brief completely. Fill every gap. Strengthen every thin section.
 
 ORIGINAL BRIEF:
-${briefText}
+${briefText.slice(0, 5000)}
 
 GAPS IDENTIFIED:
 ${gaps.join('\n')}
 
 STRATEGIC ANALYSIS:
-${JSON.stringify(strategicAnalysis, null, 2)}
+${JSON.stringify(strategicAnalysis, null, 2).slice(0, 3000)}
 
-Rewrite this brief completely. Fill every gap. Strengthen every thin section. Add the missing elements (${gaps.map(g => g.split(' (')[0]).join(', ')}). Make the audience specific with psychographics. Make the objective measurable. Add a clear tension or insight. Make deliverables specific with formats and platforms.
+Add the missing elements (${gaps.map(g => g.split(' (')[0]).join(', ')}). Make the audience specific with psychographics. Make the objective measurable. Add a clear tension or insight. Make deliverables specific with formats and platforms.
 
-Preserve the author's intent and the brand's context. Write it as a polished, ready-to-brief document that a creative team can work from immediately.
-
-Output ONLY the rewritten brief. No commentary, no preamble, no "here is the rewritten brief" intro.`
-
-    let rewrittenBrief: string | null = null
-    try {
-      const chatResult = await callAidenAPI<{ success: boolean; data: { content: string; metadata?: unknown } }>('/chat', {
-        message: rewritePrompt,
+Preserve the author's intent. Write it as a polished, ready-to-brief document.`
+        }],
       })
-      rewrittenBrief = chatResult.data?.content ?? null
+      const text = rewriteResult.content[0]
+      rewrittenBrief = text.type === 'text' ? text.text : null
     } catch (err) {
       console.error('Brief rewrite failed (non-blocking):', err)
     }
