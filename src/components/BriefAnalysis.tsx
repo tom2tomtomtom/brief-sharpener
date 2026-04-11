@@ -528,6 +528,22 @@ function MarkdownContent({ content }: { content: string }) {
   )
 }
 
+const INTERNAL_ANALYSIS_FIELDS = new Set([
+  'aidenAnalysis',
+  'aiden_analysis',
+  'rawResponse',
+  'raw_response',
+  'extractionAnalysis',
+  'extraction_analysis',
+])
+
+function formatAnalysisLabel(key: string): string {
+  return key
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase())
+}
+
 function StrategicAnalysisSection({ strategicAnalysis }: { strategicAnalysis: Record<string, unknown> }) {
   const analysis = (strategicAnalysis.aidenAnalysis ?? strategicAnalysis.aiden_analysis) as string | undefined
   if (!analysis) return null
@@ -540,6 +556,55 @@ function StrategicAnalysisSection({ strategicAnalysis }: { strategicAnalysis: Re
       </div>
       <div className="border border-border-subtle bg-black-card p-6">
         <MarkdownContent content={analysis} />
+      </div>
+    </section>
+  )
+}
+
+function BehindThinkingSection({ strategicAnalysis }: { strategicAnalysis: Record<string, unknown> }) {
+  const extractionAnalysis = (strategicAnalysis.extractionAnalysis ?? strategicAnalysis.extraction_analysis) as string | undefined
+  const rawResponse = (strategicAnalysis.rawResponse ?? strategicAnalysis.raw_response) as string | undefined
+  const aidenAnalysis = (strategicAnalysis.aidenAnalysis ?? strategicAnalysis.aiden_analysis) as string | undefined
+
+  const secondaryInsights = Object.entries(strategicAnalysis).filter(([key, value]) => {
+    if (INTERNAL_ANALYSIS_FIELDS.has(key)) return false
+    return typeof value === 'string' && value.trim().length > 0
+  }) as Array<[string, string]>
+
+  const showRawResponse = typeof rawResponse === 'string' && rawResponse.trim().length > 0 && rawResponse.trim() !== aidenAnalysis?.trim()
+
+  if (!extractionAnalysis && !showRawResponse && secondaryInsights.length === 0) {
+    return null
+  }
+
+  return (
+    <section>
+      <div className="mb-4 flex items-center gap-3">
+        <h2 className="text-lg font-semibold uppercase tracking-wider text-white">Behind the Thinking</h2>
+      </div>
+      <div className="space-y-3">
+        {extractionAnalysis && (
+          <div className="border border-border-subtle bg-black-card p-5">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-orange-accent">Initial extraction read</p>
+            <MarkdownContent content={extractionAnalysis} />
+          </div>
+        )}
+        {secondaryInsights.map(([key, value]) => (
+          <div key={key} className="border border-border-subtle bg-black-card p-5">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-orange-accent">{formatAnalysisLabel(key)}</p>
+            <MarkdownContent content={value} />
+          </div>
+        ))}
+        {showRawResponse && (
+          <details className="border border-border-subtle bg-black-card p-5">
+            <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-orange-accent">
+              Full model response
+            </summary>
+            <div className="mt-4 border-t border-border-subtle pt-4">
+              <MarkdownContent content={rawResponse} />
+            </div>
+          </details>
+        )}
       </div>
     </section>
   )
@@ -566,11 +631,14 @@ function StrategicTensionsSection({ strategicAnalysis }: { strategicAnalysis: Re
   }
 
   if (tensions.length === 0) {
-    const insights = Object.entries(strategicAnalysis).filter(([, v]) => typeof v === 'string' && v.length > 0)
+    const insights = Object.entries(strategicAnalysis).filter(([key, value]) => {
+      if (INTERNAL_ANALYSIS_FIELDS.has(key)) return false
+      return typeof value === 'string' && value.length > 0
+    })
     if (insights.length === 0) return null
 
     const insightsCopyText = insights.map(([key, value]) => {
-      const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+      const label = formatAnalysisLabel(key)
       return `${label}: ${String(value)}`
     }).join('\n')
     return (
@@ -581,7 +649,7 @@ function StrategicTensionsSection({ strategicAnalysis }: { strategicAnalysis: Re
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           {insights.map(([key, value]) => {
-            const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+            const label = formatAnalysisLabel(key)
             return (
               <div key={key} className="border border-border-strong bg-black-card p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-orange-accent">{label}</p>
@@ -1200,6 +1268,9 @@ export default function BriefAnalysis({ data, previewUrl, isPro, isPaidUser, isF
       </div>
       <div style={{ animation: 'aidenFadeInUp 0.5s ease-out 250ms both' }}>
         <StrategicAnalysisSection strategicAnalysis={strategicAnalysis} />
+      </div>
+      <div style={{ animation: 'aidenFadeInUp 0.5s ease-out 300ms both' }}>
+        <BehindThinkingSection strategicAnalysis={strategicAnalysis} />
       </div>
       <div style={{ animation: 'aidenFadeInUp 0.5s ease-out 350ms both' }}>
         <StrategicTensionsSection strategicAnalysis={strategicAnalysis} />
