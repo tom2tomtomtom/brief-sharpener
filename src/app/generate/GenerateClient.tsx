@@ -8,7 +8,7 @@ import ErrorBoundary from '@/components/ErrorBoundary'
 import { ToastProvider, useToast } from '@/components/Toast'
 import { createClient } from '@/lib/supabase/client'
 
-type Status = 'idle' | 'loading' | 'done' | 'error' | 'unauthenticated'
+type Status = 'idle' | 'loading' | 'done' | 'error'
 type Plan = 'free' | 'single' | 'pro' | 'agency'
 
 interface PlanInfo {
@@ -21,6 +21,33 @@ export interface GenerateFormData {
   brandName?: string
   industry?: string
   briefType?: string
+}
+
+interface ApiErrorPayload {
+  error?: string
+  code?: string
+  retryAfter?: string | number
+}
+
+function getGuestToken(): string {
+  const key = 'aiden_guest_token'
+  const existing = localStorage.getItem(key)
+  if (existing) return existing
+  const created = (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function')
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`
+  localStorage.setItem(key, created)
+  return created
+}
+
+async function parseApiError(response: Response): Promise<ApiErrorPayload> {
+  const contentType = response.headers.get('content-type') ?? ''
+  if (contentType.includes('application/json')) {
+    const json = await response.json().catch(() => ({}))
+    return json as ApiErrorPayload
+  }
+  const text = await response.text().catch(() => '')
+  return text ? { error: text } : {}
 }
 
 export default function GeneratePage() {
@@ -118,7 +145,11 @@ function GeneratePageInner() {
     try {
       const response = await fetch('/api/analyze-brief', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-guest-token': getGuestToken(),
+          'x-guest-fingerprint': `${navigator.language}-${Intl.DateTimeFormat().resolvedOptions().timeZone}`,
+        },
         body: JSON.stringify({
           briefText: formData.briefText,
           brandName: formData.brandName,
@@ -128,10 +159,20 @@ function GeneratePageInner() {
       })
 
       if (!response.ok) {
+        const err = await parseApiError(response)
         if (response.status === 429) {
-          throw new Error('You have reached your analysis limit. Please wait a moment before trying again.')
+          if (err.code === 'RATE_LIMIT') {
+            const retryAfter = Number(response.headers.get('Retry-After') ?? err.retryAfter ?? 60)
+            throw new Error(`Too many requests right now. Please wait ${Math.max(1, retryAfter)}s and try again.`)
+          }
+          if (err.code === 'GUEST_MONTHLY_LIMIT') {
+            throw new Error('Free guest limit reached. Sign in to continue with 3 analyses per month.')
+          }
+          if (err.code === 'PLAN_LIMIT') {
+            throw new Error('You have reached your analysis limit for this plan. Upgrade to continue.')
+          }
+          throw new Error('Request limit reached. Please try again in a moment.')
         }
-        const err = await response.json()
         throw new Error(err.error || 'Analysis failed')
       }
 
@@ -230,9 +271,10 @@ function GeneratePageInner() {
           `}</style>
           <div
             className="nprogress-bar"
-            role="progressbar"
-            aria-label="Loading"
-            aria-valuenow={undefined}
+            role="status"
+            aria-live="polite"
+            aria-busy="true"
+            aria-label="Interrogating your brief"
             style={{ position: 'relative', height: 3, overflow: 'hidden', background: 'rgba(255,255,255,0.1)' }}
           />
         </>
@@ -300,7 +342,6 @@ function GeneratePageInner() {
           {/* Right: Analysis / Loading / Empty */}
           <div className="min-w-0 flex-1">
             {status === 'loading' && <LoadingState />}
-            {status === 'unauthenticated' && <AuthPrompt />}
             {status === 'done' && analysisData && mobileResultsCollapsed && (
               <button
                 onClick={() => setMobileResultsCollapsed(false)}
@@ -498,45 +539,6 @@ function LoadingState() {
   )
 }
 
-function AuthPrompt() {
-  return (
-    <div className="flex flex-col items-center justify-center border border-border-strong bg-black-card py-24 text-center px-8">
-      <div className="flex h-14 w-14 items-center justify-center bg-black-deep border border-border-subtle">
-        <svg
-          className="h-7 w-7 text-orange-accent"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-          />
-        </svg>
-      </div>
-      <h2 className="mt-4 text-lg font-semibold text-white">Sign up free to interrogate your brief</h2>
-      <p className="mt-2 text-sm text-white-muted max-w-xs">
-        Get 3 free analyses per month. No credit card required.
-      </p>
-      <Link
-        href="/login?redirect=/generate"
-        className="mt-6 inline-block bg-red-hot px-8 py-3 text-sm font-semibold text-white hover:bg-red-dim transition-colors"
-      >
-        Sign up free
-      </Link>
-      <p className="mt-3 text-xs text-white-dim">
-        Already have an account?{' '}
-        <Link href="/login?redirect=/generate" className="text-orange-accent hover:underline">
-          Log in
-        </Link>
-      </p>
-    </div>
-  )
-}
-
 function EmailCaptureModal({ onDismiss }: { onDismiss: () => void }) {
   const [email, setEmail] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -581,13 +583,13 @@ function EmailCaptureModal({ onDismiss }: { onDismiss: () => void }) {
         {submitted ? (
           <div className="text-center py-4">
             <p className="text-lg font-semibold text-white">You&apos;re in.</p>
-            <p className="mt-1 text-sm text-white-muted">Check your inbox for your full report.</p>
+            <p className="mt-1 text-sm text-white-muted">We&apos;ll send future brief-sharpening insights to your inbox.</p>
           </div>
         ) : (
           <>
             <h2 className="text-xl font-bold text-white">Get your full report</h2>
             <p className="mt-2 text-sm text-white-muted">
-              Enter your email to receive a PDF of this analysis and future insights.
+              Enter your email to get future brief-sharpening insights and product updates.
             </p>
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               <input
@@ -604,7 +606,7 @@ function EmailCaptureModal({ onDismiss }: { onDismiss: () => void }) {
                 disabled={submitting}
                 className="w-full bg-red-hot px-4 py-3 text-sm font-semibold text-white hover:bg-red-dim transition-colors disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {submitting ? 'Sending…' : 'Send my report'}
+                {submitting ? 'Saving…' : 'Save my email'}
               </button>
             </form>
           </>

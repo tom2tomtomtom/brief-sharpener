@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { canGenerate, incrementUsage, getUserPlan } from '@/lib/usage'
-import { checkRateLimit } from '@/lib/rate-limit'
+import { checkGuestMonthlyLimit, checkRateLimit } from '@/lib/rate-limit'
 
 const AIDEN_API_BASE = process.env.AIDEN_API_URL ?? 'https://aiden-api-production.up.railway.app'
 const AIDEN_API_KEY = process.env.AIDEN_API_KEY ?? ''
@@ -12,6 +12,11 @@ interface AnalyzeBriefRequest {
   brandName?: string
   industry?: string
   briefType?: string
+}
+
+function compactToken(input: string | null | undefined): string {
+  if (!input) return 'none'
+  return input.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64) || 'none'
 }
 
 async function callAidenAPI<T>(path: string, body: unknown, timeoutMs = 60000): Promise<T> {
@@ -114,7 +119,7 @@ export async function POST(request: NextRequest) {
   const { allowed: rateLimitAllowed, retryAfter } = await checkRateLimit(ip)
   if (!rateLimitAllowed) {
     return NextResponse.json(
-      { error: 'Too many requests' },
+      { error: 'Too many requests', code: 'RATE_LIMIT' },
       { status: 429, headers: { 'Retry-After': String(retryAfter) } }
     )
   }
@@ -127,7 +132,7 @@ export async function POST(request: NextRequest) {
 
   const adminSupabase = createAdminClient()
 
-  // Usage limit check (only for authenticated users)
+  // Monthly usage limit check
   if (user) {
     const { allowed, planLimits } = await canGenerate(adminSupabase, user.id)
 
@@ -135,10 +140,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Generation limit reached',
+          code: 'PLAN_LIMIT',
           plan: planLimits.plan,
           used: planLimits.used,
           limit: planLimits.limit,
           upgradeUrl: '/pricing',
+        },
+        { status: 429 }
+      )
+    }
+  } else {
+    const guestToken = compactToken(request.headers.get('x-guest-token'))
+    const fingerprint = compactToken(request.headers.get('x-guest-fingerprint'))
+    const userAgent = compactToken(request.headers.get('user-agent'))
+    const guestIdentifier = `${ip}:${guestToken}:${fingerprint}:${userAgent}`
+    const guestQuota = await checkGuestMonthlyLimit(guestIdentifier)
+
+    if (!guestQuota.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Free guest limit reached. Sign in to continue with 3 analyses per month.',
+          code: 'GUEST_MONTHLY_LIMIT',
+          limit: guestQuota.limit,
+          upgradeUrl: '/login?redirect=/generate',
         },
         { status: 429 }
       )

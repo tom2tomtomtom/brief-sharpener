@@ -47,6 +47,8 @@ export default function FAQAccordion() {
         <div className="space-y-3">
           {faqs.map((item, index) => {
             const isOpen = openIndex === index
+            const panelId = `faq-panel-${index}`
+            const buttonId = `faq-button-${index}`
             return (
               <div
                 key={item.question}
@@ -56,6 +58,8 @@ export default function FAQAccordion() {
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                   className="flex w-full items-center justify-between px-6 py-5 text-left"
                   aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  id={buttonId}
                 >
                   <span className="text-sm font-semibold text-white">{item.question}</span>
                   <span
@@ -68,7 +72,7 @@ export default function FAQAccordion() {
                   </span>
                 </button>
                 {isOpen && (
-                  <div className="px-6 pb-5">
+                  <div id={panelId} role="region" aria-labelledby={buttonId} className="px-6 pb-5">
                     <p className="text-sm text-white-muted leading-relaxed">{item.answer}</p>
                   </div>
                 )}

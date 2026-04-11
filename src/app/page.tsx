@@ -9,7 +9,7 @@ import type { StatsResponse } from '@/app/api/stats/route'
 
 export const metadata: Metadata = {
   title: 'AIDEN Brief Intelligence | AI-Powered Brief Analysis',
-  description: 'Paste your brief. AIDEN interrogates it with AI-powered creative analysis. Get gaps identified and a sharper brief back in seconds. Start free.',
+  description: 'Paste your brief. AIDEN interrogates it with AI-powered creative analysis. Get gaps identified and a sharper brief back quickly. Start free.',
   alternates: {
     canonical: 'https://brief-sharpener.aiden.services',
   },
@@ -34,9 +34,9 @@ const jsonLd = {
     {
       '@type': 'Offer',
       name: 'Starter',
-      price: '49',
+      price: '30',
       priceCurrency: 'USD',
-      description: '10 brief analyses, never expires',
+      description: '50 brief analyses, never expires',
     },
     {
       '@type': 'Offer',
@@ -195,12 +195,14 @@ export default async function MarketingPage() {
               <p className="mt-2 text-xs text-white-dim uppercase tracking-wide">Briefs Analysed</p>
             </div>
             <div className="bg-black-card px-8 py-10 text-center">
-              <p className="text-4xl font-bold text-red-hot">62/100</p>
+              <p className="text-4xl font-bold text-red-hot">{stats.avgScore}/100</p>
               <p className="mt-2 text-xs text-white-dim uppercase tracking-wide">Average Brief Score</p>
             </div>
             <div className="bg-black-card px-8 py-10 text-center">
-              <p className="text-4xl font-bold text-red-hot">2.3 hrs</p>
-              <p className="mt-2 text-xs text-white-dim uppercase tracking-wide">Time Saved Per Brief</p>
+              <p className="text-4xl font-bold text-red-hot">
+                {stats.gapCount > 0 ? stats.gapCount.toLocaleString() : '—'}
+              </p>
+              <p className="mt-2 text-xs text-white-dim uppercase tracking-wide">Gaps Identified</p>
             </div>
           </div>
         </div>

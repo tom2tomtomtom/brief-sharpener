@@ -431,22 +431,30 @@ function TensionCards({ tensions }: { tensions: unknown[] }) {
         if (typeof tension === 'string') {
           const [summary, ...rest] = tension.split('. ')
           const hasMore = rest.length > 0
+          const panelId = `tension-panel-${i}`
           return (
             <div
               key={i}
-              onClick={() => hasMore && setExpanded(prev => ({ ...prev, [i]: !prev[i] }))}
-              className={`border bg-black-card p-4 transition-colors ${isExpanded ? 'border-orange-accent' : 'border-border-subtle'} ${hasMore ? 'cursor-pointer' : ''}`}
+              className={`border bg-black-card p-4 transition-colors ${isExpanded ? 'border-orange-accent' : 'border-border-subtle'}`}
             >
-              <div className="flex items-start justify-between gap-2">
-                <p className="text-sm text-white leading-relaxed">{summary}{!isExpanded && hasMore ? '...' : ''}</p>
-                {hasMore && (
+              {hasMore ? (
+                <button
+                  type="button"
+                  onClick={() => setExpanded(prev => ({ ...prev, [i]: !prev[i] }))}
+                  aria-expanded={isExpanded}
+                  aria-controls={panelId}
+                  className="flex w-full items-start justify-between gap-2 text-left"
+                >
+                  <p className="text-sm text-white leading-relaxed">{summary}{!isExpanded ? '...' : ''}</p>
                   <svg className={`mt-0.5 h-4 w-4 flex-shrink-0 text-white-muted transition-transform ${isExpanded ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                   </svg>
-                )}
-              </div>
+                </button>
+              ) : (
+                <p className="text-sm text-white leading-relaxed">{summary}</p>
+              )}
               {isExpanded && hasMore && (
-                <p className="mt-2 text-sm text-white-muted leading-relaxed">{rest.join('. ')}</p>
+                <p id={panelId} className="mt-2 text-sm text-white-muted leading-relaxed">{rest.join('. ')}</p>
               )}
             </div>
           )
@@ -458,25 +466,36 @@ function TensionCards({ tensions }: { tensions: unknown[] }) {
           const description = String(t.description ?? t.insight ?? t.explanation ?? t.detail ?? '')
           const recommendation = String(t.recommendation ?? t.action ?? t.suggest ?? '')
           const hasMore = !!(description || recommendation)
+          const panelId = `tension-panel-${i}`
           return (
             <div
               key={i}
-              onClick={() => hasMore && setExpanded(prev => ({ ...prev, [i]: !prev[i] }))}
-              className={`border bg-black-card p-4 transition-colors ${isExpanded ? 'border-orange-accent' : 'border-border-subtle'} ${hasMore ? 'cursor-pointer' : ''}`}
+              className={`border bg-black-card p-4 transition-colors ${isExpanded ? 'border-orange-accent' : 'border-border-subtle'}`}
             >
-              <div className="flex items-start justify-between gap-2">
+              {hasMore ? (
+                <button
+                  type="button"
+                  onClick={() => setExpanded(prev => ({ ...prev, [i]: !prev[i] }))}
+                  aria-expanded={isExpanded}
+                  aria-controls={panelId}
+                  className="flex w-full items-start justify-between gap-2 text-left"
+                >
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-orange-accent">Tension</p>
+                    <p className="mt-1 text-sm font-semibold text-white">{title}</p>
+                  </div>
+                  <svg className={`mt-1 h-4 w-4 flex-shrink-0 text-white-muted transition-transform ${isExpanded ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              ) : (
                 <div className="min-w-0">
                   <p className="text-xs font-semibold uppercase tracking-wide text-orange-accent">Tension</p>
                   <p className="mt-1 text-sm font-semibold text-white">{title}</p>
                 </div>
-                {hasMore && (
-                  <svg className={`mt-1 h-4 w-4 flex-shrink-0 text-white-muted transition-transform ${isExpanded ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
-                )}
-              </div>
+              )}
               {isExpanded && (
-                <div className="mt-2 space-y-2">
+                <div id={panelId} className="mt-2 space-y-2">
                   {description && <p className="text-sm text-white-muted leading-relaxed">{description}</p>}
                   {recommendation && (
                     <p className="text-sm text-white-muted leading-relaxed border-t border-border-subtle pt-2">{recommendation}</p>
@@ -1053,6 +1072,72 @@ function ShareResultButton({ url }: { url: string }) {
   )
 }
 
+function TeamHandoffPanel({ data, previewUrl }: { data: BriefAnalysisData; previewUrl?: string }) {
+  const [notes, setNotes] = useState('')
+  const [copied, setCopied] = useState(false)
+  const checklist = data.gaps.map((gap, index) => {
+    const cleanGap = gap.replace(/\s*\(.*\)\s*$/, '')
+    return `${index + 1}. Resolve: ${cleanGap}`
+  })
+
+  const payload = [
+    'Team Handoff Checklist',
+    `Score: ${data.score}/100`,
+    previewUrl ? `Share link: ${previewUrl}` : null,
+    '',
+    'Action items:',
+    ...checklist,
+    '',
+    'Team notes:',
+    notes.trim() || '(none)',
+  ].filter(Boolean).join('\n')
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(payload)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // clipboard not available
+    }
+  }, [payload])
+
+  return (
+    <section className="border border-border-subtle bg-black-card p-5">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h2 className="text-lg font-semibold uppercase tracking-wider text-white">Team Handoff</h2>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="inline-flex items-center gap-1.5 border border-border-subtle bg-black-deep px-3 py-1.5 text-xs font-semibold text-white-muted hover:bg-white-faint transition-colors"
+        >
+          {copied ? 'Checklist copied' : 'Copy checklist'}
+        </button>
+      </div>
+      <div className="space-y-2">
+        {checklist.length === 0 ? (
+          <p className="text-sm text-green-500">No critical gaps left to action.</p>
+        ) : (
+          checklist.map((item) => (
+            <p key={item} className="text-sm text-white-muted">{item}</p>
+          ))
+        )}
+      </div>
+      <label htmlFor="team-notes" className="mt-4 block text-xs font-semibold uppercase tracking-wide text-white-dim">
+        Team comments
+      </label>
+      <textarea
+        id="team-notes"
+        rows={4}
+        value={notes}
+        onChange={(event) => setNotes(event.target.value)}
+        placeholder="Add client context, owners, deadlines, and next review notes..."
+        className="mt-2 w-full border border-border-subtle bg-black-deep px-3 py-2 text-sm text-white outline-none focus:border-red-hot"
+      />
+    </section>
+  )
+}
+
 function UpgradeCtaCard() {
   return (
     <div className="border border-border-strong bg-black-card p-6">
@@ -1123,6 +1208,7 @@ export default function BriefAnalysis({ data, previewUrl, isPro, isPaidUser, isF
       <div style={{ animation: 'aidenFadeInUp 0.5s ease-out 450ms both' }}>
         <RewrittenBriefSection strategicAnalysis={strategicAnalysis} extractedBrief={extractedBrief} isPro={isPro} briefText={data.briefText} rewrittenBriefFromAPI={data.rewrittenBrief} />
       </div>
+      <TeamHandoffPanel data={data} previewUrl={previewUrl} />
       {!isPaidUser && <UpgradeCtaCard />}
     </div>
   )

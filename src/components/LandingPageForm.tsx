@@ -192,6 +192,39 @@ interface FormErrors {
   briefText?: string
 }
 
+interface BriefCompletenessCheck {
+  id: string
+  label: string
+  passed: boolean
+}
+
+interface SavedTemplate {
+  id: string
+  name: string
+  briefText: string
+  brandName: string
+  industry: string
+  briefType: string
+  createdAt: string
+}
+
+const COMPLETENESS_RULES: Array<{ id: string; label: string; patterns: RegExp[] }> = [
+  { id: 'objective', label: 'Clear objective', patterns: [/\bobjective\b/i, /\bgoal\b/i, /\bwe want to\b/i] },
+  { id: 'audience', label: 'Target audience', patterns: [/\baudience\b/i, /\bwho\b/i, /\bfor\b/i] },
+  { id: 'deliverables', label: 'Deliverables', patterns: [/\bdeliverables?\b/i, /\bassets?\b/i, /\boutputs?\b/i] },
+  { id: 'timeline', label: 'Timeline', patterns: [/\btimeline\b/i, /\bdeadline\b/i, /\blaunch\b/i, /\bdate\b/i] },
+  { id: 'kpi', label: 'Success metric', patterns: [/\bkpi\b/i, /\bmetric\b/i, /\bsuccess\b/i, /\buplift\b/i] },
+]
+
+function evaluateBriefCompleteness(text: string): BriefCompletenessCheck[] {
+  const source = text.trim()
+  return COMPLETENESS_RULES.map((rule) => ({
+    id: rule.id,
+    label: rule.label,
+    passed: rule.patterns.some((pattern) => pattern.test(source)),
+  }))
+}
+
 interface LandingPageFormProps {
   onGenerate: (data: GenerateFormData) => void
   isLoading: boolean
@@ -263,22 +296,82 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
   const [uploadFileName, setUploadFileName] = useState<string | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
+  const [savedTemplates, setSavedTemplates] = useState<SavedTemplate[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const completenessChecks = evaluateBriefCompleteness(formData.briefText)
+  const passedCompleteness = completenessChecks.filter((check) => check.passed).length
+  const canSubmit = formData.briefText.trim().length >= 100 && passedCompleteness >= 3
 
-  function validate(): boolean {
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('aiden_saved_templates')
+      if (!raw) return
+      const parsed = JSON.parse(raw) as SavedTemplate[]
+      if (Array.isArray(parsed)) {
+        setSavedTemplates(parsed.slice(0, 5))
+      }
+    } catch {
+      // ignore malformed local template cache
+    }
+  }, [])
+
+  const validate = useCallback((): boolean => {
     const newErrors: FormErrors = {}
     if (!formData.briefText.trim()) {
       newErrors.briefText = 'Brief text is required.'
     } else if (formData.briefText.trim().length < 100) {
       newErrors.briefText = 'Brief must be at least 100 characters.'
+    } else if (passedCompleteness < 3) {
+      newErrors.briefText = 'Add at least 3 key fields (objective, audience, deliverables, timeline, success metric).'
     }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
-  }
+  }, [formData.briefText, passedCompleteness])
 
   function handleBriefChange(val: string) {
     setFormData((p) => ({ ...p, briefText: val }))
-    onFormChange?.(val.trim().length >= 100)
+    const checks = evaluateBriefCompleteness(val)
+    onFormChange?.(val.trim().length >= 100 && checks.filter((check) => check.passed).length >= 3)
+  }
+
+  function persistTemplates(next: SavedTemplate[]) {
+    setSavedTemplates(next)
+    localStorage.setItem('aiden_saved_templates', JSON.stringify(next))
+  }
+
+  function saveCurrentTemplate() {
+    if (!formData.briefText.trim()) {
+      showToast('Add brief content before saving a template.', 'error')
+      return
+    }
+    const name = formData.brandName.trim() || `Template ${new Date().toLocaleDateString()}`
+    const template: SavedTemplate = {
+      id: (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function')
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      name,
+      briefText: formData.briefText,
+      brandName: formData.brandName,
+      industry: formData.industry,
+      briefType: formData.briefType,
+      createdAt: new Date().toISOString(),
+    }
+    const next = [template, ...savedTemplates].slice(0, 5)
+    persistTemplates(next)
+    showToast('Template saved for later.')
+  }
+
+  function loadTemplate(id: string) {
+    const template = savedTemplates.find((item) => item.id === id)
+    if (!template) return
+    setFormData({
+      briefText: template.briefText,
+      brandName: template.brandName,
+      industry: template.industry,
+      briefType: template.briefType,
+    })
+    const checks = evaluateBriefCompleteness(template.briefText)
+    onFormChange?.(template.briefText.trim().length >= 100 && checks.filter((check) => check.passed).length >= 3)
   }
 
   async function handleFileUpload(file: File) {
@@ -350,7 +443,7 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
         })
       }
     }
-  }, [isLoading, formData, onGenerate])
+  }, [isLoading, formData, onGenerate, validate])
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown)
@@ -495,6 +588,32 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
           </div>
         </div>
 
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <p className="text-xs text-white-dim">Save and re-use your own templates:</p>
+          <button
+            type="button"
+            onClick={saveCurrentTemplate}
+            className="rounded-full border border-border-subtle bg-black-card px-3 py-1 text-xs font-medium text-white-muted transition hover:border-red-hot hover:text-white"
+          >
+            Save current as template
+          </button>
+        </div>
+        {savedTemplates.length > 0 && (
+          <div className="mb-3 flex flex-wrap gap-2">
+            {savedTemplates.map((template) => (
+              <button
+                key={template.id}
+                type="button"
+                onClick={() => loadTemplate(template.id)}
+                className="rounded-full border border-border-subtle bg-black-card px-3 py-1 text-xs font-medium text-orange-accent transition hover:border-red-hot hover:bg-black-card focus:outline-none focus:ring-2 focus:ring-red-hot"
+                title={`Load template: ${template.name}`}
+              >
+                {template.name}
+              </button>
+            ))}
+          </div>
+        )}
+
         <textarea
           id="briefText"
           rows={10}
@@ -553,6 +672,21 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
             })()}
           </div>
         </div>
+        <div className="mt-3 rounded-lg border border-border-subtle bg-black-deep p-3">
+          <div className="mb-2 flex items-center justify-between text-xs">
+            <p className="font-medium uppercase tracking-wide text-white-muted">Completeness guardrail</p>
+            <span className={passedCompleteness >= 3 ? 'text-green-500' : 'text-yellow-electric'}>
+              {passedCompleteness}/5 found
+            </span>
+          </div>
+          <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+            {completenessChecks.map((check) => (
+              <p key={check.id} className={`text-xs ${check.passed ? 'text-green-500' : 'text-white-dim'}`}>
+                {check.passed ? '✓' : '•'} {check.label}
+              </p>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Brand name */}
@@ -608,7 +742,7 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
 
       <button
         type="submit"
-        disabled={isLoading}
+        disabled={isLoading || !canSubmit}
         className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-hot px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-dim focus:outline-none focus:ring-2 focus:ring-red-hot focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isLoading ? (
@@ -620,6 +754,11 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
           'Interrogate this brief'
         )}
       </button>
+      {!canSubmit && (
+        <p className="text-center text-xs text-yellow-electric">
+          Add at least 3 key fields (objective, audience, deliverables, timeline, success metric) to run analysis.
+        </p>
+      )}
       <p className="text-center text-xs text-white-dim">
         Press <kbd className="rounded border border-border-subtle bg-black-card px-1 py-0.5 font-mono text-xs">⌘ Enter</kbd> to submit
       </p>

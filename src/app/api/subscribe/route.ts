@@ -16,16 +16,16 @@ export async function POST(request: NextRequest) {
 
   try {
     const supabase = createAdminClient()
-    await supabase.from('leads').upsert(
+    const { error } = await supabase.from('leads').upsert(
       { email, source: 'homepage_checklist', created_at: new Date().toISOString() },
       { onConflict: 'email' }
     )
+    if (error) {
+      throw error
+    }
     return NextResponse.json({ ok: true })
   } catch (error) {
-    // Log the error server-side so we can diagnose Supabase/table issues
     console.error('Failed to save lead:', error)
-    // Still return 200 to the user — email capture should degrade gracefully
-    // rather than showing an error for what feels like a simple signup action
-    return NextResponse.json({ ok: true })
+    return NextResponse.json({ error: 'Unable to save email right now. Please try again.' }, { status: 500 })
   }
 }

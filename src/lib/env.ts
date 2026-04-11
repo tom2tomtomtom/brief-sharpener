@@ -7,9 +7,10 @@ const requiredVars = [
   'STRIPE_WEBHOOK_SECRET',
   'STRIPE_PRICE_ID_SINGLE',
   'STRIPE_PRICE_ID_PRO',
+  'AIDEN_API_KEY',
 ] as const
 
-const optionalVars = ['NEXT_PUBLIC_URL', 'AIDEN_BRAIN_API_URL', 'AIDEN_BRAIN_API_KEY'] as const
+const optionalVars = ['NEXT_PUBLIC_URL', 'AIDEN_BRAIN_API_URL', 'AIDEN_BRAIN_API_KEY', 'AIDEN_API_URL'] as const
 
 type RequiredVars = (typeof requiredVars)[number]
 type OptionalVars = (typeof optionalVars)[number]

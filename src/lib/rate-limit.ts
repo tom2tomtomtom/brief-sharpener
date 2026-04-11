@@ -2,6 +2,12 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 const WINDOW_SECONDS = 60
 const MAX_REQUESTS = 10
+const FREE_GUEST_MONTHLY_LIMIT = 3
+
+function currentMonthKey(): string {
+  const now = new Date()
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`
+}
 
 export async function checkRateLimit(
   ip: string
@@ -51,4 +57,36 @@ export async function checkRateLimit(
     .eq('ip', ip)
 
   return { allowed: true }
+}
+
+export async function checkGuestMonthlyLimit(
+  identifier: string,
+  limit = FREE_GUEST_MONTHLY_LIMIT
+): Promise<{ allowed: boolean; remaining: number; limit: number }> {
+  const supabase = createAdminClient()
+  const month = currentMonthKey()
+  const key = `guest:${month}:${identifier}`
+  const nowIso = new Date().toISOString()
+
+  const { data: existing } = await supabase
+    .from('rate_limits')
+    .select('request_count')
+    .eq('ip', key)
+    .single()
+
+  const current = existing?.request_count ?? 0
+  if (current >= limit) {
+    return { allowed: false, remaining: 0, limit }
+  }
+
+  await supabase.from('rate_limits').upsert(
+    {
+      ip: key,
+      request_count: current + 1,
+      window_start: nowIso,
+    },
+    { onConflict: 'ip' }
+  )
+
+  return { allowed: true, remaining: Math.max(0, limit - (current + 1)), limit }
 }

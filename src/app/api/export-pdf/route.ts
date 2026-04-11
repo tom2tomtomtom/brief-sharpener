@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { getUserPlan } from '@/lib/usage'
 
 const BRIEF_FIELD_LABELS: Record<string, string> = {
   campaign_name: 'Campaign',
@@ -25,10 +28,23 @@ function fieldLabel(key: string): string {
   return BRIEF_FIELD_LABELS[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+}
+
+function safeText(value: unknown): string {
+  if (Array.isArray(value)) return escapeHtml(value.map(item => String(item)).join(', '))
+  if (typeof value === 'object' && value !== null) return escapeHtml(JSON.stringify(value))
+  return escapeHtml(String(value))
+}
+
 function fieldValue(value: unknown): string {
-  if (Array.isArray(value)) return value.join(', ')
-  if (typeof value === 'object' && value !== null) return JSON.stringify(value)
-  return String(value)
+  return safeText(value)
 }
 
 function getScoreLabel(score: number): string {
@@ -63,7 +79,7 @@ function buildExtractedBriefHtml(extractedBrief: Record<string, unknown>): strin
 
   const rows = fields.map(([key, value]) => `
     <div class="card">
-      <p class="label">${fieldLabel(key)}</p>
+      <p class="label">${escapeHtml(fieldLabel(key))}</p>
       <p class="value">${fieldValue(value)}</p>
     </div>
   `).join('')
@@ -93,7 +109,7 @@ function buildGapAnalysisHtml(gaps: string[]): string {
     return `
       <div class="gap-item" style="border-left: 3px solid ${color};">
         <p class="gap-severity" style="color:${color};">${label}</p>
-        <p class="value">${gap}</p>
+        <p class="value">${safeText(gap)}</p>
       </div>
     `
   }).join('')
@@ -131,8 +147,8 @@ function buildStrategicTensionsHtml(strategicAnalysis: Record<string, unknown>):
     if (insights.length === 0) return ''
     const rows = insights.map(([key, value]) => `
       <div class="card card-indigo">
-        <p class="label label-indigo">${key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</p>
-        <p class="value">${String(value)}</p>
+        <p class="label label-indigo">${escapeHtml(key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))}</p>
+        <p class="value">${safeText(value)}</p>
       </div>
     `).join('')
     return `
@@ -145,12 +161,12 @@ function buildStrategicTensionsHtml(strategicAnalysis: Record<string, unknown>):
 
   const cards = tensions.map((tension, i) => {
     if (typeof tension === 'string') {
-      return `<div class="card card-indigo"><p class="value">${tension}</p></div>`
+      return `<div class="card card-indigo"><p class="value">${safeText(tension)}</p></div>`
     }
     if (typeof tension === 'object' && tension !== null) {
       const t = tension as Record<string, unknown>
-      const title = String(t.title ?? t.name ?? t.tension ?? `Tension ${i + 1}`)
-      const description = String(t.description ?? t.insight ?? t.explanation ?? t.detail ?? '')
+      const title = safeText(t.title ?? t.name ?? t.tension ?? `Tension ${i + 1}`)
+      const description = safeText(t.description ?? t.insight ?? t.explanation ?? t.detail ?? '')
       return `
         <div class="card card-indigo">
           <p class="label label-indigo">Tension</p>
@@ -189,11 +205,11 @@ function buildSharpenedBriefHtml(strategicAnalysis: Record<string, unknown>, ext
     const tone = extractedBrief.tone
     const kpis = extractedBrief.kpis
 
-    if (objective) parts.push(`**Objective:** ${objective}`)
-    if (audience) parts.push(`**Target Audience:** ${Array.isArray(audience) ? audience.join(', ') : audience}`)
-    if (deliverables) parts.push(`**Deliverables:** ${Array.isArray(deliverables) ? deliverables.join(', ') : deliverables}`)
-    if (tone) parts.push(`**Tone:** ${tone}`)
-    if (kpis) parts.push(`**Success Metrics:** ${Array.isArray(kpis) ? kpis.join(', ') : kpis}`)
+    if (objective) parts.push(`**Objective:** ${String(objective)}`)
+    if (audience) parts.push(`**Target Audience:** ${Array.isArray(audience) ? audience.join(', ') : String(audience)}`)
+    if (deliverables) parts.push(`**Deliverables:** ${Array.isArray(deliverables) ? deliverables.join(', ') : String(deliverables)}`)
+    if (tone) parts.push(`**Tone:** ${String(tone)}`)
+    if (kpis) parts.push(`**Success Metrics:** ${Array.isArray(kpis) ? kpis.join(', ') : String(kpis)}`)
 
     if (parts.length === 0) return ''
     rewrittenBrief = parts.join('\n')
@@ -203,9 +219,9 @@ function buildSharpenedBriefHtml(strategicAnalysis: Record<string, unknown>, ext
   const linesHtml = lines.map(line => {
     const boldMatch = line.match(/^\*\*(.+?):\*\*\s*(.+)$/)
     if (boldMatch) {
-      return `<div class="brief-row"><span class="brief-key">${boldMatch[1]}</span><span class="value">${boldMatch[2]}</span></div>`
+      return `<div class="brief-row"><span class="brief-key">${escapeHtml(boldMatch[1])}</span><span class="value">${escapeHtml(boldMatch[2])}</span></div>`
     }
-    return `<p class="value">${line}</p>`
+    return `<p class="value">${escapeHtml(line)}</p>`
   }).join('')
 
   return `
@@ -245,6 +261,21 @@ function buildScoreHtml(score: number): string {
 }
 
 export async function POST(req: NextRequest) {
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: 'Authentication required', code: 'AUTH_REQUIRED' }, { status: 401 })
+  }
+
+  const adminSupabase = createAdminClient()
+  const plan = await getUserPlan(adminSupabase, user.id)
+  if (plan === 'free') {
+    return NextResponse.json({ error: 'PDF export requires a paid plan', code: 'PAID_PLAN_REQUIRED' }, { status: 403 })
+  }
+
   let body: { extractedBrief?: Record<string, unknown>; strategicAnalysis?: Record<string, unknown>; gaps?: string[]; score?: number } = {}
 
   const contentType = req.headers.get('content-type') ?? ''
@@ -262,7 +293,8 @@ export async function POST(req: NextRequest) {
   const extractedBrief = (body.extractedBrief ?? {}) as Record<string, unknown>
   const strategicAnalysis = (body.strategicAnalysis ?? {}) as Record<string, unknown>
   const gaps = Array.isArray(body.gaps) ? body.gaps as string[] : []
-  const score = typeof body.score === 'number' ? body.score : 0
+  const rawScore = typeof body.score === 'number' ? body.score : 0
+  const score = Math.min(100, Math.max(0, Math.round(rawScore)))
 
   const scoreHtml = buildScoreHtml(score)
   const extractedHtml = buildExtractedBriefHtml(extractedBrief)
