@@ -215,6 +215,7 @@ const COMPLETENESS_RULES: Array<{ id: string; label: string; patterns: RegExp[] 
   { id: 'timeline', label: 'Timeline', patterns: [/\btimeline\b/i, /\bdeadline\b/i, /\blaunch\b/i, /\bdate\b/i] },
   { id: 'kpi', label: 'Success metric', patterns: [/\bkpi\b/i, /\bmetric\b/i, /\bsuccess\b/i, /\buplift\b/i] },
 ]
+const RECOMMENDED_COMPLETENESS_COUNT = 3
 
 function evaluateBriefCompleteness(text: string): BriefCompletenessCheck[] {
   const source = text.trim()
@@ -300,7 +301,7 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
   const fileInputRef = useRef<HTMLInputElement>(null)
   const completenessChecks = evaluateBriefCompleteness(formData.briefText)
   const passedCompleteness = completenessChecks.filter((check) => check.passed).length
-  const canSubmit = formData.briefText.trim().length >= 100 && passedCompleteness >= 3
+  const canSubmit = formData.briefText.trim().length >= 100
 
   useEffect(() => {
     try {
@@ -321,17 +322,14 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
       newErrors.briefText = 'Brief text is required.'
     } else if (formData.briefText.trim().length < 100) {
       newErrors.briefText = 'Brief must be at least 100 characters.'
-    } else if (passedCompleteness < 3) {
-      newErrors.briefText = 'Add at least 3 key fields (objective, audience, deliverables, timeline, success metric).'
     }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
-  }, [formData.briefText, passedCompleteness])
+  }, [formData.briefText])
 
   function handleBriefChange(val: string) {
     setFormData((p) => ({ ...p, briefText: val }))
-    const checks = evaluateBriefCompleteness(val)
-    onFormChange?.(val.trim().length >= 100 && checks.filter((check) => check.passed).length >= 3)
+    onFormChange?.(val.trim().length >= 100)
   }
 
   function persistTemplates(next: SavedTemplate[]) {
@@ -370,8 +368,7 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
       industry: template.industry,
       briefType: template.briefType,
     })
-    const checks = evaluateBriefCompleteness(template.briefText)
-    onFormChange?.(template.briefText.trim().length >= 100 && checks.filter((check) => check.passed).length >= 3)
+    onFormChange?.(template.briefText.trim().length >= 100)
   }
 
   async function handleFileUpload(file: File) {
@@ -675,7 +672,7 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
         <div className="mt-3 rounded-lg border border-border-subtle bg-black-deep p-3">
           <div className="mb-2 flex items-center justify-between text-xs">
             <p className="font-medium uppercase tracking-wide text-white-muted">Completeness guardrail</p>
-            <span className={passedCompleteness >= 3 ? 'text-green-500' : 'text-yellow-electric'}>
+            <span className={passedCompleteness >= RECOMMENDED_COMPLETENESS_COUNT ? 'text-green-500' : 'text-yellow-electric'}>
               {passedCompleteness}/5 found
             </span>
           </div>
@@ -686,6 +683,11 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
               </p>
             ))}
           </div>
+          {passedCompleteness < RECOMMENDED_COMPLETENESS_COUNT && formData.briefText.trim().length >= 100 && (
+            <p className="mt-2 text-xs text-yellow-electric">
+              Recommended: include at least 3 of these signals for a sharper analysis, but you can still run the brief as-is.
+            </p>
+          )}
         </div>
       </div>
 
@@ -754,11 +756,6 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
           'Interrogate this brief'
         )}
       </button>
-      {!canSubmit && (
-        <p className="text-center text-xs text-yellow-electric">
-          Add at least 3 key fields (objective, audience, deliverables, timeline, success metric) to run analysis.
-        </p>
-      )}
       <p className="text-center text-xs text-white-dim">
         Press <kbd className="rounded border border-border-subtle bg-black-card px-1 py-0.5 font-mono text-xs">⌘ Enter</kbd> to submit
       </p>

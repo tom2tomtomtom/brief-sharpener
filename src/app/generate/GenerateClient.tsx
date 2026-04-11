@@ -29,17 +29,6 @@ interface ApiErrorPayload {
   retryAfter?: string | number
 }
 
-function getGuestToken(): string {
-  const key = 'aiden_guest_token'
-  const existing = localStorage.getItem(key)
-  if (existing) return existing
-  const created = (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function')
-    ? crypto.randomUUID()
-    : `${Date.now()}-${Math.random().toString(36).slice(2)}`
-  localStorage.setItem(key, created)
-  return created
-}
-
 async function parseApiError(response: Response): Promise<ApiErrorPayload> {
   const contentType = response.headers.get('content-type') ?? ''
   if (contentType.includes('application/json')) {
@@ -145,11 +134,7 @@ function GeneratePageInner() {
     try {
       const response = await fetch('/api/analyze-brief', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-guest-token': getGuestToken(),
-          'x-guest-fingerprint': `${navigator.language}-${Intl.DateTimeFormat().resolvedOptions().timeZone}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           briefText: formData.briefText,
           brandName: formData.brandName,

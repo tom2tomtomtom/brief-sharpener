@@ -66,7 +66,6 @@ export async function checkGuestMonthlyLimit(
   const supabase = createAdminClient()
   const month = currentMonthKey()
   const key = `guest:${month}:${identifier}`
-  const nowIso = new Date().toISOString()
 
   const { data: existing } = await supabase
     .from('rate_limits')
@@ -79,6 +78,26 @@ export async function checkGuestMonthlyLimit(
     return { allowed: false, remaining: 0, limit }
   }
 
+  return { allowed: true, remaining: Math.max(0, limit - current), limit }
+}
+
+export async function incrementGuestMonthlyUsage(
+  identifier: string
+): Promise<{ remaining: number; limit: number }> {
+  const supabase = createAdminClient()
+  const month = currentMonthKey()
+  const key = `guest:${month}:${identifier}`
+  const limit = FREE_GUEST_MONTHLY_LIMIT
+  const nowIso = new Date().toISOString()
+
+  const { data: existing } = await supabase
+    .from('rate_limits')
+    .select('request_count')
+    .eq('ip', key)
+    .single()
+
+  const current = existing?.request_count ?? 0
+
   await supabase.from('rate_limits').upsert(
     {
       ip: key,
@@ -88,5 +107,5 @@ export async function checkGuestMonthlyLimit(
     { onConflict: 'ip' }
   )
 
-  return { allowed: true, remaining: Math.max(0, limit - (current + 1)), limit }
+  return { remaining: Math.max(0, limit - (current + 1)), limit }
 }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { canGenerate, incrementUsage, getUserPlan } from '@/lib/usage'
-import { checkGuestMonthlyLimit, checkRateLimit } from '@/lib/rate-limit'
+import { checkGuestMonthlyLimit, checkRateLimit, incrementGuestMonthlyUsage } from '@/lib/rate-limit'
 
 const AIDEN_API_BASE = process.env.AIDEN_API_URL ?? 'https://aiden-api-production.up.railway.app'
 const AIDEN_API_KEY = process.env.AIDEN_API_KEY ?? ''
@@ -14,9 +14,20 @@ interface AnalyzeBriefRequest {
   briefType?: string
 }
 
-function compactToken(input: string | null | undefined): string {
+const GUEST_COOKIE_NAME = 'aiden_guest_id'
+
+function normalizeIdentifier(input: string | null | undefined): string {
   if (!input) return 'none'
   return input.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64) || 'none'
+}
+
+function getGuestIdentity(request: NextRequest): { id: string; isNew: boolean } {
+  const existing = request.cookies.get(GUEST_COOKIE_NAME)?.value
+  if (existing) {
+    return { id: normalizeIdentifier(existing), isNew: false }
+  }
+
+  return { id: crypto.randomUUID().replace(/-/g, ''), isNew: true }
 }
 
 async function callAidenAPI<T>(path: string, body: unknown, timeoutMs = 60000): Promise<T> {
@@ -132,6 +143,8 @@ export async function POST(request: NextRequest) {
 
   const adminSupabase = createAdminClient()
 
+  let guestIdentity: { id: string; isNew: boolean } | null = null
+
   // Monthly usage limit check
   if (user) {
     const { allowed, planLimits } = await canGenerate(adminSupabase, user.id)
@@ -149,24 +162,6 @@ export async function POST(request: NextRequest) {
         { status: 429 }
       )
     }
-  } else {
-    const guestToken = compactToken(request.headers.get('x-guest-token'))
-    const fingerprint = compactToken(request.headers.get('x-guest-fingerprint'))
-    const userAgent = compactToken(request.headers.get('user-agent'))
-    const guestIdentifier = `${ip}:${guestToken}:${fingerprint}:${userAgent}`
-    const guestQuota = await checkGuestMonthlyLimit(guestIdentifier)
-
-    if (!guestQuota.allowed) {
-      return NextResponse.json(
-        {
-          error: 'Free guest limit reached. Sign in to continue with 3 analyses per month.',
-          code: 'GUEST_MONTHLY_LIMIT',
-          limit: guestQuota.limit,
-          upgradeUrl: '/login?redirect=/generate',
-        },
-        { status: 429 }
-      )
-    }
   }
 
   let body: AnalyzeBriefRequest
@@ -180,6 +175,34 @@ export async function POST(request: NextRequest) {
 
   if (!briefText?.trim()) {
     return NextResponse.json({ error: 'briefText is required' }, { status: 400 })
+  }
+
+  let guestIdentifier: string | null = null
+  if (!user) {
+    guestIdentity = getGuestIdentity(request)
+    const userAgent = normalizeIdentifier(request.headers.get('user-agent'))
+    guestIdentifier = `${ip}:${guestIdentity.id}:${userAgent}`
+    const guestQuota = await checkGuestMonthlyLimit(guestIdentifier)
+
+    if (!guestQuota.allowed) {
+      const response = NextResponse.json(
+        {
+          error: 'Free guest limit reached. Sign in to continue with 3 analyses per month.',
+          code: 'GUEST_MONTHLY_LIMIT',
+          limit: guestQuota.limit,
+          upgradeUrl: '/login?redirect=/generate',
+        },
+        { status: 429 }
+      )
+      response.cookies.set(GUEST_COOKIE_NAME, guestIdentity.id, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 365,
+      })
+      return response
+    }
   }
 
   try {
@@ -279,9 +302,11 @@ IMPORTANT: Use the section headers exactly as shown above (## STRATEGIC ANALYSIS
         .select('id')
         .single()
       generationId = data?.id ?? null
+    } else if (guestIdentifier) {
+      await incrementGuestMonthlyUsage(guestIdentifier)
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       extractedBrief,
       strategicAnalysis,
       gaps,
@@ -289,6 +314,16 @@ IMPORTANT: Use the section headers exactly as shown above (## STRATEGIC ANALYSIS
       rewrittenBrief,
       generationId,
     })
+    if (guestIdentity) {
+      response.cookies.set(GUEST_COOKIE_NAME, guestIdentity.id, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 365,
+      })
+    }
+    return response
   } catch (error) {
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
