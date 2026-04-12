@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next'
 
-const siteUrl = process.env.NEXT_PUBLIC_URL || 'https://aiden.services'
+const siteUrl = process.env.NEXT_PUBLIC_URL || 'https://brief-sharpener.aiden.services'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

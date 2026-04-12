@@ -55,9 +55,7 @@ const jsonLd = {
 
 async function getStats(): Promise<StatsResponse> {
   try {
-    const vercelUrl = process.env.VERCEL_URL
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
-    const baseUrl = siteUrl ?? (vercelUrl ? `https://${vercelUrl}` : 'http://localhost:3000')
+    const baseUrl = process.env.NEXT_PUBLIC_URL ?? 'https://brief-sharpener.aiden.services'
     const res = await fetch(`${baseUrl}/api/stats`, { next: { revalidate: 300 } })
     if (!res.ok) throw new Error('Stats fetch failed')
     return res.json() as Promise<StatsResponse>

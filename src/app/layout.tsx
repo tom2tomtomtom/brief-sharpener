@@ -8,7 +8,7 @@ import './globals.css'
 
 validateEnvOnStartup()
 
-const siteUrl = process.env.NEXT_PUBLIC_URL || 'https://aiden.services'
+const siteUrl = process.env.NEXT_PUBLIC_URL || 'https://brief-sharpener.aiden.services'
 
 export const viewport: Viewport = {
   width: 'device-width',

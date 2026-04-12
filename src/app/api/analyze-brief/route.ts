@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { canGenerate, incrementUsage, getUserPlan } from '@/lib/usage'
-import { checkGuestMonthlyLimit, checkRateLimit, incrementGuestMonthlyUsage } from '@/lib/rate-limit'
+import { checkGuestMonthlyLimit, checkRateLimit, incrementGuestMonthlyUsage, checkIpDailyLimit, incrementIpDailyUsage } from '@/lib/rate-limit'
 import { logger } from '@/lib/logger'
 import { getClassicPrinciplesPrompt, scoreAgainstClassics, findRelevantClassics } from '@/lib/classic-briefs'
 import { enrichWithMarketInsights, formatInsightsForPrompt } from '@/lib/market-enrichment'
+import { estimateCost, recordCost, checkBudget, type UserTier } from '@/lib/cost-tracker'
 
 const AIDEN_API_BASE = process.env.AIDEN_API_URL ?? 'https://aiden-api-production.up.railway.app'
 const AIDEN_API_KEY = process.env.AIDEN_API_KEY ?? ''
@@ -249,6 +250,20 @@ export async function POST(request: NextRequest) {
 
   let guestIdentifier: string | null = null
   if (!user) {
+    // Layer 1: Per-IP daily hard cap (can't bypass with cookies/user-agent changes)
+    const ipDaily = await checkIpDailyLimit(ip)
+    if (!ipDaily.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Daily free analysis limit reached for this network. Sign up for more analyses.',
+          code: 'GUEST_DAILY_IP_LIMIT',
+          upgradeUrl: '/login?redirect=/generate',
+        },
+        { status: 429 }
+      )
+    }
+
+    // Layer 2: Per-identity monthly cap (cookie-based, tighter)
     guestIdentity = getGuestIdentity(request)
     const userAgent = normalizeIdentifier(request.headers.get('user-agent'))
     guestIdentifier = `${ip}:${guestIdentity.id}:${userAgent}`
@@ -257,7 +272,7 @@ export async function POST(request: NextRequest) {
     if (!guestQuota.allowed) {
       const response = NextResponse.json(
         {
-          error: 'Free guest limit reached. Sign in to continue with 3 analyses per month.',
+          error: 'You\'ve used your free analysis. Sign up to unlock more.',
           code: 'GUEST_MONTHLY_LIMIT',
           limit: guestQuota.limit,
           upgradeUrl: '/login?redirect=/generate',
@@ -273,6 +288,19 @@ export async function POST(request: NextRequest) {
       })
       return response
     }
+  }
+
+  // Budget check — block if daily/monthly spend exceeded (free tier gets tighter cap)
+  const userTier: UserTier = user
+    ? (await getUserPlan(adminSupabase, user.id) as UserTier)
+    : (guestIdentifier ? 'guest' : 'free')
+
+  const budget = await checkBudget(adminSupabase, userTier)
+  if (!budget.allowed) {
+    return NextResponse.json(
+      { error: budget.reason, code: 'BUDGET_EXCEEDED' },
+      { status: 503 }
+    )
   }
 
   const startTime = Date.now()
@@ -398,15 +426,41 @@ IMPORTANT: Use the section headers exactly as shown above (## STRATEGIC ANALYSIS
       generationId = data?.id ?? null
     } else if (guestIdentifier) {
       await incrementGuestMonthlyUsage(guestIdentifier)
+      await incrementIpDailyUsage(ip)
     }
+
+    const durationMs = Date.now() - startTime
+    const costEstimate = estimateCost(
+      briefText,
+      brainMessage,
+      JSON.stringify(extractResult),
+      brainResponse
+    )
+
+    await recordCost(adminSupabase, {
+      user_tier: userTier,
+      user_id: user?.id ?? null,
+      extract_input_tokens: costEstimate.extractTokens.input,
+      extract_output_tokens: costEstimate.extractTokens.output,
+      chat_input_tokens: costEstimate.chatTokens.input,
+      chat_output_tokens: costEstimate.chatTokens.output,
+      extract_cost_usd: costEstimate.extractCost,
+      chat_cost_usd: costEstimate.chatCost,
+      total_cost_usd: costEstimate.totalCost,
+      brief_length: briefText.length,
+      response_length: brainResponse.length,
+      duration_ms: durationMs,
+    })
 
     logger.info('analysis.complete', {
       userId: user?.id ?? 'guest',
       score,
       gapCount: gaps.length,
       questionCount: clarifyingQuestions.length,
-      durationMs: Date.now() - startTime,
+      durationMs,
       generationId,
+      costUsd: costEstimate.totalCost.toFixed(4),
+      userTier,
     })
 
     const response = NextResponse.json({

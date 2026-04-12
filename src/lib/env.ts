@@ -7,6 +7,7 @@ const requiredVars = [
   'STRIPE_WEBHOOK_SECRET',
   'STRIPE_PRICE_ID_SINGLE',
   'STRIPE_PRICE_ID_PRO',
+  'STRIPE_PRICE_ID_AGENCY',
   'AIDEN_API_KEY',
 ] as const
 

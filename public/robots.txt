@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://aiden.services/sitemap.xml
+Sitemap: https://brief-sharpener.aiden.services/sitemap.xml

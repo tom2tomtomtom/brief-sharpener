@@ -2,7 +2,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 const WINDOW_SECONDS = 60
 const MAX_REQUESTS = 10
-const FREE_GUEST_MONTHLY_LIMIT = 3
+const FREE_GUEST_MONTHLY_LIMIT = 1
 
 function currentMonthKey(): string {
   const now = new Date()
@@ -58,6 +58,52 @@ export async function checkRateLimit(
     .eq('request_count', existing.request_count)
 
   return { allowed: true }
+}
+
+const IP_DAILY_GUEST_LIMIT = 3
+
+/**
+ * Hard cap on unauthenticated analyses per IP per day.
+ * This can't be bypassed by clearing cookies or changing user-agent.
+ */
+export async function checkIpDailyLimit(
+  ip: string
+): Promise<{ allowed: boolean; remaining: number }> {
+  const supabase = createAdminClient()
+  const today = new Date()
+  const dayKey = `ip-day:${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(today.getUTCDate()).padStart(2, '0')}:${ip}`
+
+  const { data: existing } = await supabase
+    .from('rate_limits')
+    .select('request_count')
+    .eq('ip', dayKey)
+    .single()
+
+  const current = existing?.request_count ?? 0
+  if (current >= IP_DAILY_GUEST_LIMIT) {
+    return { allowed: false, remaining: 0 }
+  }
+  return { allowed: true, remaining: IP_DAILY_GUEST_LIMIT - current }
+}
+
+export async function incrementIpDailyUsage(ip: string): Promise<void> {
+  const supabase = createAdminClient()
+  const today = new Date()
+  const dayKey = `ip-day:${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, '0')}-${String(today.getUTCDate()).padStart(2, '0')}:${ip}`
+  const nowIso = today.toISOString()
+
+  const { data: existing } = await supabase
+    .from('rate_limits')
+    .select('request_count')
+    .eq('ip', dayKey)
+    .single()
+
+  const current = existing?.request_count ?? 0
+
+  await supabase.from('rate_limits').upsert(
+    { ip: dayKey, request_count: current + 1, window_start: nowIso },
+    { onConflict: 'ip' }
+  )
 }
 
 export async function checkGuestMonthlyLimit(

@@ -43,7 +43,7 @@ export const PLANS = {
   },
   agency: {
     name: 'Agency',
-    price: 49900, // $499.00/month in cents
+    price: 30900, // $309.00/month in cents
     priceId: process.env.STRIPE_PRICE_ID_AGENCY!,
     mode: 'subscription' as const,
   },

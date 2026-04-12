@@ -154,13 +154,19 @@ function GeneratePageInner() {
 
       if (!response.ok) {
         const err = await parseApiError(response)
+        if (response.status === 503 && err.code === 'BUDGET_EXCEEDED') {
+          throw new Error(err.error || 'Free analysis is temporarily unavailable. Please try again later or sign up for a paid plan.')
+        }
         if (response.status === 429) {
           if (err.code === 'RATE_LIMIT') {
             const retryAfter = Number(response.headers.get('Retry-After') ?? err.retryAfter ?? 60)
             throw new Error(`Too many requests right now. Please wait ${Math.max(1, retryAfter)}s and try again.`)
           }
+          if (err.code === 'GUEST_DAILY_IP_LIMIT') {
+            throw new Error('Daily free analysis limit reached. Sign up to unlock more analyses.')
+          }
           if (err.code === 'GUEST_MONTHLY_LIMIT') {
-            throw new Error('Free guest limit reached. Sign in to continue with 3 analyses per month.')
+            throw new Error('You\'ve used your free analysis. Sign up to unlock more.')
           }
           if (err.code === 'PLAN_LIMIT') {
             throw new Error('You have reached your analysis limit for this plan. Upgrade to continue.')
@@ -219,6 +225,15 @@ function GeneratePageInner() {
               </p>
             </div>
             <div className="flex items-center gap-4">
+              {isAuthenticated === false && (
+                <span className="text-sm text-white-muted">
+                  <span className="font-semibold text-yellow-electric">1 free test</span>
+                  {' · '}
+                  <Link href="/login?redirect=/generate" className="text-orange-accent hover:text-red-hot transition-colors">
+                    Sign up for more
+                  </Link>
+                </span>
+              )}
               {planInfo?.plan === 'free' && (
                 <span className="text-sm text-white-muted">
                   <span className="font-semibold text-white">{Math.max(0, 3 - planInfo.used)}</span>
