@@ -60,7 +60,7 @@ export default function PrivacyPage() {
             <div>
               <h2 className="text-lg font-semibold text-white uppercase mb-3">3. Analytics</h2>
               <p>
-                We use Vercel Analytics to understand how the site is used — page views, country of origin, and
+                We use Google Analytics to understand how the site is used — page views, country of origin, and
                 general usage patterns. This data is aggregated and not linked to individual users. No
                 third-party advertising trackers are used.
               </p>
@@ -100,7 +100,7 @@ export default function PrivacyPage() {
                 <li><strong className="text-white">Supabase:</strong> Authentication and database hosting.</li>
                 <li><strong className="text-white">Stripe:</strong> Payment processing.</li>
                 <li><strong className="text-white">AIDEN AI API:</strong> AI brief analysis. Your brief content is sent to the AIDEN API for extraction, scoring, and strategic analysis.</li>
-                <li><strong className="text-white">Vercel:</strong> Hosting and analytics.</li>
+                <li><strong className="text-white">Railway:</strong> Application hosting.</li>
               </ul>
               <p className="mt-3">Each of these services operates under their own privacy policies.</p>
             </div>

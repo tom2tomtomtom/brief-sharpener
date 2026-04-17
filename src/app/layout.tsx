@@ -1,6 +1,4 @@
 import type { Metadata, Viewport } from 'next'
-import { Analytics } from '@vercel/analytics/react'
-import { SpeedInsights } from '@vercel/speed-insights/next'
 import { validateEnvOnStartup } from '@/lib/env'
 import { GoogleAnalytics } from '@/components/Analytics'
 import Footer from '@/components/Footer'
@@ -66,8 +64,6 @@ export default function RootLayout({
         {children}
         <Footer />
         <GoogleAnalytics />
-        <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   )
