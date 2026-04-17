@@ -112,17 +112,33 @@ function GeneratePageInner() {
 
   useEffect(() => {
     async function checkAuth() {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      setIsAuthenticated(!!user)
-
-      if (user) {
-        const planRes = await fetch('/api/user-plan')
+      try {
+        const planRes = await fetch('/api/user-plan', { cache: 'no-store' })
+        if (planRes.status === 401) {
+          setIsAuthenticated(false)
+          return
+        }
         if (planRes.ok) {
           const planData = await planRes.json()
-          setPlanInfo({ plan: planData.plan as Plan, used: planData.used ?? 0 })
-        } else {
-          setPlanInfo({ plan: 'free', used: 0 })
+          setIsAuthenticated(true)
+          setPlanInfo({
+            plan: planData.plan as Plan,
+            used: planData.lifetimeUsed ?? planData.used ?? 0,
+          })
+          return
+        }
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        setIsAuthenticated(!!user)
+        if (user) setPlanInfo({ plan: 'free', used: 0 })
+      } catch {
+        try {
+          const supabase = createClient()
+          const { data: { user } } = await supabase.auth.getUser()
+          setIsAuthenticated(!!user)
+          if (user) setPlanInfo({ plan: 'free', used: 0 })
+        } catch {
+          setIsAuthenticated(false)
         }
       }
     }
@@ -141,6 +157,10 @@ function GeneratePageInner() {
     setApiError(null)
     setLastFormData(formData)
 
+    const controller = new AbortController()
+    const ANALYZE_TIMEOUT_MS = 180_000
+    const timeoutId = setTimeout(() => controller.abort(), ANALYZE_TIMEOUT_MS)
+
     try {
       const response = await fetch('/api/analyze-brief', {
         method: 'POST',
@@ -151,6 +171,7 @@ function GeneratePageInner() {
           industry: formData.industry,
           briefType: formData.briefType,
         }),
+        signal: controller.signal,
       })
 
       if (!response.ok) {
@@ -192,10 +213,19 @@ function GeneratePageInner() {
         setIsFirstAnalysis(true)
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+      let errorMsg: string
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        errorMsg = 'Analysis timed out. Your brief may be unusually long — try shortening it or splitting it up, then try again.'
+      } else if (err instanceof TypeError && /fetch|network/i.test(err.message)) {
+        errorMsg = 'The connection dropped before we could finish. This usually happens on very long briefs. Try shortening the brief and running it again.'
+      } else {
+        errorMsg = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+      }
       trackEvent({ name: 'analysis_error', error: errorMsg })
       setApiError(errorMsg)
       setStatus('error')
+    } finally {
+      clearTimeout(timeoutId)
     }
   }
 

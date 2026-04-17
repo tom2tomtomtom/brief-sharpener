@@ -482,7 +482,11 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
     <form id="generate-form" onSubmit={handleSubmit} noValidate className="space-y-6">
       {/* API error banner */}
       {error && (
-        <div className="rounded-lg border border-red-hot bg-black-card px-4 py-3 text-sm text-red-hot">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="rounded-lg border border-red-hot bg-black-card px-4 py-3 text-sm text-red-hot"
+        >
           {error}
         </div>
       )}
