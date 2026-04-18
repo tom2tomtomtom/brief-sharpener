@@ -43,7 +43,14 @@ export async function POST(request: NextRequest) {
   } catch {
     return NextResponse.json({ error: 'Bad request' }, { status: 400 })
   }
-  if (typeof body.secret !== 'string' || !constantTimeEquals(body.secret, ADMIN_SECRET)) {
+  // Cap the attempted secret length before we pass it to the constant-time
+  // compare. Without this, an attacker can ship a multi-megabyte "secret"
+  // and push our event loop building the comparison buffer each request.
+  if (
+    typeof body.secret !== 'string' ||
+    body.secret.length > 1024 ||
+    !constantTimeEquals(body.secret, ADMIN_SECRET)
+  ) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

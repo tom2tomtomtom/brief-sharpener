@@ -87,8 +87,22 @@ export async function POST(request: NextRequest) {
 
   const { briefText } = body
 
+  // Reject oversized payloads before the equality check. Without this
+  // cap an attacker can ship a 100MB string that we allocate and compare
+  // on every request, effectively DoSing this endpoint even though the
+  // comparison would ultimately fail.
+  if (
+    typeof briefText !== 'string' ||
+    briefText.length > DEMO_BRIEF_TEXT.length + 100
+  ) {
+    return NextResponse.json(
+      { error: 'This demo endpoint only works with the provided demo brief.' },
+      { status: 403 }
+    )
+  }
+
   // Abuse prevention: only the exact demo brief is accepted
-  if (!briefText || briefText.trim() !== DEMO_BRIEF_TEXT.trim()) {
+  if (briefText.trim() !== DEMO_BRIEF_TEXT.trim()) {
     return NextResponse.json(
       { error: 'This demo endpoint only works with the provided demo brief.' },
       { status: 403 }

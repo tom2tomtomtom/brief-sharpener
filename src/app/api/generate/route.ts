@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getUser } from '@/lib/auth'
 import { checkTokens, deductTokens } from '@/lib/gateway-tokens'
@@ -8,14 +9,20 @@ import { checkRateLimit } from '@/lib/rate-limit'
 
 const client = new Anthropic()
 
-interface GenerateRequest {
-  productName: string
-  productDescription: string
-  targetAudience?: string
-  features?: string[]
-  tone?: 'professional' | 'casual' | 'bold' | 'minimal'
-  template?: string
-}
+// Every field below ends up in the Claude prompt. Without caps, an
+// authenticated user could deduct a single fixed token cost for /generate
+// but still inflate their Claude usage by shipping megabytes of text in
+// productDescription/targetAudience — we'd eat the delta. Hard caps on
+// each string, a small array cap on features, and strict enums for
+// tone/template keep the prompt size predictable.
+const generateSchema = z.object({
+  productName: z.string().trim().min(1).max(200),
+  productDescription: z.string().trim().min(1).max(5000),
+  targetAudience: z.string().trim().max(1000).optional(),
+  features: z.array(z.string().max(500)).max(20).optional(),
+  tone: z.enum(['professional', 'casual', 'bold', 'minimal']).optional(),
+  template: z.string().max(100).optional(),
+})
 
 interface Feature {
   title: string
@@ -85,22 +92,29 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  let body: GenerateRequest
-
+  let raw: unknown
   try {
-    body = await request.json()
+    raw = await request.json()
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { productName, productDescription, targetAudience, features, tone = 'professional', template } = body
-
-  if (!productName?.trim()) {
-    return NextResponse.json({ error: 'productName is required' }, { status: 400 })
+  const parsed = generateSchema.safeParse(raw)
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: 'Invalid request', details: parsed.error.flatten() },
+      { status: 400 }
+    )
   }
-  if (!productDescription?.trim()) {
-    return NextResponse.json({ error: 'productDescription is required' }, { status: 400 })
-  }
+  const body = parsed.data
+  const {
+    productName,
+    productDescription,
+    targetAudience,
+    features,
+    tone = 'professional',
+    template,
+  } = body
 
   const filledFeatures = (features ?? []).filter((f) => f?.trim())
   const tpl = getTemplate(template as TemplateId | undefined)
