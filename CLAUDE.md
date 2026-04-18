@@ -6,11 +6,11 @@ User-facing web app where creatives paste a brief. Brief Sharpener analyses it a
 
 ## 2. Ambition + soul
 
-Brief Sharpener is a critic, not a writer. The senior strategist who holds up a mirror and asks "what is this actually about?" It refuses to let briefs hide behind jargon or false decisiveness. Its soul is honesty bordering on brutal. Its ambition is to rescue briefs from corporate-speak before they poison the creative that follows.
+Brief Sharpener is a critic first, a writer second. The senior strategist who holds up a mirror and asks "what is this actually about?" before offering a sharpened rewrite. It refuses to let briefs hide behind jargon or false decisiveness. Its soul is honesty bordering on brutal. Its ambition is to rescue briefs from corporate-speak before they poison the creative that follows. The optional sharpened rewrite is a benefit, not the point.
 
 ## 3. What makes it different
 
-Versus ChatGPT "write me a brief" prompts: Brief Sharpener does NOT write briefs. It critiques them using a strategic rubric that reflects AIDEN's worldview (clarity, intent, language precision, cliché resistance). Phantom perspectives let you see the brief from different strategic voices. "How would a futurist read this. How would a sceptic."
+Versus ChatGPT "write me a brief" prompts: Brief Sharpener leads with critique, not generation. It scores a brief against an AIDEN strategic rubric (clarity, intent, language precision, cliché resistance) before optionally offering a sharpened rewrite. Phantom perspectives let you see the brief from different strategic voices. "How would a futurist read this. How would a sceptic." The rewrite is available, but users walk away understanding what was broken, not just holding a cleaner draft.
 
 ## 4. Where it lives
 
