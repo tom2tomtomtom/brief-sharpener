@@ -50,8 +50,13 @@ async function callAidenAPI<T>(path: string, body: unknown, timeoutMs = 60000): 
     })
 
     if (!response.ok) {
+      // Log the upstream body server-side, but the thrown error only
+      // carries the path + status — the Brain API has been known to
+      // echo request bodies and internal stack info in 5xxs, which
+      // then would pass through to the browser via err.message below.
       const errorText = await response.text().catch(() => 'Unknown error')
-      throw new Error(`AIDEN API ${path} failed (${response.status}): ${errorText}`)
+      console.error(`[analyze-brief] AIDEN ${path} ${response.status}: ${errorText}`)
+      throw new Error(`AIDEN API ${path} failed (${response.status})`)
     }
 
     return response.json() as Promise<T>
@@ -522,7 +527,11 @@ IMPORTANT: Use the section headers exactly as shown above (## STRATEGIC ANALYSIS
           message = 'Analysis is taking longer than expected. Please try again.'
         } else if (err.message.includes('AIDEN API') || err.message.includes('timed out')) {
           code = 'UPSTREAM_ERROR'
-          message = err.message
+          // Don't pipe err.message through — callAidenAPI used to embed
+          // the full upstream response body, and even the sanitized
+          // version leaks HTTP status + path which is enough to aid
+          // enumeration. The server log above captures the detail.
+          message = 'Brief analysis service is temporarily unavailable. Please try again shortly.'
         }
         send({ type: 'error', error: message, code })
       } finally {

@@ -203,8 +203,13 @@ Return ONLY a raw JSON object with no markdown, no code fences, no commentary â€
       if (error.status === 408 || error.message.toLowerCase().includes('timeout')) {
         return NextResponse.json({ error: 'AI request timed out. Please try again.' }, { status: 504 })
       }
-      return NextResponse.json({ error: `AI API error: ${error.message}` }, { status: 502 })
+      // Anthropic error messages can include the offending request URL,
+      // model name, rate-limit hints, and fragments of system prompts.
+      // Log them, but don't let them out of the process.
+      console.error('[generate] Anthropic API error:', error.status, error.message)
+      return NextResponse.json({ error: 'AI provider error. Please try again.' }, { status: 502 })
     }
+    console.error('[generate] Unhandled error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
