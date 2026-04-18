@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getUser } from '@/lib/auth'
 import { checkTokens, deductTokens } from '@/lib/gateway-tokens'
@@ -11,12 +12,20 @@ import { estimateCost, recordCost, checkBudget, type UserTier } from '@/lib/cost
 const AIDEN_API_BASE = process.env.AIDEN_API_URL ?? 'https://aiden-api-production.up.railway.app'
 const AIDEN_API_KEY = process.env.AIDEN_API_KEY ?? ''
 
-interface AnalyzeBriefRequest {
-  briefText: string
-  brandName?: string
-  industry?: string
-  briefType?: string
-}
+// Single source of truth for request shape + caps. briefText dominates
+// Claude input tokens; brandName/industry/briefType are short metadata
+// fields that still need to be bounded because they also flow into the
+// prompt.
+const AnalyzeBriefSchema = z.object({
+  briefText: z
+    .string()
+    .trim()
+    .min(50, 'Brief is too short. Please provide at least a few sentences for meaningful analysis.')
+    .max(100_000, 'Brief text exceeds maximum length (100,000 characters).'),
+  brandName: z.string().max(200).optional(),
+  industry: z.string().max(200).optional(),
+  briefType: z.string().max(100).optional(),
+})
 
 const GUEST_COOKIE_NAME = 'aiden_guest_id'
 
@@ -228,40 +237,19 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  let body: AnalyzeBriefRequest
-  try {
-    body = await request.json()
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
-  }
-
-  const { briefText, brandName, industry, briefType } = body
-
-  if (!briefText?.trim()) {
-    return NextResponse.json({ error: 'briefText is required' }, { status: 400 })
-  }
-
-  if (briefText.trim().length < 50) {
-    return NextResponse.json({ error: 'Brief is too short. Please provide at least a few sentences for meaningful analysis.' }, { status: 400 })
-  }
-
-  if (briefText.length > 100000) {
-    return NextResponse.json({ error: 'Brief text exceeds maximum length (100,000 characters).' }, { status: 400 })
-  }
-
-  // brandName / industry / briefType flow straight into the Brain prompt.
-  // Without caps, an attacker can wedge huge strings here — they don't hit
-  // the briefText cap but still inflate Claude input tokens.
-  if (
-    (typeof brandName === 'string' && brandName.length > 200) ||
-    (typeof industry === 'string' && industry.length > 200) ||
-    (typeof briefType === 'string' && briefType.length > 100)
-  ) {
+  const rawBody = await request.json().catch(() => null)
+  const parsed = AnalyzeBriefSchema.safeParse(rawBody)
+  if (!parsed.success) {
+    // Use the first zod message for the client so "too short" /
+    // "too long" stay human-readable without falling back to
+    // "Invalid JSON body".
+    const first = parsed.error.issues[0]
     return NextResponse.json(
-      { error: 'brandName / industry / briefType exceed allowed length' },
-      { status: 400 }
+      { error: first?.message ?? 'Invalid request body' },
+      { status: 400 },
     )
   }
+  const { briefText, brandName, industry, briefType } = parsed.data
 
   let guestIdentifier: string | null = null
   if (!user) {
