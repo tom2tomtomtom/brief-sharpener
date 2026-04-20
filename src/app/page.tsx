@@ -191,7 +191,7 @@ export default async function MarketingPage() {
               See pricing
             </Link>
           </div>
-          <p className="mt-4 text-sm text-white-dim">No credit card required · 3 free analyses per month</p>
+          <p className="mt-4 text-sm text-white-dim">No credit card required · 200 free tokens on signup (about 10 analyses)</p>
         </div>
       </section>
 
@@ -536,7 +536,7 @@ export default async function MarketingPage() {
               Sign in
             </Link>
           </div>
-          <p className="mt-4 text-sm text-white-dim">No credit card required · 3 free analyses per month</p>
+          <p className="mt-4 text-sm text-white-dim">No credit card required · 200 free tokens on signup (about 10 analyses)</p>
         </div>
       </section>
 

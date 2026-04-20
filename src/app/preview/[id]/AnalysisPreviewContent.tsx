@@ -178,7 +178,7 @@ export default function AnalysisPreviewContent({ data, previewUrl }: AnalysisPre
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </Link>
-          <p className="mt-3 text-xs text-white-muted">3 free analyses per month · No credit card required</p>
+          <p className="mt-3 text-xs text-white-muted">200 free tokens on signup · No credit card required</p>
         </div>
       </main>
 
