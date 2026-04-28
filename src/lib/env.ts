@@ -15,7 +15,7 @@ type OptionalVars = (typeof optionalVars)[number]
 type Env = Record<RequiredVars, string> & Partial<Record<OptionalVars, string>>
 
 // Canonical AIDEN hub Supabase project. Fail loudly if NEXT_PUBLIC_SUPABASE_URL
-// points anywhere else — prevents silent misrouting to a legacy/decommissioned
+// points anywhere else. This prevents silent misrouting to a legacy/decommissioned
 // project (ref: 2026-04-19 Pitch incident, where hardcoded fallbacks
 // `|| 'https://ahenbjcauqpzsdcxeyfa.supabase.co'` silently redirected the
 // backend whenever Railway env wasn't threaded through).

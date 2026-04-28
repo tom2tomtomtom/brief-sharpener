@@ -80,7 +80,7 @@ export default function GuidePage() {
             How to Write a Better Creative Brief
           </h1>
           <p className="text-xl text-white-muted leading-relaxed">
-            A vague brief produces vague creative. The best briefs are not documents — they are
+            A vague brief produces vague creative. The best briefs are not documents. They are
             decisions. This guide covers everything you need to write briefs that actually inspire
             great work.
           </p>
@@ -104,7 +104,7 @@ export default function GuidePage() {
             <div className="space-y-4 text-white-muted leading-relaxed">
               <p>
                 A great brief is not a long one. It is a sharp one. The purpose of a creative brief
-                is not to document everything you know — it is to isolate the single most important
+                is not to document everything you know. It is to isolate the single most important
                 thing a piece of work needs to do, and give the creative team everything they need
                 to do it well.
               </p>
@@ -126,7 +126,7 @@ export default function GuidePage() {
               </h3>
               <p>
                 The brief is a document. The briefing is a conversation. Both matter. Many teams
-                write a strong brief but skip the briefing — the live session where creative
+                write a strong brief but skip the briefing: the live session where creative
                 teams can ask questions, push back, and internalise the challenge. Always do both.
               </p>
               <h3 className="text-xl font-semibold text-white uppercase mt-8 mb-3">
@@ -178,7 +178,7 @@ export default function GuidePage() {
                 wanting to&rdquo; gives them something to work with.
               </p>
               <p className="text-white-dim text-sm mt-3 italic">
-                Tip: Describe the audience at the moment they will encounter the work — what are
+                Tip: Describe the audience at the moment they will encounter the work. What are
                 they thinking, feeling, or doing right then?
               </p>
             </div>
@@ -201,7 +201,7 @@ export default function GuidePage() {
             <div className="border-l-4 border-red-hot pl-6 mb-10">
               <h3 className="text-xl font-bold text-white uppercase mb-2">4. Tone</h3>
               <p className="text-white-muted leading-relaxed">
-                How should this work feel? Tone is not just about language — it encompasses visual
+                How should this work feel? Tone is not just about language. It encompasses visual
                 register, emotional temperature, and brand personality. Define it by choosing three
                 adjectives, then sharpen each one: not just &ldquo;warm&rdquo; but &ldquo;the warmth of a trusted
                 older sibling, not a greeting card.&rdquo;
@@ -217,8 +217,8 @@ export default function GuidePage() {
               <h3 className="text-xl font-bold text-white uppercase mb-2">5. Budget</h3>
               <p className="text-white-muted leading-relaxed">
                 What is the production budget? Creatives need to know what world they are playing in.
-                A great idea that costs five times the budget is not a great idea for this brief —
-                it is a waste of everyone&apos;s time. Sharing the budget does not weaken your negotiating
+                A great idea that costs five times the budget is not a great idea for this brief.
+                It is a waste of everyone&apos;s time. Sharing the budget does not weaken your negotiating
                 position; it gives the team the constraint they need to be resourceful.
               </p>
               <p className="text-white-dim text-sm mt-3 italic">
@@ -237,7 +237,7 @@ export default function GuidePage() {
                 is just a deadline.
               </p>
               <p className="text-white-dim text-sm mt-3 italic">
-                Tip: Work backwards from the live date. If the timeline is impossible, say so now —
+                Tip: Work backwards from the live date. If the timeline is impossible, say so now,
                 not three weeks in.
               </p>
             </div>
@@ -248,7 +248,7 @@ export default function GuidePage() {
               <p className="text-white-muted leading-relaxed">
                 How will you know if the work succeeded? Define the metrics upfront. These might be
                 brand tracking scores, click-through rates, share of voice, sales uplift, or
-                qualitative research. Whatever they are, agree them before the work starts — not
+                qualitative research. Whatever they are, agree them before the work starts, not
                 after, when everyone is post-rationalising.
               </p>
               <p className="text-white-dim text-sm mt-3 italic">
@@ -263,7 +263,7 @@ export default function GuidePage() {
               <p className="text-white-muted leading-relaxed">
                 What does the creative team need to know about the brand to do this job? This
                 includes: brand positioning, visual identity guidelines, tone of voice principles,
-                key mandatories (logo usage, legal disclaimers), and — critically — what the brand
+                key mandatories (logo usage, legal disclaimers), and critically, what the brand
                 has done before so the team can build on or deliberately depart from it.
               </p>
               <p className="text-white-dim text-sm mt-3 italic">
@@ -281,7 +281,7 @@ export default function GuidePage() {
               3. Common Brief Mistakes (and How to Fix Them)
             </h2>
             <p className="text-white-muted leading-relaxed mb-8">
-              Most brief problems are predictable. Here are the most common mistakes — and what
+              Most brief problems are predictable. Here are the most common mistakes, and what
               good looks like instead.
             </p>
 
@@ -335,7 +335,7 @@ export default function GuidePage() {
                   <p className="text-xs font-bold text-orange-accent uppercase tracking-wide mb-2">Good</p>
                   <p className="text-sm text-white-muted leading-relaxed">
                     &ldquo;Families underestimate how much this product would change their evenings.
-                    Solve that. Medium is flexible — TV, digital, experiential — whatever gets
+                    Solve that. Medium is flexible (TV, digital, experiential), whatever gets
                     there best.&rdquo;
                   </p>
                 </div>
@@ -362,7 +362,7 @@ export default function GuidePage() {
                   <p className="text-xs font-bold text-orange-accent uppercase tracking-wide mb-2">Good</p>
                   <p className="text-sm text-white-muted leading-relaxed">
                     &ldquo;People who care deeply about their home but feel guilty spending money on
-                    it for themselves. They&apos;d justify it easily as a gift — but not for themselves.&rdquo;
+                    it for themselves. They&apos;d justify it easily as a gift, but not for themselves.&rdquo;
                   </p>
                 </div>
               </div>
@@ -374,8 +374,8 @@ export default function GuidePage() {
                 Mistake 4: No single-minded proposition
               </h3>
               <p className="text-white-muted mb-5">
-                The proposition — the one thing you want someone to think, feel, or believe after
-                seeing the work — is missing or buried in a list of messages. Without it, creative
+                The proposition (the one thing you want someone to think, feel, or believe after
+                seeing the work) is missing or buried in a list of messages. Without it, creative
                 teams cannot make decisions.
               </p>
               <div className="grid sm:grid-cols-2 gap-4">
@@ -403,7 +403,7 @@ export default function GuidePage() {
               </h3>
               <p className="text-white-muted mb-5">
                 Logo placement rules, legal disclaimers, product shots, and brand lockups that
-                must appear are often omitted from the brief, then surface at review — causing
+                must appear are often omitted from the brief, then surface at review, causing
                 expensive revisions.
               </p>
               <div className="grid sm:grid-cols-2 gap-4">
@@ -431,15 +431,15 @@ export default function GuidePage() {
           <section className="rounded-2xl bg-black-card border border-border-subtle text-white px-8 py-12 text-center">
             <h2 className="text-3xl font-bold uppercase mb-4">Ready to sharpen your brief?</h2>
             <p className="text-white-muted text-lg mb-8 max-w-xl mx-auto">
-              AIDEN analyses your brief against 8 essential creative criteria — gaps in strategy,
-              missing audience insight, weak propositions, and more — and sends back a smarter
+              AIDEN analyses your brief against 8 essential creative criteria (gaps in strategy,
+              missing audience insight, weak propositions, and more) and sends back a smarter
               version in seconds.
             </p>
             <Link
               href="/generate"
               className="inline-block rounded-lg bg-red-hot px-8 py-4 text-base font-semibold text-white hover:opacity-90 transition-opacity"
             >
-              Check your brief with AIDEN — it&apos;s free
+              Check your brief with AIDEN, it&apos;s free
             </Link>
             <p className="text-white-dim text-sm mt-4">No account needed to start.</p>
           </section>

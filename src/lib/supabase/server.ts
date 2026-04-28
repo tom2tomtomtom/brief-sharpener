@@ -18,7 +18,7 @@ export function createClient() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // setAll called from a Server Component — cookies can only be
+            // setAll called from a Server Component. Cookies can only be
             // set in middleware or route handlers; ignore in SC context
           }
         },

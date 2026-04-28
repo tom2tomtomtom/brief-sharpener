@@ -129,7 +129,7 @@ export default async function Image({ params }: Props) {
           {/* Tagline */}
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingLeft: '16px', maxWidth: '380px' }}>
             <div style={{ fontSize: '24px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
-              AI-powered brief analysis — sharpen your brief before the work begins.
+              AI-powered brief analysis. Sharpen your brief before the work begins.
             </div>
           </div>
         </div>

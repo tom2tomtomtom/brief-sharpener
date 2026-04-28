@@ -154,7 +154,7 @@ export default async function DashboardPage() {
           </div>
           <div className="border border-border-subtle bg-black-card p-5">
             <p className="text-xs font-medium text-white-dim uppercase tracking-wide">Avg score</p>
-            <p className="mt-1 text-2xl font-bold text-white">{avgScore !== null ? `${avgScore}/100` : '—'}</p>
+            <p className="mt-1 text-2xl font-bold text-white">{avgScore !== null ? `${avgScore}/100` : 'N/A'}</p>
           </div>
         </div>
 

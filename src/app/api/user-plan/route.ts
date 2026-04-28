@@ -23,7 +23,7 @@ export async function GET() {
     balance: balance.balance,
     lifetimePurchased: balance.lifetime_purchased,
     lifetimeUsed: balance.lifetime_used,
-    // Back-compat alias — some clients read `used` directly
+    // Back-compat alias: some clients read `used` directly
     used: balance.lifetime_used,
   })
 }

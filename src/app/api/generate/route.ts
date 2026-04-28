@@ -32,7 +32,7 @@ function extractJsonSubstring(text: string): string | null {
 // Every field below ends up in the Claude prompt. Without caps, an
 // authenticated user could deduct a single fixed token cost for /generate
 // but still inflate their Claude usage by shipping megabytes of text in
-// productDescription/targetAudience — we'd eat the delta. Hard caps on
+// productDescription/targetAudience; we'd eat the delta. Hard caps on
 // each string, a small array cap on features, and strict enums for
 // tone/template keep the prompt size predictable.
 const generateSchema = z.object({
@@ -151,18 +151,18 @@ ${filledFeatures.length > 0 ? `- Key features to highlight: ${filledFeatures.joi
 - Tone: ${tone}
 
 COPYWRITING RULES
-1. HEADLINE VARIANTS — Generate exactly 3 distinct headline variants. Each variant has a headline (under 10 words using the PAS framework) and a subheadline (1–2 sentences, under 25 words). Make each variant meaningfully different: vary the angle, emotion, or framing. Also provide a recommended_index (0, 1, or 2) for the strongest variant.
-2. FEATURES — Write exactly 4 features. Each feature title should name the outcome, not the tool (e.g. "Ship faster" not "Auto-deploy"). Each description explains the specific mechanism that delivers that benefit in one sentence. No generic superlatives.
-3. HOW IT WORKS — Explain the product in exactly 3 sequential steps. Each step has a short action title (3–5 words) and a one-sentence description of what happens and why it matters. Steps must feel logical and effortless.
-4. FAQ — Write 3–4 FAQ items that address the most common objections or points of confusion a buyer would have before purchasing. Answers should be reassuring and specific.
-5. CTA — A punchy call-to-action button label (2–5 words). Action verb first.
-6. SOCIAL PROOF — Write a specific, credible social proof statement. Include a plausible but realistic number of users, companies, or a measurable result (e.g. "Trusted by 1,200+ SaaS teams to cut onboarding time by 40%"). Make it feel earned, not invented.
+1. HEADLINE VARIANTS: Generate exactly 3 distinct headline variants. Each variant has a headline (under 10 words using the PAS framework) and a subheadline (1-2 sentences, under 25 words). Make each variant meaningfully different: vary the angle, emotion, or framing. Also provide a recommended_index (0, 1, or 2) for the strongest variant.
+2. FEATURES: Write exactly 4 features. Each feature title should name the outcome, not the tool (e.g. "Ship faster" not "Auto-deploy"). Each description explains the specific mechanism that delivers that benefit in one sentence. No generic superlatives.
+3. HOW IT WORKS: Explain the product in exactly 3 sequential steps. Each step has a short action title (3-5 words) and a one-sentence description of what happens and why it matters. Steps must feel logical and effortless.
+4. FAQ: Write 3-4 FAQ items that address the most common objections or points of confusion a buyer would have before purchasing. Answers should be reassuring and specific.
+5. CTA: A punchy call-to-action button label (2-5 words). Action verb first.
+6. SOCIAL PROOF: Write a specific, credible social proof statement. Include a plausible but realistic number of users, companies, or a measurable result (e.g. "Trusted by 1,200+ SaaS teams to cut onboarding time by 40%"). Make it feel earned, not invented.
 
-Return ONLY a raw JSON object with no markdown, no code fences, no commentary — just the JSON:
+Return ONLY a raw JSON object with no markdown, no code fences, no commentary. Just the JSON:
 {
   "headline_variants": [
     { "headline": "under 10 words using PAS framework", "subheadline": "1-2 sentences agitating the problem or amplifying the promise" },
-    { "headline": "different angle — outcome-focused or curiosity-driven", "subheadline": "1-2 sentences with a different emotional hook" },
+    { "headline": "different angle, outcome-focused or curiosity-driven", "subheadline": "1-2 sentences with a different emotional hook" },
     { "headline": "bold claim or transformation-focused headline", "subheadline": "1-2 sentences amplifying the transformation or result" }
   ],
   "recommended_index": 0,

@@ -71,12 +71,12 @@ const steps = [
   {
     number: '01',
     title: 'Paste your brief',
-    description: 'Drop in your campaign brief, creative brief, or strategy document. Any format works — rough notes to polished docs.',
+    description: 'Drop in your campaign brief, creative brief, or strategy document. Any format works, rough notes to polished docs.',
   },
   {
     number: '02',
     title: 'AIDEN interrogates it',
-    description: 'Expert creative perspectives — strategists, planners, and creatives — stress-test every line. They find what you missed and why it matters.',
+    description: 'Expert creative perspectives (strategists, planners, and creatives) stress-test every line. They find what you missed and why it matters.',
   },
   {
     number: '03',
@@ -102,7 +102,7 @@ const strongBrief = {
   title: 'AIDEN-sharpened brief',
   content: [
     { label: 'Objective', value: 'Drive 12% uplift in trial sign-ups among lapsed users aged 25–34 within 6 weeks of launch.' },
-    { label: 'Audience', value: 'Lapsed users (12–18 months inactive) who tried the product but never converted — they need a reason to believe again, not a reason to discover.' },
+    { label: 'Audience', value: 'Lapsed users (12-18 months inactive) who tried the product but never converted. They need a reason to believe again, not a reason to discover.' },
     { label: 'Key message', value: 'This is not the product you left. Here\'s the one thing that\'s actually different now.' },
     { label: 'Deliverables', value: '3× paid social (Meta/TikTok), 1× 30s hero film, 6× retargeting banners. All laddering to a dedicated landing page.' },
     { label: 'Tone', value: 'Direct and honest. No hype. Like a friend who knows they let you down and is showing you why it\'s worth another chance.' },
@@ -175,14 +175,14 @@ export default async function MarketingPage() {
             AIDEN will show you&nbsp;why.
           </h1>
           <p className="mt-6 text-xl text-white-muted max-w-2xl mx-auto leading-relaxed">
-            Brief Intelligence interrogates your brief the way the best strategists do — relentlessly, specifically, and without mercy. Find every gap before it becomes a missed opportunity.
+            Brief Intelligence interrogates your brief the way the best strategists do: relentlessly, specifically, and without mercy. Find every gap before it becomes a missed opportunity.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/generate"
               className="w-full sm:w-auto bg-red-hot px-8 py-4 text-base font-semibold text-white shadow-lg hover:bg-red-dim transition-colors"
             >
-              Interrogate your brief — free
+              Interrogate your brief, free
             </Link>
             <Link
               href="/pricing"
@@ -201,7 +201,7 @@ export default async function MarketingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-border-subtle border-2 border-border-subtle">
             <div className="bg-black-card px-8 py-10 text-center">
               <p className="text-4xl font-bold text-red-hot">
-                {stats.briefCount > 0 ? stats.briefCount.toLocaleString() : '—'}
+                {stats.briefCount > 0 ? stats.briefCount.toLocaleString() : '0'}
               </p>
               <p className="mt-2 text-xs text-white-dim uppercase tracking-wide">Briefs Analysed</p>
             </div>
@@ -211,7 +211,7 @@ export default async function MarketingPage() {
             </div>
             <div className="bg-black-card px-8 py-10 text-center">
               <p className="text-4xl font-bold text-red-hot">
-                {stats.gapCount > 0 ? stats.gapCount.toLocaleString() : '—'}
+                {stats.gapCount > 0 ? stats.gapCount.toLocaleString() : '0'}
               </p>
               <p className="mt-2 text-xs text-white-dim uppercase tracking-wide">Gaps Identified</p>
             </div>
@@ -346,7 +346,7 @@ export default async function MarketingPage() {
               href="/generate"
               className="inline-block bg-red-hot px-8 py-3.5 text-sm font-semibold text-white shadow-lg hover:bg-red-dim transition-colors"
             >
-              Interrogate your brief — free
+              Interrogate your brief, free
             </Link>
             <p className="mt-3 text-xs text-white-dim">No credit card required</p>
           </div>
@@ -527,7 +527,7 @@ export default async function MarketingPage() {
               href="/generate"
               className="w-full sm:w-auto bg-red-hot px-8 py-4 text-base font-semibold text-white shadow-lg hover:bg-red-dim transition-colors"
             >
-              Interrogate your brief — free
+              Interrogate your brief, free
             </Link>
             <Link
               href="/login"

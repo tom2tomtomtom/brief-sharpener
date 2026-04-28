@@ -17,7 +17,7 @@ function LoginForm() {
 
   useEffect(() => {
     if (searchParams.get('error') === 'auth') {
-      setErrorMessage('Sign-in failed. The link may have expired — please try again.')
+      setErrorMessage('Sign-in failed. The link may have expired. Please try again.')
       setStatus('error')
     }
   }, [searchParams])

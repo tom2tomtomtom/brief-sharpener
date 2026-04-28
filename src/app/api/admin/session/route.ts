@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Rate limit login attempts per IP. Without this, an attacker can
-  // brute force ADMIN_API_SECRET — nothing else gated the attempt rate,
+  // brute force ADMIN_API_SECRET. Nothing else gated the attempt rate,
   // and the previous body.secret !== ADMIN_SECRET compare was also
   // timing-leaky on top of that.
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'

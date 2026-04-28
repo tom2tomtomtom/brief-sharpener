@@ -13,7 +13,7 @@ const AIDEN_API_BASE = process.env.AIDEN_API_URL ?? 'https://aiden-api-productio
 const AIDEN_API_KEY = process.env.AIDEN_API_KEY ?? ''
 
 // Brain sometimes restates the same rubric section (e.g. "Cultural Ambition
-// (25%)") twice in one response — once as a scorecard entry and again as a
+// (25%)") twice in one response: once as a scorecard entry and again as a
 // narrative paragraph. This deduplicates sections that share an identical
 // heading line (case-insensitive, whitespace-normalised), keeping the first
 // occurrence. Headings matched: # ## ### at start of line.
@@ -89,7 +89,7 @@ async function callAidenAPI<T>(path: string, body: unknown, timeoutMs = 60000): 
 
     if (!response.ok) {
       // Log the upstream body server-side, but the thrown error only
-      // carries the path + status — the Brain API has been known to
+      // carries the path + status. The Brain API has been known to
       // echo request bodies and internal stack info in 5xxs, which
       // then would pass through to the browser via err.message below.
       const errorText = await response.text().catch(() => 'Unknown error')
@@ -144,10 +144,10 @@ interface DimensionScore {
 function scoreField(text: string | null): { score: number; status: DimensionScore['status']; evidence: string } {
   if (text === null) return { score: 0, status: 'missing', evidence: 'Not found in brief' }
   const words = wordCount(text)
-  if (words < 3) return { score: 3, status: 'thin', evidence: `Only ${words} word${words === 1 ? '' : 's'} — needs real detail` }
-  if (words < 10) return { score: 3, status: 'thin', evidence: `${words} words — present but underspecified` }
-  if (words < 30) return { score: 6, status: 'adequate', evidence: `${words} words — covers basics` }
-  return { score: 10, status: 'strong', evidence: `${words} words — well defined` }
+  if (words < 3) return { score: 3, status: 'thin', evidence: `Only ${words} word${words === 1 ? '' : 's'}, needs real detail` }
+  if (words < 10) return { score: 3, status: 'thin', evidence: `${words} words, present but underspecified` }
+  if (words < 30) return { score: 6, status: 'adequate', evidence: `${words} words, covers basics` }
+  return { score: 10, status: 'strong', evidence: `${words} words, well defined` }
 }
 
 interface ScoreBreakdown {
@@ -197,15 +197,15 @@ function generateClarifyingQuestions(gaps: string[], extractedBrief: Record<stri
   const gapMap: Record<string, string> = {
     'objective': 'What specific business outcome should this campaign achieve, and how will you measure it?',
     'goal': 'What specific business outcome should this campaign achieve, and how will you measure it?',
-    'target audience': 'Who exactly are you trying to reach — what defines them beyond demographics (behaviours, mindset, tensions)?',
-    'audience': 'Who exactly are you trying to reach — what defines them beyond demographics (behaviours, mindset, tensions)?',
+    'target audience': 'Who exactly are you trying to reach? What defines them beyond demographics (behaviours, mindset, tensions)?',
+    'audience': 'Who exactly are you trying to reach? What defines them beyond demographics (behaviours, mindset, tensions)?',
     'deliverable': 'What specific assets do you need (formats, dimensions, quantities)?',
     'budget': 'What is the production budget range? Even "high / medium / low" helps scope creative ambition.',
-    'timeline': 'What are the key milestones — brief date, creative review, final approval, live date?',
+    'timeline': 'What are the key milestones: brief date, creative review, final approval, live date?',
     'kpi': 'How will you know this worked? What are the primary and secondary success metrics?',
     'metric': 'How will you know this worked? What are the primary and secondary success metrics?',
     'tone': 'Describe the tone in 3 adjectives and one contrast ("X but never Y").',
-    'brand': 'What brand context should creatives know — positioning, recent campaigns, things to avoid?',
+    'brand': 'What brand context should creatives know? Include positioning, recent campaigns, and things to avoid.',
   }
 
   for (const gap of gaps) {
@@ -322,7 +322,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Budget check — block if daily/monthly spend exceeded (free tier gets tighter cap)
+  // Budget check: block if daily/monthly spend exceeded (free tier gets tighter cap)
   // Authed users get 'pro' tier for AI budget caps; real plan tier tracked in Gateway.
   const userTier: UserTier = user
     ? 'pro'
@@ -347,7 +347,7 @@ export async function POST(request: NextRequest) {
         try {
           controller.enqueue(encoder.encode(JSON.stringify(obj) + '\n'))
         } catch {
-          // swallow — stream may have been cancelled by the client
+          // swallow: stream may have been cancelled by the client
         }
       }
       const closeStream = () => {
@@ -360,7 +360,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Heartbeat every 8s — keeps Railway/Cloudflare idle timers from dropping
+      // Heartbeat every 8s: keeps Railway/Cloudflare idle timers from dropping
       // the long Opus call. 8s is well under any typical 30–60s proxy idle cutoff.
       const heartbeat = setInterval(() => {
         send({ type: 'heartbeat', ts: Date.now() })
@@ -394,7 +394,7 @@ export async function POST(request: NextRequest) {
 
         const benchmarkContext = classicBenchmarks.length > 0
           ? `\nBRIEF BENCHMARKS (reference these when making your analysis richer):
-${classicBenchmarks.map(b => `• ${b.brand} "${b.campaign}" (${b.year}) — Proposition: "${b.singleMindedProposition}" — Human truth: "${b.humanTruth}" — Why it worked: ${b.whyItWorked}`).join('\n')}`
+${classicBenchmarks.map(b => `• ${b.brand} "${b.campaign}" (${b.year}) | Proposition: "${b.singleMindedProposition}" | Human truth: "${b.humanTruth}" | Why it worked: ${b.whyItWorked}`).join('\n')}`
           : ''
 
         send({ type: 'stage', stage: 'scoring', message: `Scored ${score}/100 · ${gaps.length} gap${gaps.length === 1 ? '' : 's'} flagged` })
@@ -423,7 +423,7 @@ Please provide two things:
 
 ## STRATEGIC ANALYSIS & RECOMMENDATIONS
 
-Give me your honest creative director take on this brief — informed by the strategic standards above. Judge it against each framework: Does it have a genuine human truth? A research-led proposition? A creative tension worth exploiting? Does it address how the work will break through indifference? Be specific about which standards it meets and which it doesn't.
+Give me your honest creative director take on this brief, informed by the strategic standards above. Judge it against each framework: Does it have a genuine human truth? A research-led proposition? A creative tension worth exploiting? Does it address how the work will break through indifference? Be specific about which standards it meets and which it doesn't.
 
 Also cite any relevant market intelligence where it strengthens your point. If benchmark data suggests the brief is overlooking a channel or audience reality, say so.
 
@@ -515,7 +515,7 @@ IMPORTANT: Use the section headers exactly as shown above (## STRATEGIC ANALYSIS
           logger.warn('analysis.unauth_served', {
             ip,
             guestIdentifier,
-            reason: 'no authenticated user — served as guest',
+            reason: 'no authenticated user, served as guest',
           })
         }
 
@@ -584,7 +584,7 @@ IMPORTANT: Use the section headers exactly as shown above (## STRATEGIC ANALYSIS
           message = 'Analysis is taking longer than expected. Please try again.'
         } else if (err.message.includes('AIDEN API') || err.message.includes('timed out')) {
           code = 'UPSTREAM_ERROR'
-          // Don't pipe err.message through — callAidenAPI used to embed
+          // Don't pipe err.message through. callAidenAPI used to embed
           // the full upstream response body, and even the sanitized
           // version leaks HTTP status + path which is enough to aid
           // enumeration. The server log above captures the detail.
@@ -597,7 +597,7 @@ IMPORTANT: Use the section headers exactly as shown above (## STRATEGIC ANALYSIS
       }
     },
     cancel() {
-      // Client disconnected — nothing to clean up since the interval is
+      // Client disconnected. Nothing to clean up since the interval is
       // already cleared in the finally block above once start() unwinds.
     },
   })

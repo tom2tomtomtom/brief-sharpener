@@ -8,7 +8,7 @@ function getResend(): Resend | null {
   return new Resend(key)
 }
 
-// Welcome email is exported for future use (e.g. auth callback on first login) — checklist is sent from /api/subscribe.
+// Welcome email is exported for future use (e.g. auth callback on first login). Checklist is sent from /api/subscribe.
 
 export async function sendWelcomeEmail(to: string) {
   const resend = getResend()
@@ -33,7 +33,7 @@ export async function sendWelcomeEmail(to: string) {
             Go to Dashboard
           </a>
           <p style="font-size: 14px; color: #888; margin-top: 32px;">
-            Questions? Reply to this email — we read everything.
+            Questions? Reply to this email. We read everything.
           </p>
         </div>
       `,
@@ -59,20 +59,20 @@ export async function sendChecklistEmail(to: string) {
             Here are the 7 strategic frameworks Brief Sharpener evaluates every brief against:
           </p>
           <ol style="font-size: 15px; color: #333; line-height: 2;">
-            <li><strong>Single-Minded Proposition</strong> — One clear, compelling idea</li>
-            <li><strong>Human Truth</strong> — A genuine human insight</li>
-            <li><strong>Tension</strong> — A clear creative tension to resolve</li>
-            <li><strong>Desired Response</strong> — What the audience should think, feel, do</li>
-            <li><strong>Measurability</strong> — Concrete success metrics</li>
-            <li><strong>Creative Springboard</strong> — Room for big creative ideas</li>
-            <li><strong>Strategic Alignment</strong> — Connected to business objectives</li>
+            <li><strong>Single-Minded Proposition</strong>: One clear, compelling idea</li>
+            <li><strong>Human Truth</strong>: A genuine human insight</li>
+            <li><strong>Tension</strong>: A clear creative tension to resolve</li>
+            <li><strong>Desired Response</strong>: What the audience should think, feel, do</li>
+            <li><strong>Measurability</strong>: Concrete success metrics</li>
+            <li><strong>Creative Springboard</strong>: Room for big creative ideas</li>
+            <li><strong>Strategic Alignment</strong>: Connected to business objectives</li>
           </ol>
           <a href="https://brief-sharpener.aiden.services/generate" 
              style="display: inline-block; background: #ef4444; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; margin: 16px 0;">
             Analyse a Brief Now
           </a>
           <p style="font-size: 14px; color: #888; margin-top: 32px;">
-            Questions? Reply to this email — we read everything.
+            Questions? Reply to this email. We read everything.
           </p>
         </div>
       `,

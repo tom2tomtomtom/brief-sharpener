@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   // Per-IP rate limit. This endpoint (a) upserts to a public `leads` table
   // and (b) fires a transactional email via Resend for each call. Without
   // a limit, any attacker can flood arbitrary emails into our DB AND have
-  // us send checklist PDFs to them — a classic email-bombing / reputation
+  // us send checklist PDFs to them, a classic email-bombing / reputation
   // damage vector that also burns our Resend quota.
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
   const { allowed, retryAfter } = await checkRateLimit(`subscribe:${ip}`)

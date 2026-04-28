@@ -43,7 +43,7 @@ export default function TryDemoSection() {
     setLoading(true)
     setError(null)
 
-    // 90s client timeout — matches server-side demo route guard. Demo normally
+    // 90s client timeout: matches server-side demo route guard. Demo normally
     // finishes in 20–40s; this bails out if the Brain API is hung.
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 90_000)
@@ -92,10 +92,10 @@ export default function TryDemoSection() {
             Live demo
           </span>
           <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Try it now — no signup required
+            Try it now, no signup required
           </h2>
           <p className="mt-4 text-lg text-white-muted max-w-xl mx-auto">
-            See AIDEN interrogate a real brief in seconds. We&apos;ve pre-loaded a typical campaign brief — the kind that gets sent every day.
+            See AIDEN interrogate a real brief in seconds. We&apos;ve pre-loaded a typical campaign brief, the kind that gets sent every day.
           </p>
         </div>
 
@@ -139,7 +139,7 @@ export default function TryDemoSection() {
             ) : result ? (
               'Analysis complete'
             ) : (
-              "Try demo — see AIDEN's analysis"
+              "Try demo: see AIDEN's analysis"
             )}
           </button>
         </div>
@@ -197,7 +197,7 @@ export default function TryDemoSection() {
         {/* Results */}
         {result && (
           <div className="space-y-5">
-            {/* Score — visible */}
+            {/* Score: visible */}
             <div className="rounded-2xl border border-border-subtle bg-black-card p-6 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-wide text-white-dim mb-4">Brief quality score</p>
               <div className="flex items-center gap-4">
@@ -215,20 +215,20 @@ export default function TryDemoSection() {
                 })()}
               </div>
               <p className="mt-3 text-sm text-white-muted">
-                Scored across 7 strategic frameworks — the same lenses senior strategists use to stress-test a brief before kickoff.
+                Scored across 7 strategic frameworks, the same lenses senior strategists use to stress-test a brief before kickoff.
               </p>
             </div>
 
-            {/* Gaps — visible */}
+            {/* Gaps: visible */}
             <div className="rounded-2xl border border-border-subtle bg-black-card p-6 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-wide text-white-dim mb-4">
-                Gaps identified —{' '}
+                Gaps identified:{' '}
                 <span className="text-red-hot">
                   {result.gaps.length} issue{result.gaps.length !== 1 ? 's' : ''} found
                 </span>
               </p>
               {result.gaps.length === 0 ? (
-                <p className="text-sm font-medium text-white-muted">No gaps found — your brief covers all key areas.</p>
+                <p className="text-sm font-medium text-white-muted">No gaps found. Your brief covers all key areas.</p>
               ) : (
                 <ul className="space-y-2.5">
                   {result.gaps.map((gap) => (
@@ -249,7 +249,7 @@ export default function TryDemoSection() {
               )}
             </div>
 
-            {/* Strategic analysis — blurred with CTA overlay */}
+            {/* Strategic analysis: blurred with CTA overlay */}
             <div className="relative rounded-2xl border border-border-subtle bg-black-card shadow-sm overflow-hidden">
               {/* Blurred real content */}
               <div className="blur-sm select-none pointer-events-none p-6 space-y-4" aria-hidden="true">
@@ -297,7 +297,7 @@ export default function TryDemoSection() {
                 <div className="text-center px-6">
                   <p className="text-base font-semibold text-white mb-1">Your full analysis is ready</p>
                   <p className="text-sm text-white-muted mb-5">
-                    Tensions, opportunities, and a fully sharpened brief — sign up free to unlock it.
+                    Tensions, opportunities, and a fully sharpened brief. Sign up free to unlock it.
                   </p>
                   <a
                     href="https://www.aiden.services/login?next=https%3A%2F%2Fbrief-sharpener.aiden.services%2Fdashboard"

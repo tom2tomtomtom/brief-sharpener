@@ -392,7 +392,7 @@ function GeneratePageInner() {
         </>
       )}
 
-      {/* Page-level API error banner — always visible on error, independent of form mount state */}
+      {/* Page-level API error banner: always visible on error, independent of form mount state */}
       {status === 'error' && apiError && (
         <div
           role="alert"
@@ -581,7 +581,7 @@ function GeneratePageInner() {
           </button>
         </div>
       </div>
-      {/* Sticky mobile interrogate button — phones only */}
+      {/* Sticky mobile interrogate button, phones only */}
       {isFormFilled && (
         <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border-subtle bg-black-deep p-4 md:hidden">
           <button

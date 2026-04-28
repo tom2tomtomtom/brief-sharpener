@@ -7,7 +7,7 @@ import { useToast } from '@/components/Toast'
 const EXAMPLE_BRIEFS = [
   {
     label: 'FMCG Launch',
-    brief: `Project: NovaBite Protein Bar — UK Market Launch
+    brief: `Project: NovaBite Protein Bar | UK Market Launch
 
 Brand: NovaBite
 Category: Health & Wellness Snacks
@@ -15,7 +15,7 @@ Target Audience: Health-conscious millennials aged 25–40, gym-goers and busy p
 
 Campaign Objective: Drive trial and awareness for NovaBite's new plant-based protein bar range across the UK. Target 15% prompted awareness among core audience within 6 months of launch. Generate 50,000 units sold in month one.
 
-Key Message: Real ingredients, real protein — fuel your day without compromise.
+Key Message: Real ingredients, real protein. Fuel your day without compromise.
 
 Tone of Voice: Energetic, honest, and aspirational without being preachy. Think Innocent Drinks meets Gymshark.
 
@@ -27,7 +27,7 @@ Budget: £450,000 total. Deliverables required: campaign concept, hero visual, s
   },
   {
     label: 'Tech SaaS',
-    brief: `Project: Flowdesk CRM — Series B Launch Campaign
+    brief: `Project: Flowdesk CRM | Series B Launch Campaign
 
 Brand: Flowdesk
 Category: B2B SaaS / Sales Enablement
@@ -47,7 +47,7 @@ Budget: $600,000 USD. Deliverables: campaign strategy, LinkedIn creative suite, 
   },
   {
     label: 'Charity Campaign',
-    brief: `Project: See The Child — Annual Awareness and Fundraising Campaign
+    brief: `Project: See The Child | Annual Awareness and Fundraising Campaign
 
 Organisation: ChildFirst UK (registered charity)
 Cause Area: Child poverty and educational inequality in the UK
@@ -57,7 +57,7 @@ Campaign Objective: Raise £2.1M through the annual appeal. Reactivate 8,000 lap
 
 Key Message: Right now, 4.2 million children in the UK are living in poverty. You can change one child's story today.
 
-Tone of Voice: Warm, urgent, and empowering — not guilt-driven. Give donors agency and hope, not despair.
+Tone of Voice: Warm, urgent, and empowering, not guilt-driven. Give donors agency and hope, not despair.
 
 Channels: TV and radio (30-second spots), direct mail, email nurture sequence, social media (Facebook, Instagram), PR campaign targeting national press.
 
@@ -67,17 +67,17 @@ Budget: £320,000. Deliverables: campaign concept, TV script, DM pack, email ser
   },
   {
     label: 'Retail Seasonal',
-    brief: `Project: Hartley's Home — Christmas 2025 Seasonal Campaign
+    brief: `Project: Hartley's Home | Christmas 2025 Seasonal Campaign
 
 Brand: Hartley's Home
 Category: Mid-premium homeware and gifting retail (UK)
-Target Audience: Gift-buyers aged 28–55, predominantly female, ABC1. Existing loyalty card holders and new-to-brand shoppers. Focus on those buying gifts for the home — partners, parents, friends.
+Target Audience: Gift-buyers aged 28-55, predominantly female, ABC1. Existing loyalty card holders and new-to-brand shoppers. Focus on those buying gifts for the home: partners, parents, friends.
 
 Campaign Objective: Drive a 22% uplift in Christmas period revenue versus prior year. Increase average basket value by 15% through gifting bundles. Grow email subscriber list by 40,000 ahead of peak trading.
 
 Key Message: The gift that makes a house feel like home.
 
-Tone of Voice: Warm, nostalgic, and generous. Evoke the feeling of Christmas morning — considered, personal, and a little luxurious. Not discount-led.
+Tone of Voice: Warm, nostalgic, and generous. Evoke the feeling of Christmas morning: considered, personal, and a little luxurious. Not discount-led.
 
 Channels: TV (brand-led 60-second hero ad), digital display, email (8-touch nurture from October), Instagram and Pinterest, in-store POS and window displays, gift guide PR placement.
 
@@ -501,7 +501,7 @@ export default function LandingPageForm({ onGenerate, isLoading, error, onFormCh
         <div
           role="button"
           tabIndex={0}
-          aria-label="Upload brief file — drag and drop or press Enter to browse"
+          aria-label="Upload brief file: drag and drop or press Enter to browse"
           onDragOver={(e) => { e.preventDefault(); setIsDragOver(true) }}
           onDragLeave={() => setIsDragOver(false)}
           onDrop={handleFileDrop}

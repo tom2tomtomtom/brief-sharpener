@@ -380,7 +380,7 @@ const GAP_SUGGESTIONS: Array<{ keywords: string[]; suggestion: string }> = [
   },
   {
     keywords: ['budget'],
-    suggestion: 'Include a production budget range to help scope creative ambition. E.g. "Production budget: £80k–£120k" or at minimum "TBC — ballpark high/medium/low."',
+    suggestion: 'Include a production budget range to help scope creative ambition. E.g. "Production budget: £80k-£120k" or at minimum "TBC, ballpark high/medium/low."',
   },
   {
     keywords: ['timeline', 'deadline', 'launch', 'date'],
@@ -392,11 +392,11 @@ const GAP_SUGGESTIONS: Array<{ keywords: string[]; suggestion: string }> = [
   },
   {
     keywords: ['tone', 'voice', 'personality', 'character'],
-    suggestion: 'Describe tone with 3 adjectives and one "tone is X, not Y" contrast. E.g. "Warm, direct, optimistic — inspirational but never preachy."',
+    suggestion: 'Describe tone with 3 adjectives and one "tone is X, not Y" contrast. E.g. "Warm, direct, optimistic: inspirational but never preachy."',
   },
   {
     keywords: ['brand', 'brand context', 'brand background'],
-    suggestion: 'Add brand context: positioning, recent campaigns, what to avoid, and mandatory brand elements. E.g. "Brand is moving from functional to emotional — avoid category clichés and competitor comparisons."',
+    suggestion: 'Add brand context: positioning, recent campaigns, what to avoid, and mandatory brand elements. E.g. "Brand is moving from functional to emotional. Avoid category clichés and competitor comparisons."',
   },
 ]
 
@@ -920,7 +920,7 @@ function RewrittenBriefSection({ strategicAnalysis, extractedBrief, isPro, brief
   }
 
   const sharpenedLines = rewrittenBrief.split('\n').filter(Boolean)
-  const ATTRIBUTION = '\n\nAnalysed by AIDEN Brief Intelligence — brief-sharpener.aiden.services'
+  const ATTRIBUTION = '\n\nAnalysed by AIDEN Brief Intelligence | brief-sharpener.aiden.services'
   const copyText = isPro ? rewrittenBrief : rewrittenBrief + ATTRIBUTION
 
   // Build original brief text for comparison
@@ -972,7 +972,7 @@ function RewrittenBriefSection({ strategicAnalysis, extractedBrief, isPro, brief
 }
 
 // ---------------------------------------------------------------------------
-// STRATEGIC STANDARDS SECTION — how the brief scores against 7 frameworks
+// STRATEGIC STANDARDS SECTION: how the brief scores against 7 frameworks
 // ---------------------------------------------------------------------------
 
 const CLASSIC_STATUS: Record<string, { color: string; bg: string }> = {
@@ -1051,7 +1051,7 @@ function ClassicStandardsSection({ scores }: { scores: ClassicStandardScore[] })
 }
 
 // ---------------------------------------------------------------------------
-// CLASSIC BENCHMARK SECTION — reference campaigns
+// CLASSIC BENCHMARK SECTION: reference campaigns
 // ---------------------------------------------------------------------------
 
 function ClassicBenchmarkSection({ benchmarks }: { benchmarks: ClassicBriefRef[] }) {
@@ -1125,7 +1125,7 @@ const CATEGORY_COLORS: Record<string, { text: string; border: string }> = {
 }
 
 function MarketIntelligenceSection({ insights }: { insights: MarketInsightData[] }) {
-  const copyText = insights.map(i => `[${i.category.toUpperCase()}] ${i.insight} — ${i.source}`).join('\n')
+  const copyText = insights.map(i => `[${i.category.toUpperCase()}] ${i.insight} | ${i.source}`).join('\n')
 
   return (
     <section>
@@ -1161,7 +1161,7 @@ function buildFullMarkdown(data: BriefAnalysisData): string {
 
   // Score
   const { label } = getScoreColor(score)
-  sections.push(`# Brief Analysis\n\n**Score:** ${score}/100 — ${label}`)
+  sections.push(`# Brief Analysis\n\n**Score:** ${score}/100 | ${label}`)
 
   // Extracted Brief (exclude AIDEN meta fields)
   const briefFields = Object.entries(extractedBrief).filter(([key, v]) => {
