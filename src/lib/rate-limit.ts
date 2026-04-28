@@ -16,7 +16,7 @@ export async function checkRateLimit(
   const now = new Date()
   const nowIso = now.toISOString()
 
-  // Atomic upsert — always write, then read the result to decide
+  // Atomic upsert: always write, then read the result to decide
   await supabase.from('rate_limits').upsert(
     { ip, request_count: 1, window_start: nowIso },
     { onConflict: 'ip', ignoreDuplicates: true }
@@ -36,7 +36,7 @@ export async function checkRateLimit(
   const elapsedSeconds = (now.getTime() - windowStart.getTime()) / 1000
 
   if (elapsedSeconds >= WINDOW_SECONDS) {
-    // Window expired — reset atomically
+    // Window expired. Reset atomically.
     await supabase
       .from('rate_limits')
       .update({ request_count: 1, window_start: nowIso })
@@ -50,7 +50,7 @@ export async function checkRateLimit(
     return { allowed: false, retryAfter }
   }
 
-  // Conditional increment — only if count hasn't changed (optimistic lock)
+  // Conditional increment: only if count hasn't changed (optimistic lock)
   await supabase
     .from('rate_limits')
     .update({ request_count: existing.request_count + 1 })

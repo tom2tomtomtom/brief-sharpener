@@ -1,11 +1,11 @@
 /**
- * Preview page — public share link for a brief analysis.
+ * Preview page: public share link for a brief analysis.
  *
  * ACCESS MODEL: Secret link. Anyone with the UUID can view the analysis.
  * UUIDs are cryptographically random (v4) and not enumerable.
  * This is the same pattern used by Google Docs "anyone with the link" sharing.
  * We use an admin Supabase client (bypasses RLS) because the viewer may not be
- * the owner — or may not be authenticated at all.
+ * the owner, or may not be authenticated at all.
  *
  * If owner-only access is needed in the future, add an auth check here and
  * compare the viewer's user_id against the generation's user_id.
@@ -42,11 +42,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (isBriefAnalysis(generation.output_copy)) {
     const data = generation.output_copy as BriefAnalysisData
-    return { title: `Brief Score: ${data.score}/100 — AIDEN Brief Intelligence` }
+    return { title: `Brief Score: ${data.score}/100 | AIDEN Brief Intelligence` }
   }
 
   const inputData = generation.input_data as { productName?: string }
-  return { title: `${inputData.productName ?? 'Preview'} — Landing Page Preview` }
+  return { title: `${inputData.productName ?? 'Preview'} | Landing Page Preview` }
 }
 
 export default async function PreviewPage({ params }: PageProps) {

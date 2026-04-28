@@ -27,6 +27,8 @@ export type {
 interface BriefAnalysisProps {
   data: BriefAnalysisData
   previewUrl?: string
+  /** When true, renders a disabled Share button instead of hiding it (e.g. persist failed). */
+  shareDisabled?: boolean
   /** Original brief text (for PDF); falls back to `data.briefText` when omitted. */
   briefText?: string
   isPro?: boolean
@@ -378,7 +380,7 @@ const GAP_SUGGESTIONS: Array<{ keywords: string[]; suggestion: string }> = [
   },
   {
     keywords: ['budget'],
-    suggestion: 'Include a production budget range to help scope creative ambition. E.g. "Production budget: £80k–£120k" or at minimum "TBC — ballpark high/medium/low."',
+    suggestion: 'Include a production budget range to help scope creative ambition. E.g. "Production budget: £80k-£120k" or at minimum "TBC, ballpark high/medium/low."',
   },
   {
     keywords: ['timeline', 'deadline', 'launch', 'date'],
@@ -390,11 +392,11 @@ const GAP_SUGGESTIONS: Array<{ keywords: string[]; suggestion: string }> = [
   },
   {
     keywords: ['tone', 'voice', 'personality', 'character'],
-    suggestion: 'Describe tone with 3 adjectives and one "tone is X, not Y" contrast. E.g. "Warm, direct, optimistic — inspirational but never preachy."',
+    suggestion: 'Describe tone with 3 adjectives and one "tone is X, not Y" contrast. E.g. "Warm, direct, optimistic: inspirational but never preachy."',
   },
   {
     keywords: ['brand', 'brand context', 'brand background'],
-    suggestion: 'Add brand context: positioning, recent campaigns, what to avoid, and mandatory brand elements. E.g. "Brand is moving from functional to emotional — avoid category clichés and competitor comparisons."',
+    suggestion: 'Add brand context: positioning, recent campaigns, what to avoid, and mandatory brand elements. E.g. "Brand is moving from functional to emotional. Avoid category clichés and competitor comparisons."',
   },
 ]
 
@@ -918,7 +920,7 @@ function RewrittenBriefSection({ strategicAnalysis, extractedBrief, isPro, brief
   }
 
   const sharpenedLines = rewrittenBrief.split('\n').filter(Boolean)
-  const ATTRIBUTION = '\n\nAnalysed by AIDEN Brief Intelligence — brief-sharpener.aiden.services'
+  const ATTRIBUTION = '\n\nAnalysed by AIDEN Brief Intelligence | brief-sharpener.aiden.services'
   const copyText = isPro ? rewrittenBrief : rewrittenBrief + ATTRIBUTION
 
   // Build original brief text for comparison
@@ -970,7 +972,7 @@ function RewrittenBriefSection({ strategicAnalysis, extractedBrief, isPro, brief
 }
 
 // ---------------------------------------------------------------------------
-// STRATEGIC STANDARDS SECTION — how the brief scores against 7 frameworks
+// STRATEGIC STANDARDS SECTION: how the brief scores against 7 frameworks
 // ---------------------------------------------------------------------------
 
 const CLASSIC_STATUS: Record<string, { color: string; bg: string }> = {
@@ -1049,7 +1051,7 @@ function ClassicStandardsSection({ scores }: { scores: ClassicStandardScore[] })
 }
 
 // ---------------------------------------------------------------------------
-// CLASSIC BENCHMARK SECTION — reference campaigns
+// CLASSIC BENCHMARK SECTION: reference campaigns
 // ---------------------------------------------------------------------------
 
 function ClassicBenchmarkSection({ benchmarks }: { benchmarks: ClassicBriefRef[] }) {
@@ -1123,7 +1125,7 @@ const CATEGORY_COLORS: Record<string, { text: string; border: string }> = {
 }
 
 function MarketIntelligenceSection({ insights }: { insights: MarketInsightData[] }) {
-  const copyText = insights.map(i => `[${i.category.toUpperCase()}] ${i.insight} — ${i.source}`).join('\n')
+  const copyText = insights.map(i => `[${i.category.toUpperCase()}] ${i.insight} | ${i.source}`).join('\n')
 
   return (
     <section>
@@ -1159,7 +1161,7 @@ function buildFullMarkdown(data: BriefAnalysisData): string {
 
   // Score
   const { label } = getScoreColor(score)
-  sections.push(`# Brief Analysis\n\n**Score:** ${score}/100 — ${label}`)
+  sections.push(`# Brief Analysis\n\n**Score:** ${score}/100 | ${label}`)
 
   // Extracted Brief (exclude AIDEN meta fields)
   const briefFields = Object.entries(extractedBrief).filter(([key, v]) => {
@@ -1497,7 +1499,7 @@ function UpgradeCtaCard() {
   )
 }
 
-export default function BriefAnalysis({ data, previewUrl, briefText, isPro, isPaidUser, isFirstAnalysis, previousScore }: BriefAnalysisProps) {
+export default function BriefAnalysis({ data, previewUrl, shareDisabled, briefText, isPro, isPaidUser, isFirstAnalysis, previousScore }: BriefAnalysisProps) {
   const { score, extractedBrief, strategicAnalysis, gaps } = data
 
   return (
@@ -1521,6 +1523,20 @@ export default function BriefAnalysis({ data, previewUrl, briefText, isPro, isPa
         <div className="flex flex-col items-end gap-2 pb-2">
           <CopyAllButton data={data} />
           {previewUrl && <ShareResultButton url={previewUrl} />}
+          {!previewUrl && shareDisabled && (
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              title="Result could not be saved. Retry to get a share link."
+              className="inline-flex items-center gap-1.5 border border-border-strong bg-black-card px-3 py-1.5 text-xs font-semibold text-white-dim opacity-50 cursor-not-allowed"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+              Share unavailable
+            </button>
+          )}
         </div>
       </div>
       <div style={{ animation: 'aidenFadeInUp 0.5s ease-out 0ms both' }}>

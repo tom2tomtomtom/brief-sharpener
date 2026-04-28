@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const code = url.searchParams.get('code')
   const next = url.searchParams.get('next') ?? '/dashboard'
 
-  // Validate redirect path — only allow relative paths within the app
+  // Validate redirect path: only allow relative paths within the app
   const safePath = next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard'
 
   if (code) {
@@ -32,7 +32,7 @@ export async function GET(request: Request) {
           }
         }
       } catch {
-        // best-effort only — never affect auth redirect
+        // best-effort only, never affect auth redirect
       }
 
       return NextResponse.redirect(new URL(safePath, url.origin))

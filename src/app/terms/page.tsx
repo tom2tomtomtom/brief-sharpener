@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 export const metadata = {
-  title: 'Terms of Service — AIDEN',
+  title: 'Terms of Service | AIDEN',
   description: 'Terms of service for AIDEN brief analysis tool.',
 }
 
@@ -48,8 +48,8 @@ export default function TermsPage() {
               <h2 className="text-lg font-semibold text-white uppercase mb-3">2. Ownership of Generated Output</h2>
               <p>
                 You own the brief analyses AIDEN generates for you. Once downloaded, the analyses and
-                recommendations are yours to use, modify, and distribute however you see fit — commercially or
-                otherwise — without attribution to AIDEN (except on the free plan, which includes a small
+                recommendations are yours to use, modify, and distribute however you see fit, commercially or
+                otherwise, without attribution to AIDEN (except on the free plan, which includes a small
                 &ldquo;Analysed by AIDEN&rdquo; attribution when copied).
               </p>
             </div>

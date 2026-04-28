@@ -6,17 +6,17 @@ const faqs = [
   {
     question: 'What is Brief Intelligence?',
     answer:
-      'Brief Intelligence is AIDEN\'s core capability: a deep interrogation of your creative or campaign brief that finds every gap, assumption, and weakness before your team acts on it. It identifies missing audience insight, vague objectives, absent tension, weak deliverables, and fuzzy tone of voice — then rewrites the brief to fix them.',
+      'Brief Intelligence is AIDEN\'s core capability: a deep interrogation of your creative or campaign brief that finds every gap, assumption, and weakness before your team acts on it. It identifies missing audience insight, vague objectives, absent tension, weak deliverables, and fuzzy tone of voice, then rewrites the brief to fix them.',
   },
   {
     question: 'How is this different from ChatGPT?',
     answer:
-      'ChatGPT will help you if you know what to ask. AIDEN knows what to ask on your behalf — because it\'s been trained on the way the best strategists, planners, and creative directors interrogate briefs. It doesn\'t wait for you to find the gaps. It finds them for you, explains why they matter, and rewrites the brief with the gaps closed.',
+      'ChatGPT will help you if you know what to ask. AIDEN knows what to ask on your behalf, because it\'s been trained on the way the best strategists, planners, and creative directors interrogate briefs. It doesn\'t wait for you to find the gaps. It finds them for you, explains why they matter, and rewrites the brief with the gaps closed.',
   },
   {
     question: 'What are phantoms?',
     answer:
-      'Phantoms are the expert strategic perspectives AIDEN uses to interrogate your brief. They represent distinct strategic and creative viewpoints — the account planner who questions every audience assumption, the creative director who demands a single-minded proposition, the strategist who won\'t accept a vague objective. Each phantom stresses a different part of your brief, so nothing gets missed.',
+      'Phantoms are the expert strategic perspectives AIDEN uses to interrogate your brief. They represent distinct strategic and creative viewpoints: the account planner who questions every audience assumption, the creative director who demands a single-minded proposition, the strategist who won\'t accept a vague objective. Each phantom stresses a different part of your brief, so nothing gets missed.',
   },
   {
     question: 'Who is this for?',
@@ -26,12 +26,12 @@ const faqs = [
   {
     question: 'What does the output look like?',
     answer:
-      'You get two things: a gap report that identifies every weakness in your brief and explains why it matters, and a rewritten brief with those gaps closed. On the Free plan, the output includes AIDEN branding. On Pro, you get a clean PDF — ready to share with your team or client.',
+      'You get two things: a gap report that identifies every weakness in your brief and explains why it matters, and a rewritten brief with those gaps closed. On the Free plan, the output includes AIDEN branding. On Pro, you get a clean PDF ready to share with your team or client.',
   },
   {
     question: 'Can I use this for any type of brief?',
     answer:
-      'Yes. AIDEN works with campaign briefs, creative briefs, strategy documents, and rough notes. It\'s format-agnostic — paste in whatever you have and AIDEN will interrogate it. The more context you give, the sharper the output.',
+      'Yes. AIDEN works with campaign briefs, creative briefs, strategy documents, and rough notes. It\'s format-agnostic. Paste in whatever you have and AIDEN will interrogate it. The more context you give, the sharper the output.',
   },
 ]
 

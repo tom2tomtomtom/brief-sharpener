@@ -5,7 +5,7 @@ export const runtime = 'nodejs'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 
-// Magic-byte sniffers. Extension alone is a fig leaf — anyone can rename a
+// Magic-byte sniffers. Extension alone is a fig leaf; anyone can rename a
 // zip bomb to .pdf and ship it straight into pdf-parse, which has a history
 // of hangs and stack overflows on malformed input. Cross-check the declared
 // extension against the first bytes of the buffer before we hand the file
@@ -40,7 +40,7 @@ function looksLikeOleDoc(buf: Buffer): boolean {
 }
 
 export async function POST(request: NextRequest) {
-  // Per-IP rate limit — no auth on this endpoint and PDF/DOCX parsing is
+  // Per-IP rate limit: no auth on this endpoint and PDF/DOCX parsing is
   // CPU-heavy. Limits an anonymous attacker to ~10 10MB-files/minute/IP.
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
   const { allowed, retryAfter } = await checkRateLimit(ip)
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     if (name.endsWith('.txt') || name.endsWith('.md')) {
       // No reliable magic bytes for plain text. Guard against obvious
       // binary-masquerading-as-text by rejecting files that contain many
-      // NUL bytes in the first 1KB — UTF-8 text never has U+0000.
+      // NUL bytes in the first 1KB. UTF-8 text never has U+0000.
       const sample = buffer.subarray(0, Math.min(1024, buffer.length))
       let nulCount = 0
       for (let i = 0; i < sample.length; i++) { if (sample[i] === 0) nulCount++ }

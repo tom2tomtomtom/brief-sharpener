@@ -89,7 +89,7 @@ export function generateAnalysisPDF(analysis: BriefAnalysis, briefText: string):
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(16)
   doc.setTextColor(TEXT[0], TEXT[1], TEXT[2])
-  doc.text('Brief Sharpener — Analysis Report', MARGIN, y)
+  doc.text('Brief Sharpener | Analysis Report', MARGIN, y)
   y += 8
 
   doc.setFont('helvetica', 'normal')
@@ -171,7 +171,7 @@ export function generateAnalysisPDF(analysis: BriefAnalysis, briefText: string):
       doc.setTextColor(ACCENT[0], ACCENT[1], ACCENT[2])
       doc.text(`${cs.score}/${cs.maxScore}`, PAGE_W - MARGIN, y, { align: 'right' })
       y += LINE_H
-      writeParagraph(`${cs.verdict} ${cs.advice ? `— ${cs.advice}` : ''}`.trim(), 8.5)
+      writeParagraph(`${cs.verdict} ${cs.advice ? `. ${cs.advice}` : ''}`.trim(), 8.5)
     }
   }
 

@@ -1,5 +1,5 @@
-// Hardcoded demo brief — must match exactly what the API route checks
-export const DEMO_BRIEF_TEXT = `Campaign Brief — Vitafresh Summer Launch
+// Hardcoded demo brief: must match exactly what the API route checks
+export const DEMO_BRIEF_TEXT = `Campaign Brief | Vitafresh Summer Launch
 
 Brand: Vitafresh Drinks
 Objective: We want to increase awareness of our new vitamin-enhanced water range and get more people buying it this summer.

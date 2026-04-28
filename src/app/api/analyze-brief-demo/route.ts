@@ -67,7 +67,7 @@ function identifyGaps(extractedBrief: Record<string, unknown>): string[] {
 }
 
 export async function POST(request: NextRequest) {
-  // Per-IP rate limit — even though the demo brief text is hardcoded, we still
+  // Per-IP rate limit: even though the demo brief text is hardcoded, we still
   // hit Brain API (two Opus calls) on every invocation. Cap spam early.
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
   const { allowed, retryAfter } = await checkRateLimit(ip)

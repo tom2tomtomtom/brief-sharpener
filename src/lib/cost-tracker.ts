@@ -9,14 +9,14 @@
 import { SupabaseClient } from '@supabase/supabase-js'
 import { logger } from '@/lib/logger'
 
-// Anthropic pricing (per million tokens) — update when rates change
+// Anthropic pricing (per million tokens): update when rates change
 const PRICING = {
   haiku: { input: 0.25, output: 1.25 },
   opus: { input: 15.0, output: 75.0 },
   sonnet: { input: 3.0, output: 15.0 },
 } as const
 
-// Budget caps — configurable via env, with safe defaults
+// Budget caps: configurable via env, with safe defaults
 const DAILY_BUDGET_USD = Number(process.env.DAILY_BUDGET_USD || '20')
 const MONTHLY_BUDGET_USD = Number(process.env.MONTHLY_BUDGET_USD || '300')
 

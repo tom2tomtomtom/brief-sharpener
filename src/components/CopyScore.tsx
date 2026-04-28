@@ -74,7 +74,7 @@ function evaluateCopy(data: GeneratedContent): CriterionResult[] {
       points: socialProofPassed ? 15 : 0,
       max: 15,
       passed: socialProofPassed,
-      suggestion: socialProofPassed ? '' : 'Add a social proof statement — a customer count, testimonial snippet, or press mention builds trust fast.',
+      suggestion: socialProofPassed ? '' : 'Add a social proof statement: a customer count, testimonial snippet, or press mention builds trust fast.',
     },
   ]
 }

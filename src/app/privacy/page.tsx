@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 export const metadata = {
-  title: 'Privacy Policy — AIDEN',
+  title: 'Privacy Policy | AIDEN',
   description: 'Privacy policy for AIDEN Brief Intelligence.',
 }
 
@@ -51,7 +51,7 @@ export default function PrivacyPage() {
                 <a href="https://stripe.com" target="_blank" rel="noopener noreferrer" className="text-orange-accent hover:opacity-80 transition-opacity">
                   Stripe
                 </a>
-                . We never see or store your credit card details — Stripe handles all card data under their own
+                . We never see or store your credit card details. Stripe handles all card data under their own
                 PCI-compliant infrastructure. We receive a customer ID and subscription status from Stripe so we
                 know which plan you are on.
               </p>
@@ -60,7 +60,7 @@ export default function PrivacyPage() {
             <div>
               <h2 className="text-lg font-semibold text-white uppercase mb-3">3. Analytics</h2>
               <p>
-                We use Google Analytics to understand how the site is used — page views, country of origin, and
+                We use Google Analytics to understand how the site is used: page views, country of origin, and
                 general usage patterns. This data is aggregated and not linked to individual users. No
                 third-party advertising trackers are used.
               </p>
