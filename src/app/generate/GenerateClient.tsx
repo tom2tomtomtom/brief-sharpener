@@ -33,7 +33,7 @@ interface ApiErrorPayload {
 type StreamMessage =
   | { type: 'heartbeat'; ts?: number }
   | { type: 'stage'; stage: string; message?: string }
-  | { type: 'result'; data: BriefAnalysisData & { generationId?: string | null; persistFailed?: true } }
+  | { type: 'result'; data: BriefAnalysisData & { generationId?: string | null; persistFailed?: true; deductedAt?: string; deductTransactionId?: string } }
   | { type: 'error'; error: string; code?: string }
 
 async function parseApiError(response: Response): Promise<ApiErrorPayload> {
@@ -73,7 +73,12 @@ function GeneratePageInner() {
   const [mobileResultsCollapsed, setMobileResultsCollapsed] = useState(false)
   const [previousScore, setPreviousScore] = useState<number | null>(null)
   const [progressStage, setProgressStage] = useState<string | null>(null)
+  const [deductedAt, setDeductedAt] = useState<string | null>(null)
+  const [deductTransactionId, setDeductTransactionId] = useState<string | null>(null)
+  const [graceCancelSecondsLeft, setGraceCancelSecondsLeft] = useState<number | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
   const emailModalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const graceCancelTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const formPanelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -153,6 +158,44 @@ function GeneratePageInner() {
     checkAuth()
   }, [])
 
+  function handleCancelAnalysis() {
+    abortControllerRef.current?.abort()
+    abortControllerRef.current = null
+  }
+
+  async function handleGraceCancel() {
+    if (!generationId || !deductedAt) return
+    setGraceCancelSecondsLeft(null)
+    if (graceCancelTimerRef.current) {
+      clearInterval(graceCancelTimerRef.current)
+      graceCancelTimerRef.current = null
+    }
+    try {
+      const body: Record<string, unknown> = { generationId, deductedAt }
+      if (deductTransactionId) body.deductTransactionId = deductTransactionId
+      const res = await fetch('/api/analyze-brief/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (res.ok) {
+        const data = await res.json() as { refunded?: boolean }
+        if (data.refunded) {
+          showToast('Tokens refunded. Analysis cancelled.')
+        } else {
+          showToast('Analysis noted. Grace window had expired, no refund.')
+        }
+      }
+    } catch {
+      // Best-effort: don't surface network errors for a cancel action.
+    }
+    setAnalysisData(null)
+    setGenerationId(null)
+    setDeductedAt(null)
+    setDeductTransactionId(null)
+    setStatus('idle')
+  }
+
   async function handleGenerate(formData: GenerateFormData) {
     const isRerun = !!analysisData
     if (isRerun) {
@@ -166,8 +209,16 @@ function GeneratePageInner() {
     setPersistFailed(false)
     setLastFormData(formData)
     setProgressStage('Sending brief for interrogation')
+    setDeductedAt(null)
+    setDeductTransactionId(null)
+    setGraceCancelSecondsLeft(null)
+    if (graceCancelTimerRef.current) {
+      clearInterval(graceCancelTimerRef.current)
+      graceCancelTimerRef.current = null
+    }
 
     const controller = new AbortController()
+    abortControllerRef.current = controller
     const ANALYZE_TIMEOUT_MS = 300_000
     const timeoutId = setTimeout(() => controller.abort(), ANALYZE_TIMEOUT_MS)
 
@@ -214,7 +265,7 @@ function GeneratePageInner() {
       const contentType = response.headers.get('content-type') ?? ''
       const isStreaming = contentType.includes('application/x-ndjson') && !!response.body
 
-      let analysisResult: (BriefAnalysisData & { generationId?: string | null; persistFailed?: true }) | null = null
+      let analysisResult: (BriefAnalysisData & { generationId?: string | null; persistFailed?: true; deductedAt?: string; deductTransactionId?: string }) | null = null
       let streamError: { message: string; code?: string } | null = null
 
       if (isStreaming) {
@@ -252,7 +303,7 @@ function GeneratePageInner() {
         if (!analysisResult) throw new Error('Analysis ended unexpectedly. Please try again.')
       } else {
         const data = await response.json()
-        analysisResult = data as BriefAnalysisData & { generationId?: string | null; persistFailed?: true }
+        analysisResult = data as BriefAnalysisData & { generationId?: string | null; persistFailed?: true; deductedAt?: string; deductTransactionId?: string }
       }
 
       setAnalysisData(analysisResult)
@@ -260,6 +311,33 @@ function GeneratePageInner() {
       setPersistFailed(analysisResult.persistFailed === true)
       setMobileResultsCollapsed(false)
       setStatus('done')
+      abortControllerRef.current = null
+
+      // Start 5s grace-cancel countdown if tokens were deducted.
+      if (analysisResult.deductedAt && analysisResult.generationId) {
+        const at = analysisResult.deductedAt
+        const txId = analysisResult.deductTransactionId ?? null
+        setDeductedAt(at)
+        setDeductTransactionId(txId)
+        const elapsed = Date.now() - new Date(at).getTime()
+        const remaining = Math.max(0, Math.ceil((5000 - elapsed) / 1000))
+        setGraceCancelSecondsLeft(remaining)
+        if (remaining > 0) {
+          graceCancelTimerRef.current = setInterval(() => {
+            setGraceCancelSecondsLeft(prev => {
+              const next = (prev ?? 0) - 1
+              if (next <= 0) {
+                if (graceCancelTimerRef.current) {
+                  clearInterval(graceCancelTimerRef.current)
+                  graceCancelTimerRef.current = null
+                }
+                return null
+              }
+              return next
+            })
+          }, 1000)
+        }
+      }
       setCompletedAt(new Date().toLocaleTimeString())
       setPlanInfo(prev => prev && prev.plan !== 'pro' && prev.plan !== 'agency' ? { ...prev, used: prev.used + 1 } : prev)
       trackEvent({ name: 'analysis_completed', score: analysisResult.score, gapCount: analysisResult.gaps.length, durationMs: Date.now() - analyzeStart })
@@ -269,6 +347,14 @@ function GeneratePageInner() {
         setIsFirstAnalysis(true)
       }
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError' && abortControllerRef.current === null) {
+        // User clicked cancel. Reset cleanly without an error banner.
+        setStatus('idle')
+        setProgressStage(null)
+        clearTimeout(timeoutId)
+        showToast('Analysis cancelled. No tokens charged.')
+        return
+      }
       let errorMsg: string
       if (err instanceof DOMException && err.name === 'AbortError') {
         errorMsg = 'Analysis timed out after 5 minutes. Try a shorter brief, or try again.'
@@ -283,6 +369,7 @@ function GeneratePageInner() {
     } finally {
       clearTimeout(timeoutId)
       setProgressStage(null)
+      abortControllerRef.current = null
     }
   }
 
@@ -383,9 +470,19 @@ function GeneratePageInner() {
               aria-live="polite"
               className="border-b border-border-subtle bg-black-deep px-4 py-2 text-xs text-white-muted sm:px-6 lg:px-8"
             >
-              <div className="mx-auto max-w-7xl flex items-center gap-2">
-                <span className="h-2 w-2 flex-shrink-0 animate-pulse bg-red-hot" aria-hidden="true" />
-                <span>{progressStage}…</span>
+              <div className="mx-auto max-w-7xl flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 flex-shrink-0 animate-pulse bg-red-hot" aria-hidden="true" />
+                  <span>{progressStage}…</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCancelAnalysis}
+                  className="text-white-dim hover:text-red-hot transition-colors text-xs font-medium"
+                  aria-label="Cancel analysis"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           )}
@@ -528,6 +625,15 @@ function GeneratePageInner() {
                     >
                       Start over
                     </button>
+                    {graceCancelSecondsLeft !== null && graceCancelSecondsLeft > 0 && (
+                      <button
+                        onClick={handleGraceCancel}
+                        className="flex items-center gap-1 border border-red-hot/50 px-2 py-1 text-xs font-medium text-red-hot hover:bg-red-hot/10 transition-colors"
+                        aria-label={`Cancel and refund tokens (${graceCancelSecondsLeft}s remaining)`}
+                      >
+                        Undo ({graceCancelSecondsLeft}s)
+                      </button>
+                    )}
                   </div>
                   {completedAt && (
                     <span className="text-xs text-white-dim">Analysed at {completedAt}</span>

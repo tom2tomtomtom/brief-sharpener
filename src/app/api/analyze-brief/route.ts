@@ -477,8 +477,12 @@ IMPORTANT: Use the section headers exactly as shown above (## STRATEGIC ANALYSIS
         // Deduct tokens and save for authenticated users
         let generationId: string | null = null
         let persistFailed = false
+        let deductedAt: string | null = null
+        let deductTransactionId: string | null = null
         if (user) {
           const deductResult = await deductTokens(user.id, 'analyze')
+          deductedAt = new Date().toISOString()
+          deductTransactionId = deductResult.transactionId ?? null
 
           if (!deductResult.success) {
             logger.error('analysis.deduct_failed', {
@@ -568,6 +572,8 @@ IMPORTANT: Use the section headers exactly as shown above (## STRATEGIC ANALYSIS
             marketInsights,
             generationId,
             persistFailed: persistFailed || undefined,
+            deductedAt: deductedAt || undefined,
+            deductTransactionId: deductTransactionId || undefined,
           },
         })
       } catch (error) {

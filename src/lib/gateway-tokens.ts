@@ -13,6 +13,15 @@ interface DeductResult {
   error?: string
   required?: number
   balance?: number
+  transactionId?: string
+}
+
+interface RefundResult {
+  success: boolean
+  newBalance?: number
+  transactionId?: string
+  error?: string
+  gatewayUnavailable?: boolean
 }
 
 interface BalanceResult {
@@ -79,10 +88,60 @@ export async function deductTokens(
       return { success: false, error: `gateway_error_${res.status}` }
     }
 
-    return res.json()
+    const data = await res.json() as { success?: boolean; remaining?: number; transactionId?: string }
+    return {
+      success: data.success !== false,
+      remaining: data.remaining,
+      transactionId: data.transactionId,
+    }
   } catch (err) {
     console.error('[gateway-tokens] Deduct threw:', err)
     return { success: false, error: 'gateway_unreachable' }
+  }
+}
+
+/**
+ * Refund tokens to a user after a cancel within the 5-second grace window.
+ *
+ * Best-effort: never awaited on the critical path. If Gateway is unreachable,
+ * the refund is lost and the user may raise a support ticket. Uses x-aiden-service-key
+ * auth as required by POST /api/tokens/refund.
+ */
+export async function refundTokens(
+  userId: string,
+  amount: number,
+  originalTransactionId?: string,
+): Promise<RefundResult> {
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 5_000)
+
+    const body: Record<string, unknown> = {
+      userId,
+      amount,
+      reason: 'user_cancelled_within_grace_window',
+    }
+    if (originalTransactionId) {
+      body.originalTransactionId = originalTransactionId
+    }
+
+    const res = await fetch(`${GATEWAY_URL}/api/tokens/refund`, {
+      method: 'POST',
+      headers: getHeaders(userId),
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    }).finally(() => clearTimeout(timeout))
+
+    if (!res.ok) {
+      console.error(`[gateway-tokens] Refund failed: ${res.status}`)
+      return { success: false, error: 'refund_failed', gatewayUnavailable: res.status >= 500 }
+    }
+
+    const data = await res.json() as { ok?: boolean; newBalance?: number; transactionId?: string }
+    return { success: data.ok === true, newBalance: data.newBalance, transactionId: data.transactionId }
+  } catch (err) {
+    console.error('[gateway-tokens] Refund threw:', err)
+    return { success: false, error: 'gateway_unreachable', gatewayUnavailable: true }
   }
 }
 
