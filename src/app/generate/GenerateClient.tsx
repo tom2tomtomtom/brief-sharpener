@@ -33,7 +33,7 @@ interface ApiErrorPayload {
 type StreamMessage =
   | { type: 'heartbeat'; ts?: number }
   | { type: 'stage'; stage: string; message?: string }
-  | { type: 'result'; data: BriefAnalysisData & { generationId?: string | null } }
+  | { type: 'result'; data: BriefAnalysisData & { generationId?: string | null; persistFailed?: true } }
   | { type: 'error'; error: string; code?: string }
 
 async function parseApiError(response: Response): Promise<ApiErrorPayload> {
@@ -59,6 +59,7 @@ function GeneratePageInner() {
   const [status, setStatus] = useState<Status>('idle')
   const [analysisData, setAnalysisData] = useState<BriefAnalysisData | null>(null)
   const [generationId, setGenerationId] = useState<string | null>(null)
+  const [persistFailed, setPersistFailed] = useState(false)
   const [apiError, setApiError] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [isFormFilled, setIsFormFilled] = useState(false)
@@ -162,6 +163,7 @@ function GeneratePageInner() {
     const analyzeStart = Date.now()
     setStatus('loading')
     setApiError(null)
+    setPersistFailed(false)
     setLastFormData(formData)
     setProgressStage('Sending brief for interrogation')
 
@@ -212,7 +214,7 @@ function GeneratePageInner() {
       const contentType = response.headers.get('content-type') ?? ''
       const isStreaming = contentType.includes('application/x-ndjson') && !!response.body
 
-      let analysisResult: (BriefAnalysisData & { generationId?: string | null }) | null = null
+      let analysisResult: (BriefAnalysisData & { generationId?: string | null; persistFailed?: true }) | null = null
       let streamError: { message: string; code?: string } | null = null
 
       if (isStreaming) {
@@ -250,11 +252,12 @@ function GeneratePageInner() {
         if (!analysisResult) throw new Error('Analysis ended unexpectedly. Please try again.')
       } else {
         const data = await response.json()
-        analysisResult = data as BriefAnalysisData & { generationId?: string | null }
+        analysisResult = data as BriefAnalysisData & { generationId?: string | null; persistFailed?: true }
       }
 
       setAnalysisData(analysisResult)
       setGenerationId(analysisResult.generationId ?? null)
+      setPersistFailed(analysisResult.persistFailed === true)
       setMobileResultsCollapsed(false)
       setStatus('done')
       setCompletedAt(new Date().toLocaleTimeString())
@@ -417,6 +420,46 @@ function GeneratePageInner() {
         </div>
       )}
 
+      {/* Persist-failure banner: result delivered but save to history failed */}
+      {status === 'done' && persistFailed && (
+        <div
+          role="alert"
+          aria-live="polite"
+          className="border-b border-orange-accent bg-black-card px-4 py-3 sm:px-6 lg:px-8"
+        >
+          <div className="mx-auto max-w-7xl flex items-start justify-between gap-4">
+            <div className="flex items-start gap-2 text-sm text-orange-accent">
+              <svg className="mt-0.5 h-4 w-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <p>
+                Result delivered but could not save to history.{' '}
+                {lastFormData && (
+                  <button
+                    type="button"
+                    onClick={() => lastFormData && handleGenerate(lastFormData)}
+                    className="underline hover:no-underline font-semibold"
+                  >
+                    Retry analysis
+                  </button>
+                )}{' '}
+                to save this result.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPersistFailed(false)}
+              aria-label="Dismiss save warning"
+              className="flex-shrink-0 p-1 text-orange-accent/70 hover:text-orange-accent transition-colors"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Welcome banner for first-time users */}
       {showWelcomeBanner && (
         <div className="border-b border-border-strong bg-black-card px-4 py-3 sm:px-6 lg:px-8">
@@ -494,6 +537,7 @@ function GeneratePageInner() {
                   data={analysisData}
                   briefText={lastFormData?.briefText}
                   previewUrl={generationId ? `${typeof window !== 'undefined' ? window.location.origin : ''}/preview/${generationId}` : undefined}
+                  shareDisabled={persistFailed}
                   isPro={planInfo?.plan === 'pro' || planInfo?.plan === 'agency'}
                   isPaidUser={planInfo?.plan !== 'free' && planInfo?.plan !== undefined}
                   isFirstAnalysis={isFirstAnalysis}

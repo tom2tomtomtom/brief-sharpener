@@ -476,6 +476,7 @@ IMPORTANT: Use the section headers exactly as shown above (## STRATEGIC ANALYSIS
 
         // Deduct tokens and save for authenticated users
         let generationId: string | null = null
+        let persistFailed = false
         if (user) {
           const deductResult = await deductTokens(user.id, 'analyze')
 
@@ -498,6 +499,7 @@ IMPORTANT: Use the section headers exactly as shown above (## STRATEGIC ANALYSIS
             .select('id')
             .single()
           if (insertError) {
+            persistFailed = true
             logger.error('analysis.persist_failed', {
               userId: user.id,
               code: insertError.code,
@@ -565,6 +567,7 @@ IMPORTANT: Use the section headers exactly as shown above (## STRATEGIC ANALYSIS
             classicBenchmarks,
             marketInsights,
             generationId,
+            persistFailed: persistFailed || undefined,
           },
         })
       } catch (error) {

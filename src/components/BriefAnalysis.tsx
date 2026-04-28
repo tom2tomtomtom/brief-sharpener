@@ -27,6 +27,8 @@ export type {
 interface BriefAnalysisProps {
   data: BriefAnalysisData
   previewUrl?: string
+  /** When true, renders a disabled Share button instead of hiding it (e.g. persist failed). */
+  shareDisabled?: boolean
   /** Original brief text (for PDF); falls back to `data.briefText` when omitted. */
   briefText?: string
   isPro?: boolean
@@ -1497,7 +1499,7 @@ function UpgradeCtaCard() {
   )
 }
 
-export default function BriefAnalysis({ data, previewUrl, briefText, isPro, isPaidUser, isFirstAnalysis, previousScore }: BriefAnalysisProps) {
+export default function BriefAnalysis({ data, previewUrl, shareDisabled, briefText, isPro, isPaidUser, isFirstAnalysis, previousScore }: BriefAnalysisProps) {
   const { score, extractedBrief, strategicAnalysis, gaps } = data
 
   return (
@@ -1521,6 +1523,20 @@ export default function BriefAnalysis({ data, previewUrl, briefText, isPro, isPa
         <div className="flex flex-col items-end gap-2 pb-2">
           <CopyAllButton data={data} />
           {previewUrl && <ShareResultButton url={previewUrl} />}
+          {!previewUrl && shareDisabled && (
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              title="Result could not be saved. Retry to get a share link."
+              className="inline-flex items-center gap-1.5 border border-border-strong bg-black-card px-3 py-1.5 text-xs font-semibold text-white-dim opacity-50 cursor-not-allowed"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+              Share unavailable
+            </button>
+          )}
         </div>
       </div>
       <div style={{ animation: 'aidenFadeInUp 0.5s ease-out 0ms both' }}>
